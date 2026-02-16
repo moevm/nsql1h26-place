@@ -35,3 +35,17 @@
 - Запросы `/api/*` проксируются на backend `http://backend:8080`
 
 При необходимости поменяй upstream backend в nginx-конфиге под свой сервис.
+
+## Docker
+
+Контейнер собирает и отдает только фронтенд-статику (без кастомного Nginx proxy-конфига для `/api`).
+
+Собрать образ:
+
+`docker build -t nsql-frontend .`
+
+Запустить контейнер:
+
+`docker run --rm -p 5173:80 --name nsql-frontend nsql-frontend`
+
+После запуска фронт доступен на `http://localhost:5173`.
