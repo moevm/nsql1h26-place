@@ -8,10 +8,10 @@ export const useListMaps = (): [
 ] => {
     const { setMaps } = useMapStore()
 
-    const [cars, error, loading, refresh] = useApi<Map[]>({});
+    const [maps, error, loading, refresh] = useApi<Map[]>({ path: '/maps' });
     useEffect(() => {
-        setMaps(cars)
-    }, [cars, setMaps])
+        setMaps(maps)
+    }, [maps, setMaps])
 
-    return [cars, error, loading, refresh]
+    return [maps, error, loading, refresh]
 }

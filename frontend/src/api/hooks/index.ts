@@ -15,7 +15,7 @@ export type ApiRequest<T,> = {
 }
 
 export const getApiUri = () => {
-    return import.meta.env.VITE_API_URI;
+    return import.meta.env.VITE_API_URI || '/api';
 }
 
 export const useApi = <ResultType, RequestType = undefined>(
@@ -42,8 +42,9 @@ export const useApi = <ResultType, RequestType = undefined>(
             }
 
             const paramString = `${params}`;
+            const path = request.path || '';
             const req: Request = {
-                uri: `${getApiUri()}${paramString.length > 0 ? '/?' + paramString : ''}`,
+                uri: `${getApiUri()}${path}${paramString.length > 0 ? '?' + paramString : ''}`,
                 method: method,
                 headers: {
                     ...request.headers,
