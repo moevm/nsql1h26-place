@@ -4,7 +4,7 @@ import { Map } from "./schemas/maps.schema";
 import { CreateMapDto } from "./dto/create-map.dto";
 import { UpdateMapDto } from "./dto/update-map.dto";
 
-@Controller("/api/maps")
+@Controller("/maps")
 export class MapsController {
     constructor(private readonly mapsService: MapsService) {}
 
