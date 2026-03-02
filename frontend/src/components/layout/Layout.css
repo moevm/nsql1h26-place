@@ -1,0 +1,20 @@
+.layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.layout__body {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+}
+
+.layout__content {
+    flex: 1;
+    overflow-y: auto;
+    background: #fafafa;
+    min-width: 0;
+}

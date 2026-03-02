@@ -1,0 +1,22 @@
+import type { RouteObject } from 'react-router-dom'
+import Layout from './components/layout/Layout'
+import HomePage from './pages/HomePage/HomePage'
+import SettingsPage from './pages/SettingsPage/SettingsPage'
+import StatisticsPage from './pages/StatisticsPage/StatisticsPage'
+import AuthPage from './pages/AuthPage/AuthPage'
+
+export const routes: RouteObject[] = [
+    {
+        path: '/',
+        element: <Layout />,
+        children: [
+            { index: true, element: <HomePage /> },
+            { path: 'settings', element: <SettingsPage /> },
+            { path: 'statistics', element: <StatisticsPage /> },
+        ],
+    },
+    {
+        path: '/auth',
+        element: <AuthPage />,
+    },
+];

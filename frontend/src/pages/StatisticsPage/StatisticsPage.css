@@ -1,0 +1,42 @@
+.statistics-page {
+    padding: 16px;
+}
+
+.statistics-page h1 {
+    margin: 0 0 8px;
+    font-size: 28px;
+    color: #948C0F;
+}
+
+.statistics-page__subtitle {
+    color: #666;
+    margin: 0 0 32px;
+}
+
+.statistics-page__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.statistics-page__card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.statistics-page__card-value {
+    font-size: 36px;
+    font-weight: 700;
+    color: #2e7d32;
+}
+
+.statistics-page__card-label {
+    font-size: 14px;
+    color: #888;
+}

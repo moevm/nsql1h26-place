@@ -1,0 +1,56 @@
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    padding: 0 14px;
+    background: #fff;
+    color: #333;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+    z-index: 100;
+    flex-shrink: 0;
+}
+
+.topbar__left {
+    flex: 1;
+    img { cursor: pointer; }
+}
+
+.topbar__brand {
+    font-family: "Pacifico";
+    font-style: italic;
+    font-size: 32px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    color: #948C0F;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.topbar__right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 18px;
+}
+
+.topbar__icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: #CCC530;
+    cursor: pointer;
+}
+
+.topbar__icon-img--user {
+    border-radius: 50%;
+    height: 48px;
+    width: 48px;
+    cursor: auto;
+}
