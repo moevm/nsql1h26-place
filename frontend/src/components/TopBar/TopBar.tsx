@@ -1,9 +1,33 @@
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TbGraphFilled, TbSettingsFilled } from 'react-icons/tb';
+import { useAuthStore } from '../../stores/authStore'
 import './TopBar.css'
 
 const TopBar = () => {
     const navigate = useNavigate()
+    const { logout } = useAuthStore()
+    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+    const userMenuRef = useRef<HTMLDivElement | null>(null)
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+                setIsUserMenuOpen(false)
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside)
+        }
+    }, [])
+
+    const handleLogout = () => {
+        logout()
+        setIsUserMenuOpen(false)
+        navigate('/auth')
+    }
 
     return (
         <header className="topbar">
@@ -22,8 +46,22 @@ const TopBar = () => {
                     <TbSettingsFilled size={"48px"} />
                 </button>
 
-                <div className="topbar__icon-btn topbar__icon-btn--user">
-                    <img className='topbar__icon-img--user' src="/src/assets/images/avatar.jpg" alt="user" />
+                <div className="topbar__user-menu" ref={userMenuRef}>
+                    <button
+                        className="topbar__icon-btn topbar__icon-btn--user"
+                        title="Пользователь"
+                        onClick={() => setIsUserMenuOpen((prev) => !prev)}
+                    >
+                        <img className='topbar__icon-img--user' src="/src/assets/images/avatar.jpg" alt="user" />
+                    </button>
+
+                    {isUserMenuOpen && (
+                        <div className="topbar__user-dropdown">
+                            <button className="topbar__user-dropdown-btn" onClick={handleLogout}>
+                                Выйти из аккаунта
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </header>

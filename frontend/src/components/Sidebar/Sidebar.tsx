@@ -92,7 +92,7 @@ const Sidebar = () => {
                         userid: 'local-user',
                         title: payload.title,
                         description: payload.description,
-                        avatar: '🗺️',
+                        image_path: "",
                     })
                     setCreatePanelOpen(false)
                 }}

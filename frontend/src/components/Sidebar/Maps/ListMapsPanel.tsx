@@ -29,7 +29,7 @@ const ListMapsPanel = ({ isOpen, maps, onAddClick }: ListMapsPanelProps) => {
 
                 {maps.map((map) => (
                     <article key={map.id} className="map-card">
-                        <div className="map-card__avatar">{map.avatar}</div>
+                        <div className="map-card__avatar">{map.image_path}</div>
                         <div className="map-card__content">
                             <div className="map-card__title">{map.title}</div>
                             <div className="map-card__desc">{map.description}</div>
