@@ -3,7 +3,7 @@ import Layout from './components/layout/Layout'
 import HomePage from './pages/HomePage/HomePage'
 import SettingsPage from './pages/SettingsPage/SettingsPage'
 import StatisticsPage from './pages/StatisticsPage/StatisticsPage'
-import AuthPage from './pages/AuthPage/AuthPage'
+// import AuthPage from './pages/AuthPage/AuthPage'
 
 export const routes: RouteObject[] = [
     {
@@ -17,6 +17,6 @@ export const routes: RouteObject[] = [
     },
     {
         path: '/auth',
-        element: <AuthPage />,
+        // element: <AuthPage />,
     },
 ];
