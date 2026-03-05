@@ -58,6 +58,7 @@
     color: #CCC530;
     cursor: pointer;
     font-size: clamp(1.25rem, 3vw, 1.8rem);
+    svg { height: clamp(2.25rem, 5vw, 2.5rem); width: clamp(2.25rem, 5vw, 2.5rem); }
 }
 
 .topbar__user-menu {

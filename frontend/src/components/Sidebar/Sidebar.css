@@ -1,3 +1,9 @@
+.sidebar-area {
+    display: flex;
+    flex-shrink: 0;
+    height: 100%;
+}
+
 .sidebar {
     --sidebar-collapsed-width: 4.5rem;
     --sidebar-open-width: 15rem;
@@ -47,7 +53,7 @@
 }
 
 .sidebar__item--active {
-    background: #eef8ef;
+    background: #f3f3f3;
     color: #948C0F;
 }
 
@@ -57,6 +63,7 @@
     color: #CCC530;
     text-align: center;
     flex-shrink: 0;
+    svg { height: 1.5rem; width: 1.5rem; }
 }
 
 .sidebar__label {
