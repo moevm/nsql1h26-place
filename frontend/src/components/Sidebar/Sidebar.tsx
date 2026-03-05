@@ -4,6 +4,14 @@ import { CgClose } from 'react-icons/cg'
 import { LuBarcode, LuFileInput, LuGrid2X2, LuMap, LuMapPinned, LuRoute, LuSearch } from 'react-icons/lu'
 import ListMapsPanel from './Panels/Maps/ListMapsPanel'
 import CreateMapPanel from './Panels/Maps/CreateMapPanel'
+import ListPointsPanel from './Panels/Points/ListPointsPanel'
+import CreatePointPanel from './Panels/Points/CreatePointPanel'
+import ListRoutesPanel from './Panels/Routes/ListRoutePanel'
+import CreateRoutePanel from './Panels/Routes/CreateRoutePanel'
+import ListAreasPanel from './Panels/Areas/ListAreasPanel'
+import CreateAreaPanel from './Panels/Areas/CreateAreaPanel'
+import SearchPanel from './Panels/Search/SearchPanel'
+import DataPanel from './Panels/Data/DataPanel'
 
 type SidebarEntry = {
     id: string
@@ -20,19 +28,68 @@ const Sidebar = () => {
     const [openComponent, setOpenComponent] = useState(false)
 
     const SIDEBAR_ENTRIES: SidebarEntry[] = [
-        { id: 'data', icon: <LuFileInput />, label: 'Данные', component: <div>data</div> },
-        { id: 'search', icon: <LuSearch />, label: 'Поиск', component: <div>search</div> },
-        { id: 'maps', icon: <LuMap />, label: 'Карты',
-            component: <ListMapsPanel setOpen={setOpenComponent} setAdditionalOpen={setOpenAdditional} />,
-            additionalComponent: <CreateMapPanel setAdditionalOpen={setOpenAdditional} /> },
-        { id: 'points', icon: <LuMapPinned />, label: 'Отметки', component: <div>points</div> },
-        { id: 'routes', icon: <LuRoute />, label: 'Маршруты', component: <div>route</div> },
-        { id: 'areas', icon: <LuGrid2X2 />, label: 'Области', component: <div>area</div> },
+        {
+            id: 'data',
+            icon: <LuFileInput />,
+            label: 'Данные',
+            component: <DataPanel setOpen={setOpenComponent} />
+        },
+        {
+            id: 'search',
+            icon: <LuSearch />,
+            label: 'Поиск',
+            component: <SearchPanel setOpen={setOpenComponent} />,
+        },
+        {
+            id: 'maps',
+            icon: <LuMap />,
+            label: 'Карты',
+            component:
+                <ListMapsPanel
+                    setOpen={setOpenComponent}
+                    setAdditionalOpen={setOpenAdditional}
+                />,
+            additionalComponent: <CreateMapPanel setAdditionalOpen={setOpenAdditional} />
+        },
+        {
+            id: 'points',
+            icon: <LuMapPinned />,
+            label: 'Отметки',
+            component:
+                <ListPointsPanel
+                    setOpen={setOpenComponent}
+                    setAdditionalOpen={setOpenAdditional}
+                />,
+            additionalComponent: <CreatePointPanel setAdditionalOpen={setOpenAdditional} />
+        },
+        {
+            id: 'routes',
+            icon: <LuRoute />,
+            label: 'Маршруты',
+            component:
+                <ListRoutesPanel
+                    setOpen={setOpenComponent}
+                    setAdditionalOpen={setOpenAdditional}
+                />,
+            additionalComponent: <CreateRoutePanel setAdditionalOpen={setOpenAdditional} />
+        },
+        {
+            id: 'areas',
+            icon: <LuGrid2X2 />,
+            label: 'Области',
+            component:
+                <ListAreasPanel
+                    setOpen={setOpenComponent}
+                    setAdditionalOpen={setOpenAdditional}
+                />,
+            additionalComponent: <CreateAreaPanel setAdditionalOpen={setOpenAdditional} />
+        },
     ]
 
     const handleClick = (entry: SidebarEntry) => {
         setActivePanel(entry.id);
         setOpenComponent(true);
+        setOpenAdditional(false);
     }
 
     return (
