@@ -1,16 +1,16 @@
 .home-page {
-    padding: 16px;
+    padding: clamp(0.75rem, 2.4vw, 1.5rem);
 }
 
 .home-page h1 {
     margin: 0 0 8px;
-    font-size: 28px;
+    font-size: clamp(1.5rem, 4vw, 1.75rem);
     color: #948C0F;
 }
 
 .home-page__subtitle {
     color: #666;
-    margin: 0 0 32px;
+    margin: 0 0 clamp(1rem, 3.5vw, 2rem);
 }
 
 .home-page__placeholder {
@@ -19,7 +19,7 @@
     align-items: center;
     justify-content: center;
     gap: 12px;
-    padding: 64px;
+    padding: clamp(1.5rem, 7vw, 4rem);
     background: #fff;
     border: 2px dashed #c8e6c9;
     border-radius: 12px;
@@ -27,5 +27,5 @@
 }
 
 .home-page__placeholder-icon {
-    font-size: 48px;
+    font-size: clamp(1.75rem, 8vw, 3rem);
 }

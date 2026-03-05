@@ -32,18 +32,18 @@ const TopBar = () => {
     return (
         <header className="topbar">
             <div className="topbar__left">
-                <img onClick={() => navigate('/')} className='topbar__icon-img--user' src="/src/assets/images/mushroom.png" alt="logo" />
+                <img onClick={() => navigate('/')} className='topbar__logo' src="/src/assets/images/mushroom.png" alt="logo" />
             </div>
 
             <span className="topbar__brand">Mushroom Place</span>
 
             <div className="topbar__right">
                 <button className="topbar__icon-btn" title="Статистика" onClick={() => navigate('/statistics')}>
-                    <TbGraphFilled size={"48px"} />
+                    <TbGraphFilled />
                 </button>
 
                 <button className="topbar__icon-btn" title="Настройки" onClick={() => navigate('/settings')}>
-                    <TbSettingsFilled size={"48px"} />
+                    <TbSettingsFilled />
                 </button>
 
                 <div className="topbar__user-menu" ref={userMenuRef}>
