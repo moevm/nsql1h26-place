@@ -1,72 +1,96 @@
-import {useEffect, useState} from 'react';
-import requester, {type Request} from '../requests/fetch';
+import { useCallback, useEffect, useState } from 'react';
+
+// ── Типы ────────────────────────────────────────────────
 
 export type ApiError = {
     message: string;
     status_code: number;
-}
+};
 
-export type ApiRequest<T,> = {
-    path?: string;
-    method?: string;
-    headers?: HeadersInit;
-    params?: object;
-    body?: T;
-}
+// ── Базовый URI ─────────────────────────────────────────
 
 export const getApiUri = () => {
     return import.meta.env.VITE_API_URI || '/api';
-}
+};
 
-export const useApi = <ResultType, RequestType = undefined>(
-    request: ApiRequest<RequestType>
-): [ResultType, ApiError | undefined, boolean, () => void] => {
-    const [apiError, setApiError] = useState<ApiError | undefined>(undefined);
-    const [loading, setLoading] = useState(false);
-    const [refreshCounter, setRefreshCounter] = useState(0);
-    const [result, setResult] = useState<ResultType | undefined>(undefined);
+// ── runApi — единая точка входа для любого запроса к бэку ──
+//
+// Использование:
+//   await runApi<Map[]>('GET', '/maps')
+//   await runApi<Map, CreateMapPayload>('POST', '/maps', body)
+//   await runApi<Map, UpdateMapPayload>('PATCH', `/maps/${id}`, body)
+//   await runApi<Map>('DELETE', `/maps/${id}`)
 
-    const refresh = () => {
-        setRefreshCounter((prev) => prev + 1);
+export const runApi = async <ResultType, BodyType = undefined>(
+    method: string,
+    path: string,
+    body?: BodyType,
+): Promise<ResultType> => {
+    const headers: HeadersInit = {
+        'Content-Type': 'application/json;charset=UTF-8',
+    };
+
+    const response = await fetch(`${getApiUri()}${path}`, {
+        method,
+        headers,
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
+
+    if (!response.ok) {
+        let message = 'Request failed';
+        try {
+            const payload = await response.json();
+            message = payload?.message || message;
+        } catch {
+            message = response.statusText || message;
+        }
+        throw { message, status_code: response.status } as ApiError;
     }
 
+    if (response.status === 204) {
+        return undefined as ResultType;
+    }
+
+    return response.json() as Promise<ResultType>;
+};
+
+// ── useQuery — React-хук для GET-запросов ───────────────
+//
+// Автоматически делает GET при монтировании и при вызове refresh().
+// Возвращает [data, error, loading, refresh].
+
+export const useQuery = <T,>(
+    path: string,
+): [T | undefined, ApiError | undefined, boolean, () => void] => {
+    const [data, setData] = useState<T | undefined>(undefined);
+    const [error, setError] = useState<ApiError | undefined>(undefined);
+    const [loading, setLoading] = useState(true);
+    const [tick, setTick] = useState(0);
+
+    const refresh = useCallback(() => setTick((t) => t + 1), []);
+
     useEffect(() => {
-        const method = request.method || 'GET';
+        let cancelled = false;
+        setLoading(true);
 
-        if ((['POST', 'PUT', 'PATCH', 'DELETE'].find((value) => value === method) && request.body) || method === 'GET') {
-            setLoading(true);
+        runApi<T>('GET', path)
+            .then((result) => {
+                if (!cancelled) {
+                    setData(result);
+                    setError(undefined);
+                }
+            })
+            .catch((err: ApiError) => {
+                if (!cancelled) {
+                    setError(err);
+                }
+            })
+            .finally(() => {
+                if (!cancelled) setLoading(false);
+            });
 
-            const params = new URLSearchParams();
-            for (const [key, value] of Object.entries(request.params || {})) {
-                params.append(key, value);
-            }
+        return () => { cancelled = true; };
+    }, [path, tick]);
 
-            const paramString = `${params}`;
-            const path = request.path || '';
-            const req: Request = {
-                uri: `${getApiUri()}${path}${paramString.length > 0 ? '?' + paramString : ''}`,
-                method: method,
-                headers: {
-                    ...request.headers,
-                    'Content-Type': 'application/json;charset=UTF-8',
-                },
-                body: JSON.stringify(request.body),
-            };
-
-            requester(req)
-                .then(async (response) => {
-                    if (response.ok) {
-                        setResult(await response.json());
-                        setApiError(undefined);
-                        setLoading(false);
-                    }
-                })
-                .catch((err) => {
-                    setApiError({message: err.message, status_code: err.status_code});
-                    setLoading(false);
-                });
-        }
-    }, [refreshCounter, request.body, request.headers, request.method, request.params, request.path]);
-
-    return [result!, apiError, loading, refresh];
-}
+    return [data, error, loading, refresh];
+};
