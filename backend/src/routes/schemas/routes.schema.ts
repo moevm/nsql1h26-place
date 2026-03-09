@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
+import { Map } from '../../maps/schemas/maps.schema';
 
 export type RouteDocument = HydratedDocument<Route>;
 
@@ -17,28 +18,28 @@ export class Waypoint {
 
 @Schema()
 export class Route {
-  @Prop(String)
-  map_id: string;
+  @Prop({ type: Types.ObjectId, ref: "Map", required: true })
+  map_id: Types.ObjectId;
 
-  @Prop(String)
+  @Prop({ type: String, required: true, default: '' })
   name: string;
 
-  @Prop(String)
+  @Prop({ type: String, required: true, default: '' })
   description: string;
 
-  @Prop([String])
+  @Prop({ type: [String], required: true, default: [] })
   tags: string[];
 
-  @Prop(String)
+  @Prop({ type: String, required: true, default: '' })
   created_at: string;
 
-  @Prop(String)
+  @Prop({ type: String, required: true, default: '' })
   updated_at: string;
 
-  @Prop({ type: [Waypoint], default: [] })
+  @Prop({ type: [Waypoint], required: true, default: [] })
   waypoints: Waypoint[];
 
-  @Prop(String)
+  @Prop({ type: String, required: true, default: '' })
   image_path: string;
 }
 

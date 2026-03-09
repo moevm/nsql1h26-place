@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
+import { AuthModule } from './auth/auth.module';
 import { MapsModule } from './maps/maps.module';
 import { RoutesModule } from './routes/routes.module';
 
@@ -24,6 +25,7 @@ import { RoutesModule } from './routes/routes.module';
                 uri: configService.get<string>('MONGO_URI'),
             }),
         }),
+        AuthModule,
         MapsModule,
         RoutesModule,
     ],
