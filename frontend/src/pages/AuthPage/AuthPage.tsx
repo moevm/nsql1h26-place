@@ -1,9 +1,14 @@
 import { useState, type SubmitEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { login, register } from '../../api/auth'
+import { saveAuthSession } from '../../auth/storage'
 import './AuthPage.css'
 
-const AuthPage = () => {
-    const [isLogin, setIsLogin] = useState(true)
+type AuthPageProps = {
+    mode: 'login' | 'register'
+}
+
+const AuthPage = ({ mode }: AuthPageProps) => {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
@@ -17,11 +22,23 @@ const AuthPage = () => {
         setLoading(true)
 
         try {
+            if (mode === 'register') {
+                await register({ username, password })
+                navigate('/auth/login')
+                return
+            }
+
+            const response = await login({ username, password })
+            saveAuthSession(response.token, response.user)
             navigate('/')
         }
 
-        catch (err) {
-            setError(err instanceof Error ? err.message : 'Произошла ошибка')
+        catch (err: unknown) {
+            if (typeof err === 'object' && err !== null && 'message' in err) {
+                setError(String(err.message))
+            } else {
+                setError('Произошла ошибка')
+            }
         }
 
         finally {
@@ -38,14 +55,16 @@ const AuthPage = () => {
 
                 <div className="auth-card__tabs">
                     <button
-                        className={isLogin ? "auth-card__tab auth-card__tab--active" : "auth-card__tab"}
-                        onClick={() => { setIsLogin(true); setError('') }}
+                        type="button"
+                        className={mode === 'login' ? 'auth-card__tab auth-card__tab--active' : 'auth-card__tab'}
+                        onClick={() => { setError(''); navigate('/auth/login') }}
                     >
                         Вход
                     </button>
                     <button
-                        className={isLogin ? "auth-card__tab" : "auth-card__tab auth-card__tab--active"}
-                        onClick={() => { setIsLogin(false); setError('') }}
+                        type="button"
+                        className={mode === 'register' ? 'auth-card__tab auth-card__tab--active' : 'auth-card__tab'}
+                        onClick={() => { setError(''); navigate('/auth/register') }}
                     >
                         Регистрация
                     </button>
@@ -79,7 +98,7 @@ const AuthPage = () => {
                     {error && <div className="auth-card__error">{error}</div>}
 
                     <button className="auth-card__submit" type="submit" disabled={loading}>
-                        {loading ? '...' : isLogin ? 'Войти' : 'Зарегистрироваться'}
+                        {loading ? '...' : mode === 'login' ? 'Войти' : 'Зарегистрироваться'}
                     </button>
                 </form>
             </div>

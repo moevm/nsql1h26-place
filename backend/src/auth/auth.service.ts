@@ -45,6 +45,7 @@ export class AuthService {
     }
 
     return {
+      token: randomBytes(24).toString('hex'),
       user: this.toSafeUser(user),
     };
   }

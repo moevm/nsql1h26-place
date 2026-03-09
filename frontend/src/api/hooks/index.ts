@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { getAuthToken } from '../../auth/storage';
 
 // ── Типы ────────────────────────────────────────────────
 
@@ -29,6 +30,11 @@ export const runApi = async <ResultType, BodyType = undefined>(
     const headers: HeadersInit = {
         'Content-Type': 'application/json;charset=UTF-8',
     };
+
+    const token = getAuthToken();
+    if (token) {
+        headers.Authorization = `Bearer ${token}`;
+    }
 
     const response = await fetch(`${getApiUri()}${path}`, {
         method,

@@ -4,3 +4,10 @@ export type Map = {
     title: string;
     description: string;
 };
+
+export type CreateMapPayload = {
+    title: string;
+    description: string;
+};
+
+export type UpdateMapPayload = Partial<CreateMapPayload>;
