@@ -1,7 +1,7 @@
 import { useState, type SubmitEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { login, register } from '../../api/auth'
-import { saveAuthSession } from '../../auth/storage'
+import { useAuthStore } from '../../stores/authStore'
 import './AuthPage.css'
 
 type AuthPageProps = {
@@ -15,6 +15,7 @@ const AuthPage = ({ mode }: AuthPageProps) => {
     const [loading, setLoading] = useState(false)
 
     const navigate = useNavigate()
+    const setSession = useAuthStore((state) => state.setSession)
 
     const handleSubmit = async (e: SubmitEvent) => {
         e.preventDefault()
@@ -29,7 +30,7 @@ const AuthPage = ({ mode }: AuthPageProps) => {
             }
 
             const response = await login({ username, password })
-            saveAuthSession(response.token, response.user)
+            setSession(response.token, response.user)
             navigate('/')
         }
 

@@ -1,26 +1,17 @@
-type AuthUser = {
-    _id: string;
-    username: string;
-    image_path?: string;
-};
-
-const TOKEN_KEY = 'auth_token';
-const USER_KEY = 'auth_user';
+import { type AuthUser, useAuthStore } from '../stores/authStore'
 
 export const saveAuthSession = (token: string, user: AuthUser) => {
-    localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    useAuthStore.getState().setSession(token, user)
 };
 
 export const clearAuthSession = () => {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
+    useAuthStore.getState().clearSession()
 };
 
 export const getAuthToken = () => {
-    return localStorage.getItem(TOKEN_KEY);
+    return useAuthStore.getState().token
 };
 
 export const isAuthenticated = () => {
-    return Boolean(getAuthToken());
+    return useAuthStore.getState().isAuthenticated
 };

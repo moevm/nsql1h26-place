@@ -5,10 +5,12 @@ import HomePage from './pages/HomePage/HomePage'
 import SettingsPage from './pages/SettingsPage/SettingsPage'
 import StatisticsPage from './pages/StatisticsPage/StatisticsPage'
 import AuthPage from './pages/AuthPage/AuthPage'
-import { isAuthenticated } from './auth/storage'
+import { useAuthStore } from './stores/authStore'
 
 const ProtectedLayout = () => {
-    if (!isAuthenticated()) {
+    const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+
+    if (!isAuthenticated) {
         return <Navigate to="/auth/login" replace />
     }
 

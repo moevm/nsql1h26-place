@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { getAuthToken } from '../../auth/storage';
+import { useAuthStore } from '../../stores/authStore';
 
 // ── Типы ────────────────────────────────────────────────
 
@@ -31,7 +31,7 @@ export const runApi = async <ResultType, BodyType = undefined>(
         'Content-Type': 'application/json;charset=UTF-8',
     };
 
-    const token = getAuthToken();
+    const token = useAuthStore.getState().token;
     if (token) {
         headers.Authorization = `Bearer ${token}`;
     }
