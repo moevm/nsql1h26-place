@@ -4,7 +4,8 @@
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.04);
     overflow-y: auto;
     flex-shrink: 0;
-    width: 360px;
+    width: min(clamp(280px, 32vw, 360px), calc(100vw - 4rem));
+    max-width: 100%;
     animation: panelSlideIn 0.2s ease;
 }
 
@@ -20,24 +21,25 @@
 }
 
 .panel--primary {
-    width: 360px;
+    width: inherit;
 }
 
 .panel--slide {
-    width: 360px;
+    width: inherit;
 }
 
 .panel__header {
-    padding: 18px;
+    padding: clamp(12px, 2vw, 18px);
     border-bottom: 1px solid #f0f0f0;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 10px;
 }
 
 .panel__header h3 {
     margin: 0;
-    font-size: 24px;
+    font-size: clamp(18px, 2.2vw, 24px);
     font-weight: 600;
     color: #948C0F;
 }
@@ -76,7 +78,7 @@
 }
 
 .list {
-    padding: 12px;
+    padding: clamp(10px, 2vw, 12px);
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -84,9 +86,9 @@
 
 .card {
     display: flex;
-    gap: 14px;
+    gap: clamp(10px, 2vw, 14px);
     width: 100%;
-    padding: 12px;
+    padding: clamp(10px, 2vw, 12px);
     border-radius: 12px;
     border: 2px solid #948C0F;
     background: #fff;
@@ -228,4 +230,65 @@ button.card {
 
 .create-form__btn--ghost:hover {
     background: #e8e8e8;
+}
+
+@media (max-width: 1024px) {
+    .panel {
+        width: min(340px, calc(100vw - 4rem));
+    }
+}
+
+@media (max-width: 768px) {
+    .panel {
+        min-width: 0;
+        width: calc(100vw - 4rem);
+        box-shadow: 1px 0 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .card__actions,
+    .create-form__actions {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .panel {
+        width: calc(100vw - 3.75rem);
+    }
+
+    .panel__header {
+        padding: 12px;
+    }
+
+    .panel__header h3 {
+        font-size: 18px;
+    }
+
+    .card {
+        border-width: 1px;
+    }
+
+    .card__avatar {
+        width: 34px;
+        height: 34px;
+        font-size: 16px;
+    }
+
+    .card__title {
+        font-size: 15px;
+    }
+
+    .card__desc {
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+    .card__btn,
+    .create-form__btn {
+        width: 100%;
+    }
+
+    .create-form {
+        padding: 12px;
+    }
 }

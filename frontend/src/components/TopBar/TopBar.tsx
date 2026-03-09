@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TbGraphFilled, TbSettingsFilled } from 'react-icons/tb';
-import { useAuthStore } from '../../stores/authStore'
+// import { useAuthStore } from '../../stores/authStore'
 import './TopBar.css'
 
 const TopBar = () => {
     const navigate = useNavigate()
-    const { logout } = useAuthStore()
+    // const { logout } = useAuthStore()
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
     const userMenuRef = useRef<HTMLDivElement | null>(null)
 
@@ -24,7 +24,7 @@ const TopBar = () => {
     }, [])
 
     const handleLogout = () => {
-        logout()
+        // logout()
         setIsUserMenuOpen(false)
         navigate('/auth')
     }
