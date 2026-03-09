@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 import { MapsModule } from './maps/maps.module';
+import { RoutesModule } from './routes/routes.module';
 
 @Module({
     imports: [
@@ -24,6 +25,7 @@ import { MapsModule } from './maps/maps.module';
             }),
         }),
         MapsModule,
+        RoutesModule,
     ],
 })
 export class AppModule {}
