@@ -1,9 +1,12 @@
 import { Outlet } from 'react-router-dom'
 import TopBar from '../TopBar/TopBar'
 import Sidebar from '../Sidebar/Sidebar'
+import { useLoadMaps } from '../../api/maps'
 import './Layout.css'
 
 const Layout = () => {
+    useLoadMaps()
+
     return (
         <div className="layout">
             <TopBar />

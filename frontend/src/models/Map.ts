@@ -1,13 +1,39 @@
+export type Coordinates = {
+    x: number;
+    y: number;
+};
+
 export type Map = {
-    id: string;
+    _id: string;
     user_id: string;
-    title: string;
+    name: string;
     description: string;
+    country: string;
+    area: string;
+    coordinates: Coordinates;
+    visible: boolean;
+    tags: string[];
+    image_path: string;
+    created_at: string;
+    updated_at: string;
 };
 
-export type CreateMapPayload = {
-    title: string;
+export type CreateMap = {
+    user_id: string;
+    name: string;
+    coordinates: Coordinates;
     description: string;
+    country: string;
+    area: string;
+    visible: boolean;
+    tags: string[];
+    image_path: string;
 };
 
-export type UpdateMapPayload = Partial<CreateMapPayload>;
+export type UpdateMap = {
+    name?: string;
+    description?: string;
+    visible?: boolean;
+    tags?: string[];
+    coordinates?: Coordinates;
+};

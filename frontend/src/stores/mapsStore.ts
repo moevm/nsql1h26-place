@@ -3,14 +3,14 @@ import { type Map } from '../models/Map';
 
 interface MapStore {
     Maps: Map[];
-    sortBy: 'id' | null;
+    sortBy: '_id' | 'name' | null;
     sortOrder: 'asc' | 'desc';
 
     setMaps: (Maps: Map[]) => void;
     addMap: (Map: Map) => void;
     updateMap: (Map: Map) => void;
     removeMap: (id: string) => void;
-    setSort: (field: 'id' | null) => void;
+    setSort: (field: '_id' | 'name' | null) => void;
     getSortedMaps: () => Map[];
 }
 
@@ -24,11 +24,11 @@ export const useMapStore = create<MapStore>((set, get) => ({
         Maps: [...state.Maps, Map]
     })),
     updateMap: (updatedMap) => set(state => ({
-        Maps: state.Maps.map(Map => Map.id === updatedMap.id ? updatedMap : Map)
+        Maps: state.Maps.map(Map => Map._id === updatedMap._id ? updatedMap : Map)
     })),
 
     removeMap: (id) => set(state => ({
-        Maps: state.Maps.filter(Map => Map.id !== id)
+        Maps: state.Maps.filter(Map => Map._id !== id)
     })),
 
     setSort: (field) => set(state => ({
