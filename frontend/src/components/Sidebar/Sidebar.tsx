@@ -1,4 +1,4 @@
-import { useState, type ReactElement, type ReactNode } from 'react'
+import { useEffect, useState, type ReactElement, type ReactNode } from 'react'
 import './Sidebar.css'
 import { CgClose } from 'react-icons/cg'
 import { LuBarcode, LuFileInput, LuGrid2X2, LuMap, LuMapPinned, LuRoute, LuSearch } from 'react-icons/lu'
@@ -85,6 +85,10 @@ const Sidebar = () => {
             additionalComponent: <CreateAreaPanel setAdditionalOpen={setOpenAdditional} />
         },
     ]
+
+    useEffect(() => {
+        if (!openComponent && !openAdditional) setActivePanel("");
+    }, [openComponent, openAdditional]);
 
     const handleClick = (entry: SidebarEntry) => {
         setActivePanel(entry.id);

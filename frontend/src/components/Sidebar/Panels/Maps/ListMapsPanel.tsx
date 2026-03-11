@@ -16,7 +16,7 @@ type ListMapsPanelProps = {
 const ListMapsPanel = ({setAdditionalOpen, setOpen} : ListMapsPanelProps) => {
     const { error, loading } = useLoadMaps();
     const maps = useMapStore((s) => s.getSortedMaps());
-    const { removeMap, updateMap: update } = useMapStore();
+    const { removeMap, updateMap: update, setSelectedMapId } = useMapStore();
     const [ edit, setEdit ] = useState("");
     const [ updatedMap, setUpdatedMap ] = useState<UpdateMap>({})
     const [ otherError, setOtherError ] = useState("")
@@ -114,7 +114,7 @@ const ListMapsPanel = ({setAdditionalOpen, setOpen} : ListMapsPanelProps) => {
                             </div>
                         </article>
                     ) : (
-                        <article key={map._id} className="card">
+                        <article key={map._id} className="card" onClick={() => setSelectedMapId(map._id)}>
                             <div className="card__content">
                                 <div className='card__title_container'>
                                     <img className='card__icon' src={`/src/assets/images/${map.image_path}`} alt="logo" />
@@ -129,12 +129,18 @@ const ListMapsPanel = ({setAdditionalOpen, setOpen} : ListMapsPanelProps) => {
                                     <div className='card__actions__container'>
                                         <GrEdit
                                             className='card__action_icon card__btn--safe'
-                                            onClick={() => setEdit(map._id)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setEdit(map._id);
+                                            }}
                                         />
                                         <FaSave className='card__action_icon card__btn--inactive' />
                                         <BsFillTrashFill
                                             className="card__action_icon card__btn--danger"
-                                            onClick={() => handleDelete(map._id)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDelete(map._id);
+                                            }}
                                         />
                                     </div>
                                 </div>
