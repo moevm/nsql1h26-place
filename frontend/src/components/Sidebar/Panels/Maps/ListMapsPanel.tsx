@@ -19,18 +19,14 @@ const ListMapsPanel = ({setAdditionalOpen, setOpen} : ListMapsPanelProps) => {
     const { removeMap, updateMap: update, setSelectedMapId } = useMapStore();
     const [ edit, setEdit ] = useState("");
     const [ updatedMap, setUpdatedMap ] = useState<UpdateMap>({})
-    const [ otherError, setOtherError ] = useState("")
 
     const handleDelete = async (map_id: string) => {
         try {
-            const res = await deleteMap(map_id);
-            console.log(res)
+            await deleteMap(map_id);
+            removeMap(map_id);
         } catch (err) {
-            const message = err instanceof Error ? err.message : 'Не удалось обновить карту';
-            setOtherError(message);
+            alert("Не удалось удалить карту!")
         }
-
-        removeMap(map_id);
     }
 
     const handleSave = async (map_id: string) => {
@@ -38,8 +34,7 @@ const ListMapsPanel = ({setAdditionalOpen, setOpen} : ListMapsPanelProps) => {
             const map = await updateMap(map_id, updatedMap);
             update(map);
         } catch (err) {
-            const message = err instanceof Error ? err.message : 'Не удалось обновить карту';
-            setOtherError(message);
+            alert("Не удалось обновить карту!")
         }
 
         setEdit("")
@@ -62,7 +57,7 @@ const ListMapsPanel = ({setAdditionalOpen, setOpen} : ListMapsPanelProps) => {
                 </button>
                 <hr className="divider" />
                 {loading && <div className="list__empty">Загружаю карты...</div>}
-                {(error || otherError) && <div className="list__empty">Ошибка: {error ? error.message : otherError}</div>}
+                {error && <div className="list__empty">Ошибка: {error.message}</div>}
                 {!loading && maps.length === 0 && <div className="list__empty">Карт пока нет</div>}
                 {maps.map((map) => (
                     edit === map._id ? (

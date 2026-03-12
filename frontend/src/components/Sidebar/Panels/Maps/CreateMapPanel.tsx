@@ -19,20 +19,83 @@ const CreateMapPanel = ({setAdditionalOpen} : CreateMapPanelProps) => {
     const [area, setArea] = useState('')
     const [visible, setVisible] = useState(true)
     const [loading, setLoading] = useState(false)
-    const [error, setError] = useState('')
+
+    type GeocodeResult = {
+        lat: string
+        lon: string
+        display_name?: string
+        address?: {
+            city?: string
+            town?: string
+            village?: string
+            municipality?: string
+            county?: string
+            state_district?: string
+        }
+    }
+
+    const extractCity = (result: GeocodeResult) => {
+        return (
+            result.address?.city
+            ?? result.address?.town
+            ?? result.address?.village
+            ?? result.address?.municipality
+            ?? result.address?.county
+            ?? result.address?.state_district
+            ?? null
+        )
+    }
+
+    const geocodeAreaCenter = async (areaName: string, countryName: string) => {
+        const query = `${areaName}, ${countryName}`.trim();
+        const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=8&q=${encodeURIComponent(query)}`;
+
+        const response = await fetch(url, {
+            headers: {
+                Accept: 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Не удалось получить координаты области');
+        }
+
+        const results = await response.json() as GeocodeResult[];
+        const first = results[0];
+
+        if (!first) {
+            throw new Error('Область не найдена. Уточните название области и страны.');
+        }
+
+        const uniqueCities = Array.from(new Set(results.map(extractCity).filter((city): city is string => !!city && city.trim().length > 0)))
+
+        if (uniqueCities.length > 1) {
+            throw new Error(`Найдено несколько мест в разных городах (${uniqueCities.join(', ')}). Уточните запрос в поле области через запятую, например: "${areaName}, ${uniqueCities[0]}".`)
+        }
+
+        const lat = Number(first.lat);
+        const lon = Number(first.lon);
+
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+            throw new Error('Геокодер вернул некорректные координаты');
+        }
+
+        return { x: lat, y: lon };
+    };
 
     const handleCreateMap = async () => {
         setLoading(true)
-        setError('')
 
         try {
+            const coordinates = await geocodeAreaCenter(area.trim(), country.trim());
+
             const newMap = await createMap({
                 user_id: user?._id || "",
                 name: name.trim(),
                 description: description.trim(),
                 country: country.trim(),
                 area: area.trim(),
-                coordinates: {x: 50.0000, y: 50.000},
+                coordinates,
                 visible: visible,
                 tags: [],
                 image_path: "map_icon.png"
@@ -41,8 +104,8 @@ const CreateMapPanel = ({setAdditionalOpen} : CreateMapPanelProps) => {
             addMap(newMap)
             setAdditionalOpen(false)
         } catch (err) {
-            const message = err instanceof Error ? err.message : 'Не удалось создать карту'
-            setError(message)
+            const message = err instanceof Error ? err.message : 'Не удалось создать карту!'
+            alert(message);
         } finally {
             setLoading(false)
         }
@@ -102,8 +165,6 @@ const CreateMapPanel = ({setAdditionalOpen} : CreateMapPanelProps) => {
                 </select>
 
                 <hr className='divider' />
-
-                {error && <div className="card__desc">{error}</div>}
 
                 <div className="create-form__actions">
                     <button className="create-form__btn create-form__btn--ghost" onClick={() => setAdditionalOpen(false)}>
