@@ -3,8 +3,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
-import { MapsModule } from './maps/maps.module';
-import { RoutesModule } from './routes/routes.module';
+import { MapsModule } from './models/maps/maps.module';
+import { RoutesModule } from './models/routes/routes.module';
+import { PointsModule } from './models/points/points.module';
+import { AreasModule } from './models/areas/areas.module';
+import { TagsModule } from './models/tags/tags.module';
 
 @Module({
     imports: [
@@ -28,6 +31,9 @@ import { RoutesModule } from './routes/routes.module';
         AuthModule,
         MapsModule,
         RoutesModule,
+        PointsModule,
+        AreasModule,
+        TagsModule,
     ],
 })
 export class AppModule {}

@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
-import { UsersService } from '../users/users.service';
-import { User } from '../users/schemas/users.schema';
+import { UsersService } from '../models/users/users.service';
+import { User } from '../models/users/schemas/users.schema';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 

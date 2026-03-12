@@ -13,9 +13,6 @@ class Coordinates {
 
 @Schema({ timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } })
 export class Map {
-    @Prop({ type: Types.ObjectId })
-    _id: Types.ObjectId;
-
     @Prop({ type: Types.ObjectId, ref: 'User', required: true })
     user_id: Types.ObjectId;
 
