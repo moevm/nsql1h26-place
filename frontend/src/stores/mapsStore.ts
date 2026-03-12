@@ -3,8 +3,12 @@ import { type Map } from '../models/Map';
 
 interface MapStore {
     Maps: Map[];
+    selectedMapId: string | null;
+    selectedMapTick: number;
     sortBy: '_id' | 'name' | null;
     sortOrder: 'asc' | 'desc';
+
+    setSelectedMapId: (selectedMapId: string | null) => void;
 
     setMaps: (Maps: Map[]) => void;
     addMap: (Map: Map) => void;
@@ -16,10 +20,19 @@ interface MapStore {
 
 export const useMapStore = create<MapStore>((set, get) => ({
     Maps: [],
+    selectedMapId: null,
+    selectedMapTick: 0,
     sortBy: null,
     sortOrder: 'asc',
 
-    setMaps: (Maps) => set({ Maps }),
+    setMaps: (Maps) => set((state) => ({
+        Maps,
+        selectedMapId: state.selectedMapId ?? (Maps.length ? Maps[0]._id : null),
+    })),
+    setSelectedMapId: (selectedMapId) => set((state) => ({
+        selectedMapId,
+        selectedMapTick: state.selectedMapTick + 1,
+    })),
     addMap: (Map) => set(state => ({
         Maps: [...state.Maps, Map]
     })),

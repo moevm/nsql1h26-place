@@ -1,31 +1,38 @@
 .home-page {
-    padding: clamp(0.75rem, 2.4vw, 1.5rem);
-}
-
-.home-page h1 {
-    margin: 0 0 8px;
-    font-size: clamp(1.5rem, 4vw, 1.75rem);
-    color: #948C0F;
-}
-
-.home-page__subtitle {
-    color: #666;
-    margin: 0 0 clamp(1rem, 3.5vw, 2rem);
-}
-
-.home-page__placeholder {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: clamp(1.5rem, 7vw, 4rem);
-    background: #fff;
-    border: 2px dashed #c8e6c9;
-    border-radius: 12px;
-    color: #888;
+    height: 100%;
 }
 
-.home-page__placeholder-icon {
-    font-size: clamp(1.75rem, 8vw, 3rem);
+.leaflet-control-zoom {
+    border: none !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2) !important;
+}
+
+.home-page__status_wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.home-page__status {
+    color: #777;
+    margin: 0 0 10px;
+}
+
+.home-page__status--error {
+    color: #b63f3f;
+}
+
+.home-page__map-wrap {
+    flex: 1 1 0;
+    min-height: 400px;
+    overflow: hidden;
+}
+
+.home-page__map {
+    width: 100%;
+    height: 100%;
 }

@@ -86,6 +86,7 @@
     background: #fff;
     text-align: left;
     align-items: center;
+    cursor: pointer;
 }
 
 button.card {
