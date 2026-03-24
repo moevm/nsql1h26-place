@@ -5,20 +5,8 @@ use shrooms;
 
 db.createCollection("users");
 db.createCollection("maps");
-db.createCollection("routes");
-db.createCollection("points");
-db.createCollection("areas");
+db.createCollection("mapobjects");
 db.createCollection("tags");
-
-
-db.users.insertMany([
-{
-    _id: ObjectId("000000000000000000000001"),
-    username: "Joku_Jokkunen",
-    password: "123",
-    image_path: "cheliks.png"
-}
-]);
 
 db.tags.insertMany([
 {
@@ -44,9 +32,11 @@ db.maps.insertMany([
     user_id: ObjectId("000000000000000000000001"),
     name: "Карта подосиновиков",
     description: "На этой карте находятся все подосиновики в районе.",
-    country: "Россия",
     area: "Свердловское городское поселение",
-    coordinates: { x: 59.773007, y: 30.775178 },
+    location: {
+        type: "Point",
+        coordinates: [59.773007, 30.775178]
+    },
     visible: true,
     tags: [
         ObjectId("000000000000000000000011"),
@@ -61,9 +51,11 @@ db.maps.insertMany([
     user_id: ObjectId("000000000000000000000001"),
     name: "Ягодная карта",
     description: "Тут собраны все ягоды местности.",
-    country: "Россия",
     area: "Гатчинский муниципальный округ",
-    coordinates: { x: 59.598731, y: 29.677867 },
+    location: {
+        type: "Point",
+        coordinates: [59.598731, 29.677867]
+    },
     visible: true,
     tags: [
         ObjectId("000000000000000000000011")
@@ -74,22 +66,26 @@ db.maps.insertMany([
 }
 ]);
 
-db.routes.insertMany([
+db.mapobjects.insertMany([
 {
     _id: ObjectId("000000000000000000000201"),
     map_id: ObjectId("000000000000000000000101"),
     name: "Маршрут с подосиновиками",
+    type: "Route",
     description: "Тут прямо очень много подосиновиков",
     tags: [
         ObjectId("000000000000000000000012")
     ],
     created_at: ISODate("2026-03-10T10:00:00.389Z"),
     updated_at: null,
-    waypoints: [
-        { x: 59.787504, y: 30.773917, ordinal_number: 1 },
-        { x: 59.788627, y: 30.778359, ordinal_number: 2 },
-        { x: 59.788287, y: 30.777903, ordinal_number: 3 }
-    ],
+    location: {
+        type: "LineString",
+        coordinates: [
+            [ 59.787504, 30.773917],
+            [ 59.788627, 30.778359],
+            [ 59.788287, 30.777903]
+        ]
+    },
     image_path: "route_icon.png"
 },
 {
@@ -97,69 +93,82 @@ db.routes.insertMany([
     map_id: ObjectId("000000000000000000000101"),
     name: "Маршрут с маленькими подосиновиками",
     description: "Тут только маленькие подосиновики",
+    type: "Route",
     tags: [
         ObjectId("000000000000000000000012")
     ],
     created_at: ISODate("2026-03-15T10:00:00.389Z"),
     updated_at: ISODate("2026-03-15T13:10:00.389Z"),
-    waypoints: [
-        { x: 59.780151, y: 30.756108, ordinal_number: 1 },
-        { x: 59.780529, y: 30.757449, ordinal_number: 2 },
-        { x: 59.780805, y: 30.757835, ordinal_number: 3 }
-    ],
+    location: {
+        type: "LineString",
+        coordinates: [
+            [ 59.780151, 30.756108],
+            [ 59.780529, 30.757449],
+            [ 59.780805, 30.757835],
+        ]
+    },
     image_path: "route_icon.png"
-}
-]);
-
-db.points.insertMany([
+},
 {
     _id: ObjectId("000000000000000000000301"),
     map_id: ObjectId("000000000000000000000101"),
+    type: "Point",
     name: "Подосиновик",
     description: "Прямо-таки огромный подосиновик",
     tag: ObjectId("000000000000000000000012"),
     created_at: ISODate("2026-03-15T10:00:00.389Z"),
     updated_at: null,
-    coordinates: { x: 59.778860, y: 30.751258 },
+    location: {
+        type: "Point",
+        coordinates: [ 59.778860, 30.751258 ]
+    },
     image_path: "point_icon.png"
 },
 {
     _id: ObjectId("000000000000000000000302"),
     map_id: ObjectId("000000000000000000000101"),
     name: "Подосиновик",
+    type: "Point",
     description: "Какой-то подозрительный подосиновик",
     tag: ObjectId("000000000000000000000012"),
     created_at: ISODate("2026-03-17T10:00:00.389Z"),
     updated_at: null,
-    coordinates: { x: 59.779850, y: 30.753382 },
+    location: {
+        type: "Point",
+        coordinates: [ 59.779850, 30.753382 ]
+    },
     image_path: "point_icon.png"
 },
 {
     _id: ObjectId("000000000000000000000303"),
     map_id: ObjectId("000000000000000000000102"),
     name: "Черника",
+    type: "Point",
     description: "На третьем кусте справа много черники",
     tag: ObjectId("000000000000000000000011"),
     created_at: ISODate("2026-03-12T10:00:00.389Z"),
     updated_at: null,
-    coordinates: { x: 59.597511, y: 29.684275 },
+    location: {
+        type: "Point",
+        coordinates: [ 59.597511, 29.684275 ]
+    },
     image_path: "point_icon.png"
-}
-]);
-
-db.areas.insertMany([
+},
 {
     _id: ObjectId("000000000000000000000401"),
     map_id: ObjectId("000000000000000000000102"),
     name: "Черничная поляна",
+    type: "Area",
     description: "Все усыпано черникой",
     tags: [
         ObjectId("000000000000000000000011")
     ],
     created_at: ISODate("2026-03-20T10:00:00.389Z"),
     updated_at: null,
-    coordinates: { x: 59.778860, y: 30.751258 },
-    radius: 1.24567,
+    location: {
+        type: "Polygon",
+        coordinates: [[[ 59.778860, 30.751252 ], [ 59.778860, 30.751258 ]], [[ 59.778860, 30.751252 ], [ 59.778860, 30.751258 ]]]
+    },
     image_path: "area_icon.png"
 }
 ]);

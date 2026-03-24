@@ -4,9 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
 import { MapsModule } from './models/maps/maps.module';
-import { RoutesModule } from './models/routes/routes.module';
-import { PointsModule } from './models/points/points.module';
-import { AreasModule } from './models/areas/areas.module';
+import { ObjectsModule } from './models/objects/objects.module';
 import { TagsModule } from './models/tags/tags.module';
 
 @Module({
@@ -30,9 +28,7 @@ import { TagsModule } from './models/tags/tags.module';
         }),
         AuthModule,
         MapsModule,
-        RoutesModule,
-        PointsModule,
-        AreasModule,
+        ObjectsModule,
         TagsModule,
     ],
 })

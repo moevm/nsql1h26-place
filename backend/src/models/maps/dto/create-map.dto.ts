@@ -1,12 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-
-class CoordinatesDto {
-    @ApiProperty({ description: 'Latitude', example: 59.773007 })
-    x: number;
-
-    @ApiProperty({ description: 'Longitude', example: 30.775178 })
-    y: number;
-}
+import type { GeoJSONGeometry } from 'src/common/types/geojson.types';
 
 export class CreateMapDto {
     @ApiProperty({ description: 'User ObjectId', example: '507f1f77bcf86cd799439011' })
@@ -18,14 +11,11 @@ export class CreateMapDto {
     @ApiProperty({ description: 'Map description', example: 'На этой карте находятся все подосиновики в районе.' })
     description: string;
 
-    @ApiProperty({ description: 'Country', example: 'Россия' })
-    country: string;
-
     @ApiProperty({ description: 'Area name', example: 'Свердловское городское поселение' })
     area: string;
 
-    @ApiProperty({ description: 'Map center coordinates', type: CoordinatesDto })
-    coordinates: CoordinatesDto;
+    @ApiProperty({ description: 'Map center coordinates', example: { type: 'Point', coordinates: [50.33, 33.5] } })
+    location: GeoJSONGeometry;
 
     @ApiProperty({ description: 'Visibility flag', example: true, default: true })
     visible: boolean;
