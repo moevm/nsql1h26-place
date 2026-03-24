@@ -4,6 +4,7 @@ import { createMap } from '../../../../api/maps'
 import { useMapStore } from '../../../../stores/mapsStore'
 import { LuX } from 'react-icons/lu'
 import { useAuthStore } from '../../../../stores/authStore'
+import type { GeoJSONPoint } from '../../../../models/GeoJSON'
 
 type CreateMapPanelProps = {
     setAdditionalOpen: (val: boolean) => void
@@ -15,39 +16,17 @@ const CreateMapPanel = ({setAdditionalOpen} : CreateMapPanelProps) => {
 
     const [name, setName] = useState('')
     const [description, setDescription] = useState('')
-    const [country, setCountry] = useState('')
     const [area, setArea] = useState('')
     const [visible, setVisible] = useState(true)
     const [loading, setLoading] = useState(false)
 
     type GeocodeResult = {
-        lat: string
-        lon: string
-        display_name?: string
-        address?: {
-            city?: string
-            town?: string
-            village?: string
-            municipality?: string
-            county?: string
-            state_district?: string
-        }
+        lat: string;
+        lon: string;
     }
 
-    const extractCity = (result: GeocodeResult) => {
-        return (
-            result.address?.city
-            ?? result.address?.town
-            ?? result.address?.village
-            ?? result.address?.municipality
-            ?? result.address?.county
-            ?? result.address?.state_district
-            ?? null
-        )
-    }
-
-    const geocodeAreaCenter = async (areaName: string, countryName: string) => {
-        const query = `${areaName}, ${countryName}`.trim();
+    const geocodeAreaCenter = async (areaName: string): Promise<GeoJSONPoint> => {
+        const query = areaName.trim();
         const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=8&q=${encodeURIComponent(query)}`;
 
         const response = await fetch(url, {
@@ -64,13 +43,7 @@ const CreateMapPanel = ({setAdditionalOpen} : CreateMapPanelProps) => {
         const first = results[0];
 
         if (!first) {
-            throw new Error('Область не найдена. Уточните название области и страны.');
-        }
-
-        const uniqueCities = Array.from(new Set(results.map(extractCity).filter((city): city is string => !!city && city.trim().length > 0)))
-
-        if (uniqueCities.length > 1) {
-            throw new Error(`Найдено несколько мест в разных городах (${uniqueCities.join(', ')}). Уточните запрос в поле области через запятую, например: "${areaName}, ${uniqueCities[0]}".`)
+            throw new Error('Область не найдена. Уточните название.');
         }
 
         const lat = Number(first.lat);
@@ -80,22 +53,28 @@ const CreateMapPanel = ({setAdditionalOpen} : CreateMapPanelProps) => {
             throw new Error('Геокодер вернул некорректные координаты');
         }
 
-        return { x: lat, y: lon };
+        return {
+            type: 'Point',
+            coordinates: [lon, lat],
+        };
     };
 
     const handleCreateMap = async () => {
         setLoading(true)
 
         try {
-            const coordinates = await geocodeAreaCenter(area.trim(), country.trim());
+            if (!user?._id) {
+                throw new Error('Пользователь не авторизован');
+            }
+
+            const location = await geocodeAreaCenter(area.trim());
 
             const newMap = await createMap({
-                user_id: user?._id || "",
+                user_id: user._id,
                 name: name.trim(),
                 description: description.trim(),
-                country: country.trim(),
                 area: area.trim(),
-                coordinates,
+                location,
                 visible: visible,
                 tags: [],
                 image_path: "map_icon.png"
@@ -138,15 +117,6 @@ const CreateMapPanel = ({setAdditionalOpen} : CreateMapPanelProps) => {
 
                 <hr className='divider' />
 
-                <label htmlFor="country">Страна</label>
-                <input
-                    id="country"
-                    className="create-form__input"
-                    value={country}
-                    onChange={(event) => setCountry(event.target.value)}
-                    placeholder="Россия"
-                />
-
                 <label htmlFor="area">Область</label>
                 <input
                     id="area"
@@ -159,9 +129,14 @@ const CreateMapPanel = ({setAdditionalOpen} : CreateMapPanelProps) => {
                 <hr className='divider' />
 
                 <label htmlFor="visible">Видимость</label>
-                <select id='visible' className="create-form__input">
-                    <option onClick={() => setVisible(true)}>Публичная</option>
-                    <option onClick={() => setVisible(false)}>Приватная</option>
+                <select
+                    id='visible'
+                    className="create-form__input"
+                    value={visible ? 'public' : 'private'}
+                    onChange={(event) => setVisible(event.target.value === 'public')}
+                >
+                    <option value="public">Публичная</option>
+                    <option value="private">Приватная</option>
                 </select>
 
                 <hr className='divider' />

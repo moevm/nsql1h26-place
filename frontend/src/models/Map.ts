@@ -1,16 +1,12 @@
-export type Coordinates = {
-    x: number;
-    y: number;
-};
+import type { GeoJSONGeometry } from './GeoJSON';
 
 export type Map = {
     _id: string;
     user_id: string;
     name: string;
     description: string;
-    country: string;
     area: string;
-    coordinates: Coordinates;
+    location: GeoJSONGeometry;
     visible: boolean;
     tags: string[];
     image_path: string;
@@ -21,9 +17,8 @@ export type Map = {
 export type CreateMap = {
     user_id: string;
     name: string;
-    coordinates: Coordinates;
+    location: GeoJSONGeometry;
     description: string;
-    country: string;
     area: string;
     visible: boolean;
     tags: string[];
@@ -35,5 +30,5 @@ export type UpdateMap = {
     description?: string;
     visible?: boolean;
     tags?: string[];
-    coordinates?: Coordinates;
+    location?: GeoJSONGeometry;
 };
