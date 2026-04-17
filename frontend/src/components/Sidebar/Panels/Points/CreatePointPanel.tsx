@@ -44,7 +44,7 @@ const CreatePointPanel = ({setAdditionalOpen} : CreatePointPanelProps) => {
                 description: description.trim(),
                 tags: tags.split(',').map((tag) => tag.trim()).filter(Boolean),
                 location: centerPoint,
-                image_path: 'map_icon.png',
+                image_path: 'point_icon.png',
             })
 
             addMapObject(object)

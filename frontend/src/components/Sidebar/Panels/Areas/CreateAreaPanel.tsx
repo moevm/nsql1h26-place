@@ -44,7 +44,7 @@ const CreateAreaPanel = ({setAdditionalOpen} : CreateAreaPanelProps) => {
                 description: description.trim(),
                 tags: tags.split(',').map((tag) => tag.trim()).filter(Boolean),
                 location: buildDefaultArea(centerPoint),
-                image_path: 'map_icon.png',
+                image_path: 'area_icon.png',
             })
 
             addMapObject(object)

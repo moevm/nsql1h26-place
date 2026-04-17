@@ -19,17 +19,16 @@ const FlyToSelected = ({ center, zoom, trigger }: { center: [number, number]; zo
 const getMapCenter = (map: Map): [number, number] | null => {
     const { location } = map
 
-    if (location.type === 'Point') {
-        return [location.coordinates[0], location.coordinates[1]]
+    switch (location.type) {
+        case "Point":
+            return location.coordinates;
+        case "LineString":
+            const first = location.coordinates[0]
+            return first ? [first[0], first[1]] : null
+        default:
+            console.log("unknown object")
+            return null;
     }
-
-    if (location.type === 'LineString') {
-        const first = location.coordinates[0]
-        return first ? [first[0], first[1]] : null
-    }
-
-    const first = location.coordinates[0]?.[0]
-    return first ? [first[0], first[1]] : null
 }
 
 const HomePage = () => {
@@ -48,13 +47,11 @@ const HomePage = () => {
         <div className="home-page">
             {loading && <p className="home-page__status_wrapper">Загрузка карт...</p>}
             {error && <p className="home-page__status_wrapper home-page__status--error">Ошибка: {error.message}</p>}
-            {(!loading && maps.length === 0) ? (
-                <p className="home-page__status_wrapper">Карт пока нет - cоздайте свою первую карту через боковую панель.</p>
-            ) : !selectedMap ? (
-                <p className="home-page__status_wrapper">Карта не выбрана — выберите карту в боковой панели.</p>
-            ) : !center ? (
-                <p className="home-page__status_wrapper home-page__status--error">У выбранной карты нет корректной геометрии.</p>
-            ) : (
+            {(!loading && maps.length === 0) ?
+                ( <p className="home-page__status_wrapper">Карт пока нет - cоздайте свою первую карту через боковую панель.</p>)
+                : !selectedMap ? (<p className="home-page__status_wrapper">Карта не выбрана — выберите карту в боковой панели.</p>)
+                : !center ? (<p className="home-page__status_wrapper home-page__status--error">Не удалось определить центр.</p>)
+            : (
                 <div className="home-page__map-wrap">
                     <MapContainer center={center} zoom={15} className="home-page__map" zoomControl={false}>
                         <ZoomControl position="topright" />

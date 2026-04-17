@@ -44,7 +44,7 @@ const CreateRoutePanel = ({setAdditionalOpen} : CreateRoutePanelProps) => {
                 description: description.trim(),
                 tags: tags.split(',').map((tag) => tag.trim()).filter(Boolean),
                 location: buildDefaultRoute(centerPoint),
-                image_path: 'map_icon.png',
+                image_path: 'route_icon.png',
             })
 
             addMapObject(object)
