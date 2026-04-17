@@ -1,12 +1,19 @@
 #!/bin/bash
 
-mongosh <<EOF
+mongosh <<'EOF'
 use shrooms;
 
 db.createCollection("users");
 db.createCollection("maps");
 db.createCollection("mapobjects");
 db.createCollection("tags");
+
+db.users.insertOne({
+    _id: ObjectId("000000000000000000001111"),
+    username: "user",
+    password_hash: "$2b$12$xW/oiIG6JLE4APfWGFQsQuzq64vBVVeotnfOUJr27Y6P1qsHL3tJK",
+    image_path: null
+});
 
 db.tags.insertMany([
 {
