@@ -17,12 +17,19 @@ type ListRoutesPanelProps = {
 const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) => {
     const { loading, error } = useLoadMapObjectsByType('Route');
     const selectedMapId = useMapStore((s) => s.selectedMapId);
-    const [ edit, setEdit ] = useState("");
-    const [ updatedMapObject, setUpdatedMapObject ] = useState<UpdateMapObject>({})
+    const [ edit, setEdit ] = useState('');
+    const [ updatedMapObject, setUpdatedMapObject ] = useState<UpdateMapObject>({});
+    const [tagsValue, setTagsValue] = useState('');
 
     const routes = useMapObjectStore((s) => s.MapObjects)
         .filter((item) => item.type === 'Route' && (!selectedMapId || String(item.map_id) === selectedMapId));
-    const { removeMapObject } = useMapObjectStore();
+    const { removeMapObject, updateMapObject: updateMapObjectInStore } = useMapObjectStore();
+
+    const handleEdit = (routeId: string, routeTags: string[]) => {
+        setEdit(routeId);
+        setUpdatedMapObject({});
+        setTagsValue(routeTags.join(', '));
+    };
 
     const handleDelete = async (id: string) => {
         try {
@@ -36,15 +43,21 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
 
     const handleSave = async (id: string) => {
         try {
-            const mapObject = await updateMapObject(id, updatedMapObject);
-            updateMapObject(id, mapObject);
+            const payload: UpdateMapObject = {
+                ...updatedMapObject,
+                tags: tagsValue.split(',').map((tag) => tag.trim()).filter(Boolean),
+            };
+
+            const mapObject = await updateMapObject(id, payload);
+            updateMapObjectInStore(mapObject);
         } catch (err) {
             alert("Не удалось обновить маршрут!")
             console.log(err)
         }
 
-        setEdit("")
+        setEdit('')
         setUpdatedMapObject({})
+        setTagsValue('')
     };
 
     return (
@@ -68,31 +81,46 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
                 {routes.map((route) => (
                     edit === route._id ? (
                         <article key={route._id} className="card">
-                            <div className="card__avatar">
-                                <img className='card__icon' src={`/src/assets/images/${route.image_path}`} alt="route" />
-                            </div>
                             <div className="card__content">
-                                <div className="card__title">{route.name}</div>
-                                <div className="card__desc">{route.description}</div>
+                                <div className='card__title_container'>
+                                    <img className='card__icon' src={`/src/assets/images/${route.image_path}`} alt="route" />
+                                    <div className='card__right_container'>
+                                        <input
+                                            type="text"
+                                            className='card__title'
+                                            value={updatedMapObject.name ?? route.name}
+                                            onChange={(event) => setUpdatedMapObject((prev) => ({ ...prev, name: event.target.value }))}
+                                        />
+                                    </div>
+                                </div>
+                                <textarea
+                                    className='create-form__textarea'
+                                    value={updatedMapObject.description ?? route.description}
+                                    onChange={(event) => setUpdatedMapObject((prev) => ({ ...prev, description: event.target.value }))}
+                                />
+                                <input
+                                    type="text"
+                                    className='create-form__input'
+                                    placeholder='Теги через запятую'
+                                    value={tagsValue}
+                                    onChange={(event) => setTagsValue(event.target.value)}
+                                />
                                 <div className="card__actions">
                                     {route.updated_at
                                         ? `ред. ${new Date(route.updated_at).toLocaleDateString()}`
                                         : new Date(route.created_at).toLocaleDateString()}
                                     <div className='card__actions__container'>
-                                        <GrEdit
-                                            className='card__action_icon card__btn--safe'
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setEdit(route._id);
-                                            }}
-                                        />
                                         <FaSave
                                             className='card__action_icon card__btn--safe'
                                             onClick={() => handleSave(route._id)}
                                         />
                                         <LuX
                                             className='card__action_icon card__btn--danger'
-                                            onClick={() => setEdit("")}
+                                            onClick={() => {
+                                                setEdit('');
+                                                setUpdatedMapObject({});
+                                                setTagsValue('');
+                                            }}
                                         />
                                     </div>
                                 </div>
@@ -115,7 +143,7 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
                                             className='card__action_icon card__btn--safe'
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                setEdit(route._id);
+                                                handleEdit(route._id, route.tags);
                                             }}
                                         />
                                         <FaSave className='card__action_icon card__btn--inactive' />

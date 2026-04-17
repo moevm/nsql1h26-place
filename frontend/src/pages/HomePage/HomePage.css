@@ -9,6 +9,11 @@
     box-shadow: 0 2px 10px rgba(0,0,0,0.2) !important;
 }
 
+.leaflet-container .leaflet-interactive:focus,
+.leaflet-container .leaflet-marker-icon:focus {
+    outline: none;
+}
+
 .home-page__status_wrapper {
     width: 100%;
     height: 100%;
@@ -30,9 +35,50 @@
     flex: 1 1 0;
     min-height: 400px;
     overflow: hidden;
+    position: relative;
 }
 
 .home-page__map {
     width: 100%;
     height: 100%;
+}
+
+.home-page__route-waypoint-icon {
+    background: transparent;
+    border: none;
+}
+
+.home-page__route-waypoint-icon span {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    background: #51704A;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+    border: 2px solid #DBE7D8;
+}
+
+.home-page__route-waypoint-icon--active span {
+    background: #3b5136;
+    border-color: #d2e3cc;
+    box-shadow: 0 0 0 3px rgba(81, 112, 74, 0.25), 0 1px 8px rgba(0, 0, 0, 0.35);
+    transform: scale(1.1);
+}
+
+.home-page__objects-error {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 500;
+    margin: 0;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: rgba(255, 246, 246, 0.92);
+    color: #a13434;
+    font-size: 13px;
 }
