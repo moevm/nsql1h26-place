@@ -18,16 +18,16 @@ const ListPointsPanel = ({setAdditionalOpen, setOpen} : ListPointPanelProps) => 
     const { loading, error } = useLoadMapObjectsByType('Point');
     const [ edit, setEdit ] = useState("");
     const [ updatedMapObject, setUpdatedMapObject ] = useState<UpdateMapObject>({})
+    const mapObjectStore = useMapObjectStore();
 
     const selectedMapId = useMapStore((s) => s.selectedMapId);
-    const points = useMapObjectStore((s) => s.MapObjects)
+    const points = mapObjectStore.MapObjects
         .filter((item) => item.type === 'Point' && (!selectedMapId || String(item.map_id) === selectedMapId));
-    const { removeMapObject } = useMapObjectStore();
 
     const handleDelete = async (id: string) => {
         try {
             await deleteMapObject(id);
-            removeMapObject(id);
+            mapObjectStore.removeMapObject(id);
         } catch (err) {
             alert('Не удалось удалить отметку!');
             console.log(err)
@@ -67,24 +67,34 @@ const ListPointsPanel = ({setAdditionalOpen, setOpen} : ListPointPanelProps) => 
                 {!loading && points.length === 0 && <div className="list__empty">Отметок пока нет</div>}
                 {points.map((point) => (
                     edit === point._id ? (
-                        <article key={point._id} className="card">
-                            <div className="card__avatar">
-                                <img className='card__icon' src={`/src/assets/images/${point.image_path}`} alt="point" />
-                            </div>
+                        <article
+                            key={point._id}
+                            className={`card ${mapObjectStore.selectedMapObjectId === point._id ? 'card--selected' : ''}`}
+                            onClick={() => mapObjectStore.setSelectedMapObjectId(point._id)}
+                        >
                             <div className="card__content">
-                                <div className="card__title">{point.name}</div>
-                                <div className="card__desc">{point.description}</div>
+                                <div className='card__title_container'>
+                                    <img className='card__icon' src={`/src/assets/images/${point.image_path}`} alt="logo" />
+                                    <div className='card__right_container'>
+                                        <input
+                                            type="text"
+                                            className='card__title'
+                                            value={updatedMapObject.name ?? point.name}
+                                            onChange={(e) => setUpdatedMapObject(prev => ({ ...prev, name: e.target.value }))}
+                                        />
+                                    </div>
+                                </div>
+                                <textarea
+                                    className='create-form__textarea'
+                                    value={updatedMapObject.description ?? point.description}
+                                    onChange={(e) => setUpdatedMapObject(prev => ({ ...prev, description: e.target.value }))}
+                                />
                                 <div className="card__actions">
-                                    {point.updated_at
-                                        ? `ред. ${new Date(point.updated_at).toLocaleDateString()}`
-                                        : new Date(point.created_at).toLocaleDateString()}
+                                    {point.updated_at ? "ред. " + new Date(point.updated_at).toLocaleDateString() : new Date(point.created_at).toLocaleDateString()}
                                     <div className='card__actions__container'>
                                         <GrEdit
                                             className='card__action_icon card__btn--safe'
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setEdit(point._id);
-                                            }}
+                                            onClick={() => setEdit(point._id)}
                                         />
                                         <FaSave
                                             className='card__action_icon card__btn--safe'
@@ -99,7 +109,11 @@ const ListPointsPanel = ({setAdditionalOpen, setOpen} : ListPointPanelProps) => 
                             </div>
                         </article>
                     ) : (
-                        <article key={point._id} className="card">
+                        <article
+                            key={point._id}
+                            className={`card ${mapObjectStore.selectedMapObjectId === point._id ? 'card--selected' : ''}`}
+                            onClick={() => mapObjectStore.setSelectedMapObjectId(point._id)}
+                        >
                             <div className="card__content">
                                 <div className='card__title_container'>
                                     <img className='card__icon' src={`/src/assets/images/${point.image_path}`} alt="logo" />

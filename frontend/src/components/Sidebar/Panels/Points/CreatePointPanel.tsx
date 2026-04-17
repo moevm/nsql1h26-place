@@ -1,18 +1,16 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import '../Panels.css'
 import { LuX } from 'react-icons/lu'
 import { createMapObject } from '../../../../api/mapObjects'
 import { useMapObjectStore } from '../../../../stores/mapObjectStore'
 import { useMapStore } from '../../../../stores/mapsStore'
-import { getMapCenterPoint } from '../objectGeometry'
 
 type CreatePointPanelProps = {
     setAdditionalOpen: (val: boolean) => void
 }
 
 const CreatePointPanel = ({setAdditionalOpen} : CreatePointPanelProps) => {
-    const { addMapObject } = useMapObjectStore()
-    const maps = useMapStore((s) => s.Maps)
+    const mapObjectStore = useMapObjectStore()
     const selectedMapId = useMapStore((s) => s.selectedMapId)
 
     const [title, setTitle] = useState('')
@@ -20,8 +18,14 @@ const CreatePointPanel = ({setAdditionalOpen} : CreatePointPanelProps) => {
     const [tags, setTags] = useState('')
     const [loading, setLoading] = useState(false)
 
-    const selectedMap = maps.find((m) => m._id === selectedMapId) ?? null
-    const centerPoint = getMapCenterPoint(selectedMap)
+    useEffect(() => {
+        mapObjectStore.setPointPlacementActive(false)
+        mapObjectStore.setPointPlacementCoordinates(null)
+
+        return () => {
+            mapObjectStore.setPointPlacementActive(false)
+        }
+    }, [mapObjectStore.setPointPlacementActive, mapObjectStore.setPointPlacementCoordinates])
 
     const handleCreate = async () => {
         if (!selectedMapId) {
@@ -29,8 +33,8 @@ const CreatePointPanel = ({setAdditionalOpen} : CreatePointPanelProps) => {
             return
         }
 
-        if (!centerPoint) {
-            alert('У выбранной карты нет корректной геометрии.')
+        if (!mapObjectStore.pointPlacementCoordinates) {
+            alert('Сначала укажите координаты отметки кнопкой "Поставить метку на карте".')
             return
         }
 
@@ -43,11 +47,16 @@ const CreatePointPanel = ({setAdditionalOpen} : CreatePointPanelProps) => {
                 name: title.trim(),
                 description: description.trim(),
                 tags: tags.split(',').map((tag) => tag.trim()).filter(Boolean),
-                location: centerPoint,
+                location: {
+                    type: 'Point',
+                    coordinates: mapObjectStore.pointPlacementCoordinates,
+                },
                 image_path: 'point_icon.png',
             })
 
-            addMapObject(object)
+            mapObjectStore.addMapObject(object)
+            mapObjectStore.setPointPlacementCoordinates(null)
+            mapObjectStore.setPointPlacementActive(false)
             setAdditionalOpen(false)
         } catch {
             alert('Не удалось создать отметку!')
@@ -56,11 +65,26 @@ const CreatePointPanel = ({setAdditionalOpen} : CreatePointPanelProps) => {
         }
     }
 
+    const handleStartPointPlacement = () => {
+        if (!selectedMapId) {
+            alert('Сначала выберите карту.')
+            return
+        }
+
+        mapObjectStore.setPointPlacementActive(true)
+    }
+
+    const handleClose = () => {
+        mapObjectStore.setPointPlacementActive(false)
+        mapObjectStore.setPointPlacementCoordinates(null)
+        setAdditionalOpen(false)
+    }
+
     return (
         <aside className="panel panel--slide">
             <div className="panel__header">
                 <h3>Создание отметки</h3>
-                <LuX className='panel__close' onClick={() => setAdditionalOpen(false)} />
+                <LuX className='panel__close' onClick={handleClose} />
             </div>
             <div className="create-form">
                 <label className="create-form__label" htmlFor="title">Название</label>
@@ -90,17 +114,23 @@ const CreatePointPanel = ({setAdditionalOpen} : CreatePointPanelProps) => {
                     placeholder="гриб, лес, ягоды"
                 />
 
-                <div className="card__desc">
-                    Геометрия точки берется из центра выбранной карты.
-                </div>
+                <hr className='divider' />
+
+                    <label className="create-form__label" htmlFor="tags">Координаты отметки</label>
+                    <button
+                        type="button"
+                        className="create-form__btn point-placement__btn"
+                        onClick={handleStartPointPlacement}
+                        disabled={!selectedMapId}
+                    >
+                        {mapObjectStore.pointPlacementActive ? 'Ожидание клика по карте...' : 'Поставить метку на карте'}
+                    </button>
+
+                <hr className='divider' />
 
                 <div className="create-form__actions">
-                    <button className="create-form__btn" onClick={handleCreate} disabled={loading}>
-                        Создать
-                    </button>
-                    <button className="create-form__btn create-form__btn--ghost" onClick={() => setAdditionalOpen(false)}>
-                        Отмена
-                    </button>
+                    <button className="create-form__btn create-form__btn--ghost" onClick={handleClose}>Отменить</button>
+                    <button className="create-form__btn" onClick={handleCreate} disabled={loading}>Принять</button>
                 </div>
             </div>
         </aside>
