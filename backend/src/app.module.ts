@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { MapsModule } from './models/maps/maps.module';
 import { ObjectsModule } from './models/objects/objects.module';
 import { TagsModule } from './models/tags/tags.module';
+import { SearchModule } from './models/search/search.module';
 
 @Module({
     imports: [
@@ -30,6 +31,7 @@ import { TagsModule } from './models/tags/tags.module';
         MapsModule,
         ObjectsModule,
         TagsModule,
+        SearchModule,
     ],
 })
 export class AppModule {}
