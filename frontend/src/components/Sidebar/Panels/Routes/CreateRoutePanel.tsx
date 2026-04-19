@@ -7,6 +7,7 @@ import { useMapObjectStore } from '../../../../stores/mapObjectStore'
 import { useMapStore } from '../../../../stores/mapsStore'
 import { getMapCenterPoint } from '../objectGeometry'
 import type { LatLon } from '../../../../models/GeoJSON'
+import { useShallow } from 'zustand/react/shallow'
 import './CreateRoutePanel.css'
 
 type CreateRoutePanelProps = {
@@ -16,18 +17,33 @@ type CreateRoutePanelProps = {
 const roundCoordinate = (value: number): number => Number(value.toFixed(6))
 
 const CreateRoutePanel = ({setAdditionalOpen} : CreateRoutePanelProps) => {
-    const addMapObject = useMapObjectStore((s) => s.addMapObject)
-    const maps = useMapStore((s) => s.Maps)
-    const selectedMapId = useMapStore((s) => s.selectedMapId)
+    const [
+        addMapObject,
+        waypoints,
+        routeDraftMapCenter,
+        startDraft,
+        stopDraft,
+        addWaypoint,
+        removeWaypoint,
+        reorderWaypoints,
+        setHoveredWaypointIndex,
+    ] = useMapObjectStore(
+        useShallow((s) => [
+            s.addMapObject,
+            s.routeDraftWaypoints,
+            s.routeDraftMapCenter,
+            s.startRouteDraft,
+            s.stopRouteDraft,
+            s.addRouteDraftWaypoint,
+            s.removeRouteDraftWaypoint,
+            s.reorderRouteDraftWaypoints,
+            s.setRouteDraftHoveredIndex,
+        ]),
+    )
 
-    const waypoints = useMapObjectStore((s) => s.routeDraftWaypoints)
-    const routeDraftMapCenter = useMapObjectStore((s) => s.routeDraftMapCenter)
-    const startDraft = useMapObjectStore((s) => s.startRouteDraft)
-    const stopDraft = useMapObjectStore((s) => s.stopRouteDraft)
-    const addWaypoint = useMapObjectStore((s) => s.addRouteDraftWaypoint)
-    const removeWaypoint = useMapObjectStore((s) => s.removeRouteDraftWaypoint)
-    const reorderWaypoints = useMapObjectStore((s) => s.reorderRouteDraftWaypoints)
-    const setHoveredWaypointIndex = useMapObjectStore((s) => s.setRouteDraftHoveredIndex)
+    const [maps, selectedMapId] = useMapStore(
+        useShallow((s) => [s.Maps, s.selectedMapId]),
+    )
 
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
