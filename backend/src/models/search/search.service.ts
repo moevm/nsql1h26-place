@@ -2,19 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ObjectType } from 'src/common/types/geojson.types';
+import { SearchCategory, SearchResultItem } from 'src/common/types/search.types';
 import { Map, MapDocument } from 'src/models/maps/schemas/maps.schema';
 import { MapObject, ObjectDocument } from 'src/models/objects/schemas/objects.schema';
-
-export type SearchCategory = 'maps' | 'points' | 'routes' | 'areas';
-
-export type SearchResultItem = {
-  id: string;
-  category: SearchCategory;
-  title: string;
-  description: string;
-  map_id: string | null;
-  image_path: string;
-};
 
 @Injectable()
 export class SearchService {
@@ -34,23 +24,16 @@ export class SearchService {
     const regex = new RegExp(this.escapeRegExp(normalizedQuery), 'i');
     const categories = this.normalizeCategories(rawCategories);
 
-    const tasks: Array<Promise<SearchResultItem[]>> = [];
+    const categorySearches: Record<SearchCategory, () => Promise<SearchResultItem[]>> = {
+      maps: () => this.searchMaps(regex),
+      points: () => this.searchObjectsByType(regex, ObjectType.POINT, 'points'),
+      routes: () => this.searchObjectsByType(regex, ObjectType.ROUTE, 'routes'),
+      areas: () => this.searchObjectsByType(regex, ObjectType.AREA, 'areas'),
+    };
 
-    if (categories.has('maps')) {
-      tasks.push(this.searchMaps(regex));
-    }
-
-    if (categories.has('points')) {
-      tasks.push(this.searchObjectsByType(regex, ObjectType.POINT, 'points'));
-    }
-
-    if (categories.has('routes')) {
-      tasks.push(this.searchObjectsByType(regex, ObjectType.ROUTE, 'routes'));
-    }
-
-    if (categories.has('areas')) {
-      tasks.push(this.searchObjectsByType(regex, ObjectType.AREA, 'areas'));
-    }
+    const tasks = this.allCategories
+      .filter((category) => categories.has(category))
+      .map((category) => categorySearches[category]());
 
     const groupedResults = await Promise.all(tasks);
     return groupedResults.flat();
@@ -85,7 +68,7 @@ export class SearchService {
       .lean()
       .exec();
 
-    return maps.map((map) => ({
+    return maps.map((map): SearchResultItem => ({
       id: String(map._id),
       category: 'maps',
       title: map.name,
@@ -112,7 +95,7 @@ export class SearchService {
       .lean()
       .exec();
 
-    return objects.map((item) => ({
+    return objects.map((item): SearchResultItem => ({
       id: String(item._id),
       category,
       title: item.name,

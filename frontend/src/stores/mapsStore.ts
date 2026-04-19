@@ -54,6 +54,10 @@ export const useMapStore = create<MapStore>((set, get) => ({
         if (!sortBy) return Maps;
 
         return [...Maps].sort((a, b) => {
+            if (a[sortBy] === b[sortBy]) {
+                return 0;
+            }
+
             const modifier = sortOrder === 'asc' ? 1 : -1;
             return a[sortBy] > b[sortBy] ? modifier : -modifier;
         });

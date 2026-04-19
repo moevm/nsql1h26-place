@@ -9,26 +9,25 @@ type SearchPanelProps = {
     setOpen: (val: boolean) => void;
 };
 
-const FILTERS: Array<{ id: SearchCategory; label: string; icon: ReactNode }> = [
+type CategoryMeta = {
+    label: string;
+    icon: ReactNode;
+};
+
+const FILTERS: Array<{ id: SearchCategory } & CategoryMeta> = [
     { id: 'points', label: 'Отметки', icon: <LuMapPinned /> },
     { id: 'routes', label: 'Маршруты', icon: <LuRoute /> },
     { id: 'areas', label: 'Области', icon: <LuGrid2X2 /> },
     { id: 'maps', label: 'Карты', icon: <LuMap /> },
 ];
 
-const CATEGORY_LABELS: Record<SearchCategory, string> = {
-    points: 'Отметки',
-    routes: 'Маршруты',
-    areas: 'Области',
-    maps: 'Карты',
-};
-
-const CATEGORY_ICONS: Record<SearchCategory, ReactNode> = {
-    points: <LuMapPinned />,
-    routes: <LuRoute />,
-    areas: <LuGrid2X2 />,
-    maps: <LuMap />,
-};
+const CATEGORY_META: Record<SearchCategory, CategoryMeta> = FILTERS.reduce(
+    (acc, { id, label, icon }) => {
+        acc[id] = { label, icon };
+        return acc;
+    },
+    {} as Record<SearchCategory, CategoryMeta>,
+);
 
 const SearchPanel = ({ setOpen }: SearchPanelProps) => {
     const [query, setQuery] = useState('');
@@ -137,9 +136,9 @@ const SearchPanel = ({ setOpen }: SearchPanelProps) => {
 
                 {results.map((result) => (
                     <article key={`${result.category}-${result.id}`} className="card card--clickable">
-                        <div className="card__avatar">{CATEGORY_ICONS[result.category]}</div>
+                        <div className="card__avatar">{CATEGORY_META[result.category].icon}</div>
                         <div className="card__content">
-                            <div className="search-panel__category">{CATEGORY_LABELS[result.category]}</div>
+                            <div className="search-panel__category">{CATEGORY_META[result.category].label}</div>
                             <div className="card__title">{result.title}</div>
                             <div className="card__desc">{result.description || 'Без описания'}</div>
                         </div>
