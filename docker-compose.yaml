@@ -33,8 +33,6 @@ services:
   frontend:
     build: ./frontend
     container_name: frontend
-    ports:
-      - "127.0.0.1:5173:5173"
     expose:
       - 5173
     restart: always

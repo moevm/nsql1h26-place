@@ -36,8 +36,8 @@ const ListPointsPanel = ({setAdditionalOpen, setOpen} : ListPointPanelProps) => 
 
     const handleSave = async (id: string) => {
         try {
-            const mapObject = await updateMapObject(id, updatedMapObject);
-            updateMapObject(id, mapObject);
+            const point = await updateMapObject(id, updatedMapObject);
+            mapObjectStore.updateMapObject(point);
         } catch (err) {
             alert("Не удалось обновить точку!")
             console.log(err)
