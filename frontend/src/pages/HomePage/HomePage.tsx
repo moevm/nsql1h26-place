@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from 'react'
 import { divIcon } from 'leaflet'
-import { CircleMarker, MapContainer, Marker, Polygon, Polyline, TileLayer, Tooltip, useMap, ZoomControl } from 'react-leaflet'
+import { MapContainer, Marker, Polyline, Popup, TileLayer, Tooltip, useMap, ZoomControl } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useMapStore } from '../../stores/mapsStore'
 import { useLoadMaps } from '../../api/maps'
@@ -125,67 +125,6 @@ const RouteDraftLayer = () => {
     )
 }
 
-const MapObjectsLayer = ({ objects }: { objects: MapObject[] }) => (
-    <>
-        {objects.map((item) => {
-            if (item.type === 'Point') {
-                return (
-                    <CircleMarker
-                        key={item._id}
-                        center={item.location.coordinates}
-                        radius={8}
-                        pathOptions={{
-                            color: '#3b5136',
-                            fillColor: '#51704A',
-                            fillOpacity: 0.9,
-                            weight: 2,
-                        }}
-                    >
-                        <Tooltip>{item.name || 'Отметка'}</Tooltip>
-                    </CircleMarker>
-                )
-            }
-
-            if (item.type === 'Route') {
-                return (
-                    <Fragment key={item._id}>
-                        <Polyline
-                            key={`${item._id}-line`}
-                            positions={item.location.coordinates}
-                            pathOptions={{ color: '#51704A', weight: 5, opacity: 0.9 }}
-                        >
-                            <Tooltip>{item.name || 'Маршрут'}</Tooltip>
-                        </Polyline>
-
-                        {item.location.coordinates.map((waypoint, waypointIndex) => (
-                            <Marker
-                                key={`${item._id}-point-${waypointIndex}`}
-                                position={waypoint}
-                                icon={getWaypointIcon(waypointIndex + 1)}
-                            />
-                        ))}
-                    </Fragment>
-                )
-            }
-
-            return (
-                <Polygon
-                    key={item._id}
-                    positions={item.location.coordinates}
-                    pathOptions={{
-                        color: '#51704A',
-                        fillColor: '#8FAE86',
-                        fillOpacity: 0.25,
-                        weight: 3,
-                    }}
-                >
-                    <Tooltip>{item.name || 'Область'}</Tooltip>
-                </Polygon>
-            )
-        })}
-    </>
-)
-
 const getMapCenter = (map: Map): [number, number] | null => {
     const { location } = map
 
@@ -206,17 +145,43 @@ const HomePage = () => {
     const { error: objectsError } = useLoadMapObjects('/objects')
     const maps = useMapStore((s) => s.Maps)
     const mapObjects = useMapObjectStore((s) => s.MapObjects)
+    const selectedMapObjectId = useMapObjectStore((s) => s.selectedMapObjectId)
+    const selectedMapObjectTick = useMapObjectStore((s) => s.selectedMapObjectTick)
     const selectedMapId = useMapStore((s) => s.selectedMapId)
     const selectedMapTick = useMapStore((s) => s.selectedMapTick)
 
     const objectsForSelectedMap = mapObjects.filter(
         (item) => !selectedMapId || String(item.map_id) === selectedMapId,
     )
+    const pointsForSelectedMap = objectsForSelectedMap.filter(
+        (item): item is Extract<MapObject, { type: 'Point' }> => item.type === 'Point',
+    )
+    const routesForSelectedMap = objectsForSelectedMap.filter(
+        (item): item is Extract<MapObject, { type: 'Route' }> => item.type === 'Route',
+    )
+    const setSelectedMapObjectId = useMapObjectStore((s) => s.setSelectedMapObjectId)
 
     const selectedMap = maps.find((m) => m._id === selectedMapId) ?? null
     const zoom = 15;
 
     const center: [number, number] | null = selectedMap ? getMapCenter(selectedMap) : null
+    const selectedPoint = pointsForSelectedMap.find(
+        (item): item is Extract<MapObject, { type: 'Point' }> => (
+            item.type === 'Point' && item._id === selectedMapObjectId
+        ),
+    )
+    const selectedRoute = routesForSelectedMap.find(
+        (item): item is Extract<MapObject, { type: 'Route' }> => (
+            item.type === 'Route' && item._id === selectedMapObjectId
+        ),
+    )
+    const selectedPointCenter: [number, number] | null = selectedPoint
+        ? selectedPoint.location.coordinates
+        : null
+    const selectedRouteCenter: [number, number] | null = selectedRoute
+        ? (selectedRoute.location.coordinates[0] ?? null)
+        : null
+    const selectedMapObjectCenter: [number, number] | null = selectedPointCenter ?? selectedRouteCenter
 
 
     return (
@@ -240,7 +205,41 @@ const HomePage = () => {
                             />
                         <ViewportCenterSync />
                         <FlyToSelected center={center} zoom={zoom} trigger={selectedMapTick} />
-                        <MapObjectsLayer objects={objectsForSelectedMap} />
+                        {selectedMapObjectCenter && (
+                            <FlyToSelected center={selectedMapObjectCenter} zoom={17} trigger={selectedMapObjectTick} />
+                        )}
+                        {pointsForSelectedMap.map((point) => (
+                            <Marker
+                                key={point._id}
+                                position={point.location.coordinates}
+                                eventHandlers={{
+                                    click: () => setSelectedMapObjectId(point._id),
+                                }}
+                            >
+                                <Popup>{point.name || 'Отметка'}</Popup>
+                            </Marker>
+                        ))}
+                        {routesForSelectedMap.map((route) => (
+                            <Fragment key={route._id}>
+                                <Polyline
+                                    positions={route.location.coordinates}
+                                    pathOptions={{ color: '#51704A', weight: 5, opacity: 0.9 }}
+                                    eventHandlers={{
+                                        click: () => setSelectedMapObjectId(route._id),
+                                    }}
+                                >
+                                    <Tooltip>{route.name || 'Маршрут'}</Tooltip>
+                                </Polyline>
+
+                                {route.location.coordinates.map((waypoint, waypointIndex) => (
+                                    <Marker
+                                        key={`${route._id}-point-${waypointIndex}`}
+                                        position={waypoint}
+                                        icon={getWaypointIcon(waypointIndex + 1)}
+                                    />
+                                ))}
+                            </Fragment>
+                        ))}
                         <RouteDraftLayer />
                     </MapContainer>
                 </div>
