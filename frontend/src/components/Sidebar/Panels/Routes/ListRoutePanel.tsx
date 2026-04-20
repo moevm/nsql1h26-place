@@ -98,13 +98,6 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
                                     value={updatedMapObject.description ?? route.description}
                                     onChange={(event) => setUpdatedMapObject((prev) => ({ ...prev, description: event.target.value }))}
                                 />
-                                <input
-                                    type="text"
-                                    className='create-form__input'
-                                    placeholder='Теги через запятую'
-                                    value={tagsValue}
-                                    onChange={(event) => setTagsValue(event.target.value)}
-                                />
                                 <div className="card__actions">
                                     {route.updated_at
                                         ? `ред. ${new Date(route.updated_at).toLocaleDateString()}`
