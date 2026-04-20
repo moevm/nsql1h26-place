@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from 'react'
 import { divIcon } from 'leaflet'
-import { MapContainer, Marker, Polyline, Popup, TileLayer, Tooltip, useMap, ZoomControl } from 'react-leaflet'
+import { MapContainer, Marker, Polyline, Popup, TileLayer, Tooltip, useMap, useMapEvents, ZoomControl } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useMapStore } from '../../stores/mapsStore'
 import { useLoadMaps } from '../../api/maps'
@@ -19,6 +19,23 @@ const FlyToSelected = ({ center, zoom, trigger }: { center: [number, number]; zo
     useEffect(() => {
         map.flyTo(center, zoom, { duration: 1.5 })
     }, [center, zoom, map, trigger])
+
+    return null
+}
+
+const PointPlacementClickHandler = () => {
+    const mapObjectStore = useMapObjectStore()
+
+    useMapEvents({
+        click(event) {
+            if (!mapObjectStore.pointPlacementActive) {
+                return
+            }
+
+            mapObjectStore.setPointPlacementCoordinates([event.latlng.lat, event.latlng.lng])
+            mapObjectStore.setPointPlacementActive(false)
+        },
+    })
 
     return null
 }
@@ -147,6 +164,7 @@ const HomePage = () => {
     const mapObjects = useMapObjectStore((s) => s.MapObjects)
     const selectedMapObjectId = useMapObjectStore((s) => s.selectedMapObjectId)
     const selectedMapObjectTick = useMapObjectStore((s) => s.selectedMapObjectTick)
+    const pointPlacementCoordinates = useMapObjectStore((s) => s.pointPlacementCoordinates)
     const selectedMapId = useMapStore((s) => s.selectedMapId)
     const selectedMapTick = useMapStore((s) => s.selectedMapTick)
 
@@ -208,6 +226,7 @@ const HomePage = () => {
                         {selectedMapObjectCenter && (
                             <FlyToSelected center={selectedMapObjectCenter} zoom={17} trigger={selectedMapObjectTick} />
                         )}
+                        <PointPlacementClickHandler />
                         {pointsForSelectedMap.map((point) => (
                             <Marker
                                 key={point._id}
@@ -219,6 +238,11 @@ const HomePage = () => {
                                 <Popup>{point.name || 'Отметка'}</Popup>
                             </Marker>
                         ))}
+                        {pointPlacementCoordinates && (
+                            <Marker position={pointPlacementCoordinates}>
+                                <Popup>Временная отметка</Popup>
+                            </Marker>
+                        )}
                         {routesForSelectedMap.map((route) => (
                             <Fragment key={route._id}>
                                 <Polyline
