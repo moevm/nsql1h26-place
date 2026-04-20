@@ -19,7 +19,7 @@
 
 ---
 
-## Mushrooms Maps
+## Mushrooms Place
 
 Веб-приложение для работы с картами грибных мест. Позволяет создавать, просматривать, обновлять и удалять карты.
 
@@ -75,21 +75,10 @@ docker-compose up --build
 | Backend API | http://localhost/api |
 | Swagger UI | http://localhost/api/docs |
 
-### Запуск без Docker (для разработки)
-
-**Backend:**
-```bash
-cd backend
-npm install
-npm run start:dev
-```
-
-**Frontend:**
-```bash
-cd frontend
-npm install
-npm run dev
-```
+### Предварительно заданный пользователь
+В приложении со старта доступен пользователь:
+  имя пользователя: user
+  пароль: 123
 
 ### API эндпоинты
 

@@ -16,6 +16,7 @@ type ListMapsPanelProps = {
 const ListMapsPanel = ({setAdditionalOpen, setOpen} : ListMapsPanelProps) => {
     const { error, loading } = useLoadMaps();
     const maps = useMapStore((s) => s.getSortedMaps());
+    const selectedMapId = useMapStore((s) => s.selectedMapId);
     const { removeMap, updateMap: update, setSelectedMapId } = useMapStore();
     const [ edit, setEdit ] = useState("");
     const [ updatedMap, setUpdatedMap ] = useState<UpdateMap>({})
@@ -61,7 +62,10 @@ const ListMapsPanel = ({setAdditionalOpen, setOpen} : ListMapsPanelProps) => {
                 {!loading && maps.length === 0 && <div className="list__empty">Карт пока нет</div>}
                 {maps.map((map) => (
                     edit === map._id ? (
-                        <article key={map._id} className="card">
+                        <article
+                            key={map._id}
+                            className={`card ${selectedMapId === map._id ? 'card--selected' : ''}`}
+                        >
                             <div className="card__content">
                                 <div className='card__title_container'>
                                     <img className='card__icon' src={`/src/assets/images/${map.image_path}`} alt="logo" />
@@ -109,7 +113,11 @@ const ListMapsPanel = ({setAdditionalOpen, setOpen} : ListMapsPanelProps) => {
                             </div>
                         </article>
                     ) : (
-                        <article key={map._id} className="card" onClick={() => setSelectedMapId(map._id)}>
+                        <article
+                            key={map._id}
+                            className={`card card--clickable ${selectedMapId === map._id ? 'card--selected' : ''}`}
+                            onClick={() => setSelectedMapId(map._id)}
+                        >
                             <div className="card__content">
                                 <div className='card__title_container'>
                                     <img className='card__icon' src={`/src/assets/images/${map.image_path}`} alt="logo" />

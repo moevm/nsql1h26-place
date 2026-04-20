@@ -1,26 +1,20 @@
 import type { RouteObject } from 'react-router-dom'
 import { Navigate } from 'react-router-dom'
 import Layout from './components/layout/Layout'
+import ProtectedRoute from './components/ProtectedRoute'
 import HomePage from './pages/HomePage/HomePage'
 import SettingsPage from './pages/SettingsPage/SettingsPage'
 import StatisticsPage from './pages/StatisticsPage/StatisticsPage'
 import AuthPage from './pages/AuthPage/AuthPage'
-import { useAuthStore } from './stores/authStore'
-
-const ProtectedLayout = () => {
-    const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
-
-    if (!isAuthenticated) {
-        return <Navigate to="/auth/login" replace />
-    }
-
-    return <Layout />
-}
 
 export const routes: RouteObject[] = [
     {
         path: '/',
-        element: <ProtectedLayout />,
+        element: (
+            <ProtectedRoute>
+                <Layout />
+            </ProtectedRoute>
+        ),
         children: [
             { index: true, element: <HomePage /> },
             { path: 'settings', element: <SettingsPage /> },

@@ -12,6 +12,9 @@ import { useMapObjectStore } from '../../stores/mapObjectStore'
 
 const roundCoordinate = (value: number): number => Number(value.toFixed(6))
 const ROUTE_DRAFT_CENTER_LEFT_OFFSET_PX = 350
+import { useMapObjectStore } from '../../stores/mapObjectStore'
+import { useLoadMapObjectsByType } from '../../api/mapObjects'
+import type { PointMapObject } from '../../models/MapObject'
 
 const FlyToSelected = ({ center, zoom, trigger }: { center: [number, number]; zoom: number; trigger: number }) => {
     const map = useMap()
@@ -157,6 +160,10 @@ const getMapCenter = (map: Map): [number, number] | null => {
     }
 }
 
+const isPointOnSelectedMap = (selectedMapId: string | null) =>
+    (item: ReturnType<typeof useMapObjectStore.getState>['MapObjects'][number]): item is PointMapObject =>
+        item.type === 'Point' && (!selectedMapId || String(item.map_id) === selectedMapId)
+
 const HomePage = () => {
     const { loading: mapsLoading, error: mapsError } = useLoadMaps()
     const { error: objectsError } = useLoadMapObjects('/objects')
@@ -167,6 +174,8 @@ const HomePage = () => {
     const pointPlacementCoordinates = useMapObjectStore((s) => s.pointPlacementCoordinates)
     const selectedMapId = useMapStore((s) => s.selectedMapId)
     const selectedMapTick = useMapStore((s) => s.selectedMapTick)
+    const points = mapObjectStore.MapObjects
+        .filter(isPointOnSelectedMap(selectedMapId))
 
     const objectsForSelectedMap = mapObjects.filter(
         (item) => !selectedMapId || String(item.map_id) === selectedMapId,
