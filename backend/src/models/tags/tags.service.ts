@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { deleteByIdOrThrow, findByIdOrThrow, updateByIdOrThrow } from 'src/common/utils/crud.utils';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
 import { Tag, TagDocument } from './schemas/tags.schema';
@@ -19,26 +20,14 @@ export class TagsService {
   }
 
   async findOne(id: string): Promise<TagDocument> {
-    const tag = await this.tagModel.findById(id).exec();
-    if (!tag) {
-      throw new NotFoundException(`Tag with id ${id} not found`);
-    }
-    return tag;
+    return findByIdOrThrow(this.tagModel.findById(id).exec(), id, 'Tag');
   }
 
   async update(id: string, updateTagDto: UpdateTagDto): Promise<TagDocument> {
-    const updatedTag = await this.tagModel.findByIdAndUpdate(id, updateTagDto, { new: true }).exec();
-    if (!updatedTag) {
-      throw new NotFoundException(`Tag with id ${id} not found`);
-    }
-    return updatedTag;
+    return updateByIdOrThrow(this.tagModel.findByIdAndUpdate(id, updateTagDto, { new: true }).exec(), id, updateTagDto, 'Tag');
   }
 
   async delete(id: string): Promise<TagDocument> {
-    const deletedTag = await this.tagModel.findByIdAndDelete(id).exec();
-    if (!deletedTag) {
-      throw new NotFoundException(`Tag with id ${id} not found`);
-    }
-    return deletedTag;
+    return deleteByIdOrThrow(this.tagModel.findByIdAndDelete(id).exec(), id, 'Tag');
   }
 }
