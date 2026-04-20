@@ -2,7 +2,11 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
-import { MapsModule } from './maps/maps.module';
+import { AuthModule } from './auth/auth.module';
+import { MapsModule } from './models/maps/maps.module';
+import { ObjectsModule } from './models/objects/objects.module';
+import { TagsModule } from './models/tags/tags.module';
+import { SearchModule } from './models/search/search.module';
 
 @Module({
     imports: [
@@ -23,7 +27,11 @@ import { MapsModule } from './maps/maps.module';
                 uri: configService.get<string>('MONGO_URI'),
             }),
         }),
+        AuthModule,
         MapsModule,
+        ObjectsModule,
+        TagsModule,
+        SearchModule,
     ],
 })
 export class AppModule {}
