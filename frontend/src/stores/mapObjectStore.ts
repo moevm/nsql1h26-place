@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import type { LatLon } from '../models/GeoJSON';
 import { type MapObject } from '../models/MapObject';
-import type { LatLon } from '../models/GeoJSON';
 
 interface MapObjectStore {
     MapObjects: MapObject[];
