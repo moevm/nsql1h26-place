@@ -16,50 +16,27 @@ const SearchResultsPanel = ({ setOpen, setAdditionalOpen, criteria }: SearchResu
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    if (!criteria) {
-        return (
-            <aside className="panel panel--secondary">
-                <div className="panel__header">
-                    <h3>Результаты</h3>
-                    <LuX className='panel__close' onClick={() => setAdditionalOpen(false)} />
-                </div>
-                <div className="list">
-                    <p style={{ textAlign: 'center', color: '#666' }}>Откройте поиск для выполнения запроса</p>
-                </div>
-            </aside>
-        );
-    }
+    const normalizedNameQuery = criteria?.nameQuery.trim().toLowerCase() ?? '';
+    const normalizedTagsQuery = criteria?.tagsQuery.trim().toLowerCase() ?? '';
+    const normalizedDescriptionQuery = criteria?.descriptionQuery.trim().toLowerCase() ?? '';
+    const activeFilters = criteria?.activeFilters ?? [];
 
-    const normalizedNameQuery = criteria.nameQuery.trim().toLowerCase();
-    const normalizedTagsQuery = criteria.tagsQuery.trim().toLowerCase();
-    const normalizedDescriptionQuery = criteria.descriptionQuery.trim().toLowerCase();
-
-    const hasSearchQuery = useMemo(
-        () => Boolean(normalizedNameQuery || normalizedTagsQuery || normalizedDescriptionQuery),
+    const hasSearchCriteria = useMemo(
+        () => Boolean(
+            normalizedNameQuery ||
+            normalizedTagsQuery ||
+            normalizedDescriptionQuery,
+        ),
         [normalizedDescriptionQuery, normalizedNameQuery, normalizedTagsQuery],
     );
 
     useEffect(() => {
-        if (!hasSearchQuery) {
+        if (!criteria || !hasSearchCriteria) {
             setResults([]);
             setError(null);
             setLoading(false);
             return;
         }
-
-        const backendQuery = normalizedNameQuery || normalizedTagsQuery || normalizedDescriptionQuery;
-
-        const matchesFrontendFilters = (result: SearchResult) => {
-            const title = result.title.toLowerCase();
-            const description = (result.description || '').toLowerCase();
-            const searchableText = `${title} ${description}`;
-
-            const matchesName = !normalizedNameQuery || title.includes(normalizedNameQuery);
-            const matchesTags = !normalizedTagsQuery || searchableText.includes(normalizedTagsQuery);
-            const matchesDescription = !normalizedDescriptionQuery || description.includes(normalizedDescriptionQuery);
-
-            return matchesName && matchesTags && matchesDescription;
-        };
 
         let cancelled = false;
 
@@ -69,12 +46,16 @@ const SearchResultsPanel = ({ setOpen, setAdditionalOpen, criteria }: SearchResu
 
             try {
                 const searchResults = await searchEntities({
-                    query: backendQuery,
-                    categories: criteria.activeFilters.length ? criteria.activeFilters : undefined,
+                    nameQuery: normalizedNameQuery || undefined,
+                    tagsQuery: normalizedTagsQuery || undefined,
+                    descriptionQuery: normalizedDescriptionQuery || undefined,
+                    dateFromDay: criteria.dateFromDay,
+                    dateToDay: criteria.dateToDay,
+                    categories: activeFilters.length ? activeFilters : undefined,
                 });
 
                 if (!cancelled) {
-                    setResults(searchResults.filter(matchesFrontendFilters));
+                    setResults(searchResults);
                 }
             } catch {
                 if (!cancelled) {
@@ -93,8 +74,9 @@ const SearchResultsPanel = ({ setOpen, setAdditionalOpen, criteria }: SearchResu
             window.clearTimeout(timer);
         };
     }, [
-        criteria.activeFilters,
-        hasSearchQuery,
+        activeFilters,
+        criteria,
+        hasSearchCriteria,
         normalizedDescriptionQuery,
         normalizedNameQuery,
         normalizedTagsQuery,
@@ -105,6 +87,20 @@ const SearchResultsPanel = ({ setOpen, setAdditionalOpen, criteria }: SearchResu
         setAdditionalOpen(false);
     };
 
+    if (!criteria) {
+        return (
+            <aside className="panel panel--secondary">
+                <div className="panel__header">
+                    <h3>Результаты</h3>
+                    <LuX className='panel__close' onClick={() => setAdditionalOpen(false)} />
+                </div>
+                <div className="list">
+                    <p style={{ textAlign: 'center', color: '#666' }}>Откройте поиск для выполнения запроса</p>
+                </div>
+            </aside>
+        );
+    }
+
     return (
         <aside className="panel panel--primary">
             <div className="panel__header">
@@ -112,10 +108,10 @@ const SearchResultsPanel = ({ setOpen, setAdditionalOpen, criteria }: SearchResu
                 <LuX className='panel__close' onClick={handleClose} />
             </div>
             <div className="list">
-                {!hasSearchQuery && <div className="list__empty">Введите параметры слева</div>}
+                {!hasSearchCriteria && <div className="list__empty">Введите параметры слева</div>}
                 {loading && <div className="list__empty">Ищу совпадения...</div>}
                 {error && <div className="list__empty">{error}</div>}
-                {!loading && hasSearchQuery && !error && results.length === 0 && (
+                {!loading && hasSearchCriteria && !error && results.length === 0 && (
                     <div className="list__empty">Ничего не найдено</div>
                 )}
 
