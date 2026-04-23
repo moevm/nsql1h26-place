@@ -5,7 +5,7 @@ ENV NODE_ENV=build
 USER node
 WORKDIR /home/node
 
-COPY package*.json ./
+COPY package.json ./
 RUN npm install
 
 COPY --chown=node:node . .

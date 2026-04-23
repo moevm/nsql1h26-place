@@ -282,6 +282,75 @@ button.card {
     width: 100%;
 }
 
+.search-panel__input-wrapper {
+    position: relative;
+}
+
+.search-panel__input-icon {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    color: #948C0F;
+    width: 18px;
+    height: 18px;
+}
+
+.search-panel__input {
+    width: 100%;
+    border: 2px solid #948C0F;
+    border-radius: 20px;
+    padding: 10px 12px 10px 38px;
+    font-size: 14px;
+    outline: none;
+}
+
+.search-panel__date-range {
+    border: 2px solid #948C0F;
+    border-radius: 20px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.search-panel__range-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.search-panel__range-input {
+    width: 100%;
+    accent-color: #948C0F;
+}
+
+.search-panel__filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+}
+
+.search-panel__filter {
+    border: none;
+    border-radius: 999px;
+    background-color: rgba(204, 197, 48, 0.3);
+    padding: 6px 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.search-panel__filter.search-panel__filter--active {
+    background: #948C0F;
+    color: #fff;
+}
+
 @media (max-width: 1024px) {
     .panel {
         width: min(340px, calc(100vw - 4rem));
@@ -340,5 +409,9 @@ button.card {
 
     .create-form {
         padding: 12px;
+    }
+
+    .search-panel__filters {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     }
 }
