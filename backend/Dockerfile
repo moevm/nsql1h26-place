@@ -5,8 +5,8 @@ ENV NODE_ENV=build
 USER node
 WORKDIR /home/node
 
-COPY package*.json ./
-RUN npm ci
+COPY package.json ./
+RUN npm install
 
 COPY --chown=node:node . .
 RUN npm run build \

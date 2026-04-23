@@ -10,7 +10,8 @@ import ListRoutesPanel from './Panels/Routes/ListRoutePanel'
 import CreateRoutePanel from './Panels/Routes/CreateRoutePanel'
 import ListAreasPanel from './Panels/Areas/ListAreasPanel'
 import CreateAreaPanel from './Panels/Areas/CreateAreaPanel'
-import SearchPanel from './Panels/Search/SearchPanel'
+import SearchPanel, { type SearchCriteria } from './Panels/Search/SearchPanel'
+import SearchResultsPanel from './Panels/Search/SearchResultsPanel'
 import DataPanel from './Panels/Data/DataPanel'
 
 type SidebarEntry = {
@@ -26,6 +27,7 @@ const Sidebar = () => {
     const [activePanel, setActivePanel] = useState("")
     const [openAdditional, setOpenAdditional] = useState(false)
     const [openComponent, setOpenComponent] = useState(false)
+    const [searchCriteria, setSearchCriteria] = useState<SearchCriteria | null>(null)
 
     const SIDEBAR_ENTRIES: SidebarEntry[] = [
         {
@@ -38,7 +40,18 @@ const Sidebar = () => {
             id: 'search',
             icon: <LuSearch />,
             label: 'Поиск',
-            component: <SearchPanel setOpen={setOpenComponent} />,
+            component:
+                <SearchPanel
+                    setOpen={setOpenComponent}
+                    setAdditionalOpen={setOpenAdditional}
+                    onCriteriaChange={setSearchCriteria}
+                />,
+            additionalComponent:
+                <SearchResultsPanel
+                    setOpen={setOpenComponent}
+                    setAdditionalOpen={setOpenAdditional}
+                    criteria={searchCriteria}
+                />,
         },
         {
             id: 'maps',
@@ -93,7 +106,7 @@ const Sidebar = () => {
     const handleClick = (entry: SidebarEntry) => {
         setActivePanel(entry.id);
         setOpenComponent(true);
-        setOpenAdditional(false);
+        setOpenAdditional(entry.id === 'search');
     }
 
     return (
