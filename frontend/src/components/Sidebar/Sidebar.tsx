@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactElement, type ReactNode } from 'react'
+import { useNavigate } from 'react-router-dom'
 import './Sidebar.css'
 import { CgClose } from 'react-icons/cg'
 import { LuBarcode, LuFileInput, LuGrid2X2, LuMap, LuMapPinned, LuRoute, LuSearch } from 'react-icons/lu'
@@ -23,6 +24,7 @@ type SidebarEntry = {
 }
 
 const Sidebar = () => {
+    const navigate = useNavigate()
     const [expanded, setExpanded] = useState(false)
     const [activePanel, setActivePanel] = useState("")
     const [openAdditional, setOpenAdditional] = useState(false)
@@ -104,6 +106,7 @@ const Sidebar = () => {
     }, [openComponent, openAdditional]);
 
     const handleClick = (entry: SidebarEntry) => {
+        navigate('/')
         setActivePanel(entry.id);
         setOpenComponent(true);
         setOpenAdditional(entry.id === 'search');

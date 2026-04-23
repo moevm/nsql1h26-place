@@ -55,7 +55,7 @@ const CreateMapPanel = ({setAdditionalOpen} : CreateMapPanelProps) => {
 
         return {
             type: 'Point',
-            coordinates: [lon, lat],
+            coordinates: [lat, lon],
         };
     };
 

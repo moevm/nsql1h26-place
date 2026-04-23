@@ -1,27 +1,98 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import '../Panels.css'
-import { LuX } from 'react-icons/lu'
+import { LuMapPinned, LuTrash2, LuX } from 'react-icons/lu'
+import { BsGripVertical } from 'react-icons/bs'
 import { createMapObject } from '../../../../api/mapObjects'
 import { useMapObjectStore } from '../../../../stores/mapObjectStore'
 import { useMapStore } from '../../../../stores/mapsStore'
-import { buildDefaultRoute, getMapCenterPoint } from '../objectGeometry'
+import { getMapCenterPoint } from '../objectGeometry'
+import type { LatLon } from '../../../../models/GeoJSON'
+import { useShallow } from 'zustand/react/shallow'
+import './CreateRoutePanel.css'
 
 type CreateRoutePanelProps = {
     setAdditionalOpen: (val: boolean) => void
 }
 
+const roundCoordinate = (value: number): number => Number(value.toFixed(6))
+
 const CreateRoutePanel = ({setAdditionalOpen} : CreateRoutePanelProps) => {
-    const { addMapObject } = useMapObjectStore()
-    const maps = useMapStore((s) => s.Maps)
-    const selectedMapId = useMapStore((s) => s.selectedMapId)
+    const [
+        addMapObject,
+        waypoints,
+        routeDraftMapCenter,
+        startDraft,
+        stopDraft,
+        addWaypoint,
+        removeWaypoint,
+        reorderWaypoints,
+        setHoveredWaypointIndex,
+    ] = useMapObjectStore(
+        useShallow((s) => [
+            s.addMapObject,
+            s.routeDraftWaypoints,
+            s.routeDraftMapCenter,
+            s.startRouteDraft,
+            s.stopRouteDraft,
+            s.addRouteDraftWaypoint,
+            s.removeRouteDraftWaypoint,
+            s.reorderRouteDraftWaypoints,
+            s.setRouteDraftHoveredIndex,
+        ]),
+    )
+
+    const [maps, selectedMapId] = useMapStore(
+        useShallow((s) => [s.Maps, s.selectedMapId]),
+    )
 
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
     const [tags, setTags] = useState('')
     const [loading, setLoading] = useState(false)
+    const [dragFromIndex, setDragFromIndex] = useState<number | null>(null)
+    const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+
+    useEffect(() => {
+        startDraft()
+
+        return () => {
+            setHoveredWaypointIndex(null)
+            stopDraft()
+        }
+    }, [setHoveredWaypointIndex, startDraft, stopDraft])
 
     const selectedMap = maps.find((m) => m._id === selectedMapId) ?? null
     const centerPoint = getMapCenterPoint(selectedMap)
+
+    const handleAddWaypoint = () => {
+        if (!selectedMapId) {
+            alert('Сначала выберите карту.')
+            return
+        }
+
+        const fallbackCenter = centerPoint
+            ? [roundCoordinate(centerPoint.coordinates[0]), roundCoordinate(centerPoint.coordinates[1])] as LatLon
+            : null
+
+        const targetCenter = routeDraftMapCenter ?? fallbackCenter
+
+        if (!targetCenter) {
+            alert('У выбранной карты нет корректной геометрии.')
+            return
+        }
+
+        addWaypoint([roundCoordinate(targetCenter[0]), roundCoordinate(targetCenter[1])])
+    }
+
+    const handleDropWaypoint = (targetIndex: number) => {
+        if (dragFromIndex === null) {
+            return
+        }
+
+        reorderWaypoints(dragFromIndex, targetIndex)
+        setDragFromIndex(null)
+        setDragOverIndex(null)
+    }
 
     const handleCreate = async () => {
         if (!selectedMapId) {
@@ -29,8 +100,13 @@ const CreateRoutePanel = ({setAdditionalOpen} : CreateRoutePanelProps) => {
             return
         }
 
-        if (!centerPoint) {
-            alert('У выбранной карты нет корректной геометрии.')
+        if (!title.trim()) {
+            alert('Укажите название маршрута.')
+            return
+        }
+
+        if (waypoints.length < 2) {
+            alert('Добавьте минимум две отметки маршрута.')
             return
         }
 
@@ -43,11 +119,15 @@ const CreateRoutePanel = ({setAdditionalOpen} : CreateRoutePanelProps) => {
                 name: title.trim(),
                 description: description.trim(),
                 tags: tags.split(',').map((tag) => tag.trim()).filter(Boolean),
-                location: buildDefaultRoute(centerPoint),
-                image_path: 'map_icon.png',
+                location: {
+                    type: 'LineString',
+                    coordinates: waypoints,
+                },
+                image_path: 'route_icon.png',
             })
 
             addMapObject(object)
+            stopDraft()
             setAdditionalOpen(false)
         } catch {
             alert('Не удалось создать маршрут!')
@@ -81,6 +161,66 @@ const CreateRoutePanel = ({setAdditionalOpen} : CreateRoutePanelProps) => {
                     placeholder="Краткое описание маршрута"
                 />
 
+                <hr className="divider route-create__divider" />
+
+                <button type="button" className="create-form__btn route-create__add-point" onClick={handleAddWaypoint}>
+                    <LuMapPinned /> Поставить метку на карте
+                </button>
+
+                <div className="route-create__waypoints">
+                    {!waypoints.length && (
+                        <div className="list__empty route-create__empty">
+                            Пока нет точек. Добавьте первую метку на карту.
+                        </div>
+                    )}
+
+                    {waypoints.map((waypoint, index) => (
+                        <div
+                            key={`${index}-${waypoint[0]}-${waypoint[1]}`}
+                            className={`route-create__waypoint ${dragOverIndex === index ? 'route-create__waypoint--over' : ''}`}
+                            onMouseEnter={() => setHoveredWaypointIndex(index)}
+                            onMouseLeave={() => setHoveredWaypointIndex(null)}
+                            onDragOver={(event) => {
+                                event.preventDefault()
+                                setDragOverIndex(index)
+                            }}
+                            onDrop={() => handleDropWaypoint(index)}
+                        >
+                            <div className="route-create__waypoint-head">
+                                <span
+                                    className="route-create__drag-handle"
+                                    draggable
+                                    onDragStart={(event) => {
+                                        setDragFromIndex(index)
+                                        event.dataTransfer.effectAllowed = 'move'
+                                        event.dataTransfer.setData('text/plain', String(index))
+                                    }}
+                                    onDragEnd={() => {
+                                        setDragFromIndex(null)
+                                        setDragOverIndex(null)
+                                    }}
+                                    title="Перетащить точку"
+                                >
+                                    <BsGripVertical className="route-create__drag-icon" />
+                                </span>
+                                <span className="route-create__waypoint-index">#{index + 1}</span>
+                                <button
+                                    type="button"
+                                    className="route-create__remove"
+                                    onClick={() => {
+                                        setHoveredWaypointIndex(null)
+                                        removeWaypoint(index)
+                                    }}
+                                >
+                                    <LuTrash2 />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <hr className="divider route-create__divider" />
+
                 <label className="create-form__label" htmlFor="tags">Теги (через запятую)</label>
                 <input
                     id="tags"
@@ -90,16 +230,15 @@ const CreateRoutePanel = ({setAdditionalOpen} : CreateRoutePanelProps) => {
                     placeholder="лесная тропа, пешком"
                 />
 
-                <div className="card__desc">
-                    Геометрия маршрута создается как линия около центра выбранной карты.
-                </div>
+                <hr className="divider route-create__divider" />
+                
 
                 <div className="create-form__actions">
-                    <button className="create-form__btn" onClick={handleCreate} disabled={loading}>
-                        Создать
-                    </button>
                     <button className="create-form__btn create-form__btn--ghost" onClick={() => setAdditionalOpen(false)}>
                         Отмена
+                    </button>
+                    <button className="create-form__btn" onClick={handleCreate} disabled={loading}>
+                        Принять
                     </button>
                 </div>
             </div>

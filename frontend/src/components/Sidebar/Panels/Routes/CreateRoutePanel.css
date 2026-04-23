@@ -1,0 +1,118 @@
+.route-create__add-point {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    align-self: flex-start;
+}
+
+.route-create__hint {
+    font-size: 13px;
+    line-height: 1.4;
+    color: #666;
+}
+
+.route-create__divider {
+    margin: 2px 0 4px;
+}
+
+.route-create__waypoints {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.route-create__empty {
+    padding: 10px 0;
+}
+
+.route-create__waypoint {
+    border: 1px solid #c9dcc4;
+    border-radius: 10px;
+    padding: 10px;
+    background: #fdfefd;
+}
+
+.route-create__waypoint--over {
+    border-color: #51704A;
+    background: #f3f9f1;
+}
+
+.route-create__waypoint-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.route-create__drag-icon {
+    color: #51704A;
+    width: 16px;
+    height: 16px;
+}
+
+.route-create__drag-handle {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #edf4eb;
+    cursor: grab;
+}
+
+.route-create__drag-handle:active {
+    cursor: grabbing;
+}
+
+.route-create__waypoint-index {
+    color: #51704A;
+    font-weight: 700;
+    margin-right: auto;
+    margin-left: 6px;
+}
+
+.route-create__remove {
+    border: none;
+    background: transparent;
+    color: #BA003A;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.route-create__coords {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.route-create__coords label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+    color: #606060;
+    min-width: 0;
+}
+
+.route-create__coord-value {
+    border: 1px solid #d5d5d5;
+    border-radius: 8px;
+    padding: 8px;
+    font-size: 13px;
+    color: #444;
+    background: #f7f9f6;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+    .route-create__coords {
+        grid-template-columns: 1fr;
+    }
+}

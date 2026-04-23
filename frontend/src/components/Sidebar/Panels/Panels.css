@@ -60,13 +60,9 @@
     padding: 24px 0;
 }
 
-.card--clickable {
-    cursor: pointer;
-}
-
-.card--clickable:hover {
-    border-color: #CCC530;
-    background: #fffef5;
+.card--selected {
+    border-style: dashed !important;
+    border-width: 2.5px !important;
 }
 
 .list {
@@ -205,10 +201,6 @@ button.card {
     height: 1.5em;
 }
 
-.card__btn:hover {
-    background: #f6f6f6;
-}
-
 .card__btn--inactive {
     color: #C7CDD4;
     cursor: auto;
@@ -271,17 +263,23 @@ button.card {
     color: #fff;
 }
 
-.create-form__btn:hover {
-    background: #3b5136;
-}
-
 .create-form__btn--ghost {
     background: #f2f2f2;
     color: #444;
 }
 
-.create-form__btn--ghost:hover {
-    background: #e8e8e8;
+.point-placement {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: #fffef5;
+    border: 1px solid #e7e2aa;
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+
+.point-placement__btn {
+    width: 100%;
 }
 
 .search-panel__input-wrapper {

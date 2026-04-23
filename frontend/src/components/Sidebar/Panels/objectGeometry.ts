@@ -9,9 +9,11 @@ export const getMapCenterPoint = (map: Map | null): GeoJSONPoint | null => {
     const { location } = map;
 
     if (location.type === 'Point') {
+        const [lat, lon] = location.coordinates;
+
         return {
             type: 'Point',
-            coordinates: [...location.coordinates] as [number, number],
+            coordinates: [lat, lon],
         };
     }
 
@@ -21,9 +23,11 @@ export const getMapCenterPoint = (map: Map | null): GeoJSONPoint | null => {
             return null;
         }
 
+        const [lat, lon] = first;
+
         return {
             type: 'Point',
-            coordinates: [first[0], first[1]],
+            coordinates: [lat, lon],
         };
     }
 
@@ -32,38 +36,40 @@ export const getMapCenterPoint = (map: Map | null): GeoJSONPoint | null => {
         return null;
     }
 
+    const [lat, lon] = first;
+
     return {
         type: 'Point',
-        coordinates: [first[0], first[1]],
+        coordinates: [lat, lon],
     };
 };
 
 export const buildDefaultRoute = (center: GeoJSONPoint): GeoJSONLineString => {
-    const [firstCoord, secondCoord] = center.coordinates;
+    const [lat, lon] = center.coordinates;
 
     return {
         type: 'LineString',
         coordinates: [
-            [firstCoord - 0.003, secondCoord - 0.002],
-            [firstCoord, secondCoord],
-            [firstCoord + 0.003, secondCoord + 0.002],
+            [lat - 0.003, lon - 0.002],
+            [lat, lon],
+            [lat + 0.003, lon + 0.002],
         ],
     };
 };
 
 export const buildDefaultArea = (center: GeoJSONPoint): GeoJSONPolygon => {
-    const [firstCoord, secondCoord] = center.coordinates;
-    const dFirst = 0.002;
-    const dSecond = 0.0015;
+    const [lat, lon] = center.coordinates;
+    const latDelta = 0.002;
+    const lonDelta = 0.0015;
 
     return {
         type: 'Polygon',
         coordinates: [[
-            [firstCoord - dFirst, secondCoord - dSecond],
-            [firstCoord + dFirst, secondCoord - dSecond],
-            [firstCoord + dFirst, secondCoord + dSecond],
-            [firstCoord - dFirst, secondCoord + dSecond],
-            [firstCoord - dFirst, secondCoord - dSecond],
+            [lat - latDelta, lon - lonDelta],
+            [lat + latDelta, lon - lonDelta],
+            [lat + latDelta, lon + lonDelta],
+            [lat - latDelta, lon + lonDelta],
+            [lat - latDelta, lon - lonDelta],
         ]],
     };
 };
