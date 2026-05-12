@@ -260,6 +260,9 @@ const HomePage = () => {
                                         key={`${route._id}-point-${waypointIndex}`}
                                         position={waypoint}
                                         icon={getWaypointIcon(waypointIndex + 1)}
+                                        eventHandlers={{
+                                            click: () => setSelectedMapObjectId(route._id),
+                                        }}
                                     />
                                 ))}
                             </Fragment>
