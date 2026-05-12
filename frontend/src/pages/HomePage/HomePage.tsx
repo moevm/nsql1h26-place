@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from 'react'
 import { divIcon } from 'leaflet'
-import { MapContainer, Marker, Polyline, Popup, TileLayer, Tooltip, useMap, useMapEvents, ZoomControl } from 'react-leaflet'
+import { MapContainer, Marker, Polygon, Polyline, Popup, TileLayer, Tooltip, useMap, useMapEvents, ZoomControl } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useMapStore } from '../../stores/mapsStore'
 import { useLoadMaps } from '../../api/maps'
@@ -9,6 +9,7 @@ import './HomePage.css'
 import type { Map } from '../../models/Map'
 import type { MapObject } from '../../models/MapObject'
 import { useMapObjectStore } from '../../stores/mapObjectStore'
+import { buildCircleArea } from '../../components/Sidebar/Panels/objectGeometry'
 
 const roundCoordinate = (value: number): number => Number(value.toFixed(6))
 const ROUTE_DRAFT_CENTER_LEFT_OFFSET_PX = 350
@@ -160,16 +161,11 @@ const getMapCenter = (map: Map): [number, number] | null => {
 const HomePage = () => {
     const { loading: mapsLoading, error: mapsError } = useLoadMaps()
     const { error: objectsError } = useLoadMapObjects('/objects')
-    const maps = useMapStore((s) => s.Maps)
-    const mapObjects = useMapObjectStore((s) => s.MapObjects)
-    const selectedMapObjectId = useMapObjectStore((s) => s.selectedMapObjectId)
-    const selectedMapObjectTick = useMapObjectStore((s) => s.selectedMapObjectTick)
-    const pointPlacementCoordinates = useMapObjectStore((s) => s.pointPlacementCoordinates)
-    const selectedMapId = useMapStore((s) => s.selectedMapId)
-    const selectedMapTick = useMapStore((s) => s.selectedMapTick)
+    const mapStore = useMapStore()
+    const mapObjectStore = useMapObjectStore()
 
-    const objectsForSelectedMap = mapObjects.filter(
-        (item) => !selectedMapId || String(item.map_id) === selectedMapId,
+    const objectsForSelectedMap = mapObjectStore.MapObjects.filter(
+        (item) => !mapStore.selectedMapId || String(item.map_id) === mapStore.selectedMapId,
     )
     const pointsForSelectedMap = objectsForSelectedMap.filter(
         (item): item is Extract<MapObject, { type: 'Point' }> => item.type === 'Point',
@@ -177,36 +173,42 @@ const HomePage = () => {
     const routesForSelectedMap = objectsForSelectedMap.filter(
         (item): item is Extract<MapObject, { type: 'Route' }> => item.type === 'Route',
     )
-    const setSelectedMapObjectId = useMapObjectStore((s) => s.setSelectedMapObjectId)
-
-    const selectedMap = maps.find((m) => m._id === selectedMapId) ?? null
+    const areasForSelectedMap = objectsForSelectedMap.filter(
+        (item): item is Extract<MapObject, { type: 'Area' }> => item.type === 'Area',
+    )
+    const selectedMap = mapStore.Maps.find((m) => m._id === mapStore.selectedMapId) ?? null
     const zoom = 15;
 
     const center: [number, number] | null = selectedMap ? getMapCenter(selectedMap) : null
     const selectedPoint = pointsForSelectedMap.find(
         (item): item is Extract<MapObject, { type: 'Point' }> => (
-            item.type === 'Point' && item._id === selectedMapObjectId
+            item.type === 'Point' && item._id === mapObjectStore.selectedMapObjectId
         ),
     )
     const selectedRoute = routesForSelectedMap.find(
         (item): item is Extract<MapObject, { type: 'Route' }> => (
-            item.type === 'Route' && item._id === selectedMapObjectId
+            item.type === 'Route' && item._id === mapObjectStore.selectedMapObjectId
         ),
     )
-    const selectedPointCenter: [number, number] | null = selectedPoint
-        ? selectedPoint.location.coordinates
-        : null
-    const selectedRouteCenter: [number, number] | null = selectedRoute
-        ? (selectedRoute.location.coordinates[0] ?? null)
-        : null
+    const selectedPointCenter: [number, number] | null = selectedPoint ? selectedPoint.location.coordinates : null
+    const selectedRouteCenter: [number, number] | null = selectedRoute ? (selectedRoute.location.coordinates[0] ?? null) : null
     const selectedMapObjectCenter: [number, number] | null = selectedPointCenter ?? selectedRouteCenter
+
+    const areaDraftPreview = mapObjectStore.areaDraftActive
+        && mapObjectStore.pointPlacementCoordinates
+        && mapObjectStore.areaDraftRadius > 0
+        ? buildCircleArea(
+            { type: 'Point', coordinates: mapObjectStore.pointPlacementCoordinates },
+            mapObjectStore.areaDraftRadius,
+        )
+        : null
 
 
     return (
         <div className="home-page">
             {mapsLoading && <p className="home-page__status_wrapper">Загрузка карт...</p>}
             {mapsError && <p className="home-page__status_wrapper home-page__status--error">Ошибка: {mapsError.message}</p>}
-            {(!mapsLoading && maps.length === 0) ?
+            {(!mapsLoading && mapStore.Maps.length === 0) ?
                 ( <p className="home-page__status_wrapper">Карт пока нет - cоздайте свою первую карту через боковую панель.</p>)
                 : !selectedMap ? (<p className="home-page__status_wrapper">Карта не выбрана — выберите карту в боковой панели.</p>)
                 : !center ? (<p className="home-page__status_wrapper home-page__status--error">Не удалось определить центр.</p>)
@@ -222,9 +224,9 @@ const HomePage = () => {
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                             />
                         <ViewportCenterSync />
-                        <FlyToSelected center={center} zoom={zoom} trigger={selectedMapTick} />
+                        <FlyToSelected center={center} zoom={zoom} trigger={mapStore.selectedMapTick} />
                         {selectedMapObjectCenter && (
-                            <FlyToSelected center={selectedMapObjectCenter} zoom={17} trigger={selectedMapObjectTick} />
+                            <FlyToSelected center={selectedMapObjectCenter} zoom={17} trigger={mapObjectStore.selectedMapObjectTick} />
                         )}
                         <PointPlacementClickHandler />
                         {pointsForSelectedMap.map((point) => (
@@ -232,16 +234,22 @@ const HomePage = () => {
                                 key={point._id}
                                 position={point.location.coordinates}
                                 eventHandlers={{
-                                    click: () => setSelectedMapObjectId(point._id),
+                                    click: () => mapObjectStore.setSelectedMapObjectId(point._id),
                                 }}
                             >
                                 <Popup>{point.name || 'Отметка'}</Popup>
                             </Marker>
                         ))}
-                        {pointPlacementCoordinates && (
-                            <Marker position={pointPlacementCoordinates}>
+                        {mapObjectStore.pointPlacementCoordinates && (
+                            <Marker position={mapObjectStore.pointPlacementCoordinates}>
                                 <Popup>Временная отметка</Popup>
                             </Marker>
+                        )}
+                        {areaDraftPreview && (
+                            <Polygon
+                                positions={areaDraftPreview.coordinates}
+                                pathOptions={{ color: '#51704A', weight: 2, dashArray: '6 6', fillColor: '#51704A', fillOpacity: 0.15 }}
+                            />
                         )}
                         {routesForSelectedMap.map((route) => (
                             <Fragment key={route._id}>
@@ -249,7 +257,7 @@ const HomePage = () => {
                                     positions={route.location.coordinates}
                                     pathOptions={{ color: '#51704A', weight: 5, opacity: 0.9 }}
                                     eventHandlers={{
-                                        click: () => setSelectedMapObjectId(route._id),
+                                        click: () => mapObjectStore.setSelectedMapObjectId(route._id),
                                     }}
                                 >
                                     <Tooltip>{route.name || 'Маршрут'}</Tooltip>
@@ -261,11 +269,23 @@ const HomePage = () => {
                                         position={waypoint}
                                         icon={getWaypointIcon(waypointIndex + 1)}
                                         eventHandlers={{
-                                            click: () => setSelectedMapObjectId(route._id),
+                                            click: () => mapObjectStore.setSelectedMapObjectId(route._id),
                                         }}
                                     />
                                 ))}
                             </Fragment>
+                        ))}
+                        {areasForSelectedMap.map((area) => (
+                            <Polygon
+                                key={area._id}
+                                positions={area.location.coordinates}
+                                pathOptions={{ color: '#51704A', weight: 3, fillColor: '#51704A', fillOpacity: 0.2 }}
+                                eventHandlers={{
+                                    click: () => mapObjectStore.setSelectedMapObjectId(area._id),
+                                }}
+                            >
+                                <Tooltip>{area.name || 'Область'}</Tooltip>
+                            </Polygon>
                         ))}
                         <RouteDraftLayer />
                     </MapContainer>

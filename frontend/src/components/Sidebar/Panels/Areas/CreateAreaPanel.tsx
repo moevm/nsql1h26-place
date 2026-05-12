@@ -1,27 +1,58 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import '../Panels.css'
-import { LuX } from 'react-icons/lu'
+import { LuMinus, LuPlus, LuX } from 'react-icons/lu'
 import { createMapObject } from '../../../../api/mapObjects'
 import { useMapObjectStore } from '../../../../stores/mapObjectStore'
 import { useMapStore } from '../../../../stores/mapsStore'
-import { buildDefaultArea, getMapCenterPoint } from '../objectGeometry'
+import { buildCircleArea } from '../objectGeometry'
 
 type CreateAreaPanelProps = {
     setAdditionalOpen: (val: boolean) => void
 }
 
+const min_radius = 1
+const max_radius = 500
+
 const CreateAreaPanel = ({setAdditionalOpen} : CreateAreaPanelProps) => {
-    const { addMapObject } = useMapObjectStore()
-    const maps = useMapStore((s) => s.Maps)
+    const addMapObject = useMapObjectStore((s) => s.addMapObject)
+    const pointPlacementActive = useMapObjectStore((s) => s.pointPlacementActive)
+    const pointPlacementCoordinates = useMapObjectStore((s) => s.pointPlacementCoordinates)
+    const setPointPlacementActive = useMapObjectStore((s) => s.setPointPlacementActive)
+    const setPointPlacementCoordinates = useMapObjectStore((s) => s.setPointPlacementCoordinates)
+    const areaDraftRadius = useMapObjectStore((s) => s.areaDraftRadius)
+    const setAreaDraftRadius = useMapObjectStore((s) => s.setAreaDraftRadius)
+    const setAreaDraftActive = useMapObjectStore((s) => s.setAreaDraftActive)
     const selectedMapId = useMapStore((s) => s.selectedMapId)
 
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
     const [tags, setTags] = useState('')
     const [loading, setLoading] = useState(false)
+    const [radius, setRadius] = useState(min_radius)
 
-    const selectedMap = maps.find((m) => m._id === selectedMapId) ?? null
-    const centerPoint = getMapCenterPoint(selectedMap)
+    useEffect(() => {
+        setAreaDraftActive(true)
+        setAreaDraftRadius(min_radius)
+        setRadius(min_radius)
+
+        return () => {
+            setAreaDraftActive(false)
+            setAreaDraftRadius(min_radius)
+            setPointPlacementActive(false)
+            setPointPlacementCoordinates(null)
+        }
+    }, [
+        setAreaDraftActive,
+        setAreaDraftRadius,
+        setPointPlacementActive,
+        setPointPlacementCoordinates,
+    ])
+
+    const handleRadiusChange = (newValue: number) => {
+        setRadius(newValue)
+        setAreaDraftRadius(newValue)
+    }
+
 
     const handleCreate = async () => {
         if (!selectedMapId) {
@@ -29,10 +60,15 @@ const CreateAreaPanel = ({setAdditionalOpen} : CreateAreaPanelProps) => {
             return
         }
 
-        if (!centerPoint) {
-            alert('У выбранной карты нет корректной геометрии.')
+        if (!pointPlacementCoordinates) {
+            alert('Сначала укажите центр области кнопкой "Поставить метку на карте".')
             return
         }
+
+        const location = buildCircleArea(
+            { type: 'Point', coordinates: pointPlacementCoordinates },
+            areaDraftRadius,
+        )
 
         setLoading(true)
 
@@ -43,12 +79,12 @@ const CreateAreaPanel = ({setAdditionalOpen} : CreateAreaPanelProps) => {
                 name: title.trim(),
                 description: description.trim(),
                 tags: tags.split(',').map((tag) => tag.trim()).filter(Boolean),
-                location: buildDefaultArea(centerPoint),
+                location,
                 image_path: 'area_icon.png',
             })
 
             addMapObject(object)
-            setAdditionalOpen(false)
+            handleClose()
         } catch {
             alert('Не удалось создать область!')
         } finally {
@@ -56,11 +92,30 @@ const CreateAreaPanel = ({setAdditionalOpen} : CreateAreaPanelProps) => {
         }
     }
 
+    const handleStartPointPlacement = () => {
+        if (!selectedMapId) {
+            alert('Сначала выберите карту.')
+            return
+        }
+
+        setPointPlacementCoordinates(null)
+        setPointPlacementActive(true)
+    }
+
+    const handleClose = () => {
+        setAreaDraftActive(false)
+        setAreaDraftRadius(min_radius)
+        setRadius(min_radius)
+        setPointPlacementActive(false)
+        setPointPlacementCoordinates(null)
+        setAdditionalOpen(false)
+    }
+
     return (
         <aside className="panel panel--slide">
             <div className="panel__header">
                 <h3>Создание области</h3>
-                <LuX className='panel__close' onClick={() => setAdditionalOpen(false)} />
+                <LuX className='panel__close' onClick={handleClose} />
             </div>
             <div className="create-form">
                 <label className="create-form__label" htmlFor="title">Название</label>
@@ -86,10 +141,43 @@ const CreateAreaPanel = ({setAdditionalOpen} : CreateAreaPanelProps) => {
                 <button
                     type="button"
                     className="create-form__btn"
+                    onClick={handleStartPointPlacement}
                     disabled={!selectedMapId}
                 >
-                    Поставить метку на карте
+                    {pointPlacementActive ? 'Ожидание клика по карте...' : 'Поставить метку на карте'}
                 </button>
+
+                <hr className='divider' />
+
+                <div className="create-form__label-row">
+                    <label className="create-form__label" htmlFor="radius">{`Радиус (м): ${radius}`}</label>
+                    <div className="create-form__radius-actions">
+                        <LuMinus
+                            cursor="pointer"
+                            color='#51704A'
+                            size={32}
+                            onClick={() => handleRadiusChange(radius - 1)}
+                        />
+                        <LuPlus
+                            cursor="pointer"
+                            color='#51704A'
+                            size={32}
+                            onClick={() => handleRadiusChange(radius + 1)}
+                        />
+                    </div>
+                </div>
+
+                <div className="search-panel__range-row">
+                    <input
+                        className="search-panel__range-input"
+                        type="range"
+                        min={min_radius}
+                        max={max_radius}
+                        step={1}
+                        value={radius}
+                        onChange={(e) => handleRadiusChange(Number(e.target.value))}
+                    />
+                </div>
 
                 <hr className='divider' />
 
@@ -108,7 +196,7 @@ const CreateAreaPanel = ({setAdditionalOpen} : CreateAreaPanelProps) => {
                     <button className="create-form__btn" onClick={handleCreate} disabled={loading}>
                         Создать
                     </button>
-                    <button className="create-form__btn create-form__btn--ghost" onClick={() => setAdditionalOpen(false)}>
+                    <button className="create-form__btn create-form__btn--ghost" onClick={handleClose}>
                         Отмена
                     </button>
                 </div>

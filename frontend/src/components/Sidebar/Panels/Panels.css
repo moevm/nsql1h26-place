@@ -253,6 +253,19 @@ button.card {
     margin-top: 4px;
 }
 
+.create-form__label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.create-form__radius-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
 .create-form__btn {
     border: none;
     border-radius: 10px;
@@ -354,12 +367,6 @@ button.card {
     display: flex;
     flex-direction: column;
     gap: 10px;
-}
-
-.search-panel__range-row {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
 }
 
 .search-panel__range-input {
