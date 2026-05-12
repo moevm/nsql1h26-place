@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { runApi, useQuery, type ApiError } from './hooks'
+import { useAuthStore } from '../stores/authStore'
 import { useMapStore } from '../stores/mapsStore'
 import type { Map, CreateMap, UpdateMap } from '../models/Map'
 
@@ -22,11 +23,20 @@ export const useLoadMaps = (): {
     refresh: () => void;
 } => {
     const setMaps = useMapStore((s) => s.setMaps);
+    const userId = useAuthStore((s) => s.user?._id);
     const [data, error, loading, refresh] = useQuery<Map[]>('/maps');
 
     useEffect(() => {
-        if (data) setMaps(data);
-    }, [data, setMaps]);
+        if (!data) {
+            return;
+        }
+
+        const filteredMaps = userId
+            ? data.filter((map) => String(map.user_id) === String(userId))
+            : [];
+
+        setMaps(filteredMaps);
+    }, [data, userId, setMaps]);
 
     return { error, loading, refresh };
 };
