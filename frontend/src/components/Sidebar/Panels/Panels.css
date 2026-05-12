@@ -282,6 +282,52 @@ button.card {
     position: relative;
 }
 
+.file_upload {
+    width: 100%;
+    background: #CCC53080;
+    color: #6c670f;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+}
+
+.file_upload svg {
+    width: 1.2em;
+    height: 1.2em;
+}
+
+.file_upload--stub {
+    cursor: default;
+}
+
+.file_upload__input {
+    display: none;
+}
+
+.data-panel__content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.data-panel__row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.data-panel__section-title {
+    font-size: clamp(18px, 2.2vw, 24px);
+    font-weight: 600;
+    color: #948C0F;
+}
+
 .search-panel__input-icon {
     position: absolute;
     top: 50%;
