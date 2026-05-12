@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import { divIcon } from 'leaflet'
 import { MapContainer, Marker, Polygon, Polyline, Popup, TileLayer, Tooltip, useMap, useMapEvents, ZoomControl } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -6,6 +6,7 @@ import { useMapStore } from '../../stores/mapsStore'
 import { useLoadMaps } from '../../api/maps'
 import { useLoadMapObjects } from '../../api/mapObjects'
 import './HomePage.css'
+import type { LatLon } from '../../models/GeoJSON'
 import type { Map } from '../../models/Map'
 import type { MapObject } from '../../models/MapObject'
 import { useMapObjectStore } from '../../stores/mapObjectStore'
@@ -158,6 +159,27 @@ const getMapCenter = (map: Map): [number, number] | null => {
     }
 }
 
+const getPolygonCenter = (coordinates: LatLon[][]): LatLon | null => {
+    const ring = coordinates[0]
+    if (!ring || ring.length === 0) {
+        return null
+    }
+
+    let minLat = ring[0][0]
+    let maxLat = ring[0][0]
+    let minLon = ring[0][1]
+    let maxLon = ring[0][1]
+
+    for (const [lat, lon] of ring) {
+        if (lat < minLat) minLat = lat
+        if (lat > maxLat) maxLat = lat
+        if (lon < minLon) minLon = lon
+        if (lon > maxLon) maxLon = lon
+    }
+
+    return [(minLat + maxLat) / 2, (minLon + maxLon) / 2]
+}
+
 const HomePage = () => {
     const { loading: mapsLoading, error: mapsError } = useLoadMaps()
     const { error: objectsError } = useLoadMapObjects('/objects')
@@ -190,9 +212,21 @@ const HomePage = () => {
             item.type === 'Route' && item._id === mapObjectStore.selectedMapObjectId
         ),
     )
+    const selectedArea = areasForSelectedMap.find(
+        (item): item is Extract<MapObject, { type: 'Area' }> => (
+            item.type === 'Area' && item._id === mapObjectStore.selectedMapObjectId
+        ),
+    )
     const selectedPointCenter: [number, number] | null = selectedPoint ? selectedPoint.location.coordinates : null
     const selectedRouteCenter: [number, number] | null = selectedRoute ? (selectedRoute.location.coordinates[0] ?? null) : null
-    const selectedMapObjectCenter: [number, number] | null = selectedPointCenter ?? selectedRouteCenter
+    const selectedAreaCenter = useMemo<[number, number] | null>(() => {
+        if (!selectedArea) {
+            return null
+        }
+
+        return getPolygonCenter(selectedArea.location.coordinates)
+    }, [selectedArea])
+    const selectedMapObjectCenter: [number, number] | null = selectedPointCenter ?? selectedRouteCenter ?? selectedAreaCenter
 
     const areaDraftPreview = mapObjectStore.areaDraftActive
         && mapObjectStore.pointPlacementCoordinates
