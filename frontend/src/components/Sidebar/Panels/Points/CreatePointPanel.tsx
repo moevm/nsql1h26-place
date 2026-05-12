@@ -116,15 +116,15 @@ const CreatePointPanel = ({setAdditionalOpen} : CreatePointPanelProps) => {
 
                 <hr className='divider' />
 
-                    <label className="create-form__label" htmlFor="tags">Координаты отметки</label>
-                    <button
-                        type="button"
-                        className="create-form__btn point-placement__btn"
-                        onClick={handleStartPointPlacement}
-                        disabled={!selectedMapId}
-                    >
-                        {mapObjectStore.pointPlacementActive ? 'Ожидание клика по карте...' : 'Поставить метку на карте'}
-                    </button>
+                <label className="create-form__label" htmlFor="tags">Координаты отметки</label>
+                <button
+                    type="button"
+                    className="create-form__btn"
+                    onClick={handleStartPointPlacement}
+                    disabled={!selectedMapId}
+                >
+                    {mapObjectStore.pointPlacementActive ? 'Ожидание клика по карте...' : 'Поставить метку на карте'}
+                </button>
 
                 <hr className='divider' />
 

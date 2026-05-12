@@ -80,6 +80,18 @@ const CreateAreaPanel = ({setAdditionalOpen} : CreateAreaPanelProps) => {
                     onChange={(event) => setDescription(event.target.value)}
                     placeholder="Краткое описание области"
                 />
+                <hr className='divider' />
+
+                <label className="create-form__label" htmlFor="tags">Выделение области</label>
+                <button
+                    type="button"
+                    className="create-form__btn"
+                    disabled={!selectedMapId}
+                >
+                    Поставить метку на карте
+                </button>
+
+                <hr className='divider' />
 
                 <label className="create-form__label" htmlFor="tags">Теги (через запятую)</label>
                 <input
@@ -90,9 +102,7 @@ const CreateAreaPanel = ({setAdditionalOpen} : CreateAreaPanelProps) => {
                     placeholder="грибная зона, опушка"
                 />
 
-                <div className="card__desc">
-                    Геометрия области создается как полигон вокруг центра выбранной карты.
-                </div>
+                <hr className='divider' />
 
                 <div className="create-form__actions">
                     <button className="create-form__btn" onClick={handleCreate} disabled={loading}>
