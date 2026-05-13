@@ -1,11 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from 'src/auth/auth.guard';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
 import { TagDocument } from './schemas/tags.schema';
 import { TagsService } from './tags.service';
 
 @ApiTags('Tags')
+@UseGuards(AuthGuard)
 @Controller('/tags')
 export class TagsController {
   constructor(private readonly tagsService: TagsService) {}

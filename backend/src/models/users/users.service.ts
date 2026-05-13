@@ -15,6 +15,10 @@ export class UsersService {
     return this.userModel.findOne({ _id: id }).exec();
   }
 
+  async findByToken(token: string): Promise<User | null> {
+    return this.userModel.findOne({ auth_token: token }).exec();
+  }
+
   async create(user: Partial<User>): Promise<User> {
     const createdUser = new this.userModel(user);
     return createdUser.save();
@@ -23,6 +27,12 @@ export class UsersService {
   async updatePasswordHash(id: string, passwordHash: string): Promise<User | null> {
     return this.userModel
       .findByIdAndUpdate({ _id: id }, { password_hash: passwordHash }, { new: true })
+      .exec();
+  }
+
+  async setAuthToken(id: string, token: string): Promise<User | null> {
+    return this.userModel
+      .findByIdAndUpdate({ _id: id }, { auth_token: token }, { new: true })
       .exec();
   }
 }

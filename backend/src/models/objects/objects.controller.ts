@@ -1,5 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from 'src/auth/auth.guard';
 import { CreateObjectDto } from './dto/create-object.dto';
 import { UpdateObjectDto } from './dto/update-object.dto';
 import { ObjectDocument } from './schemas/objects.schema';
@@ -7,6 +8,7 @@ import { ObjectsService } from './objects.service';
 import { ObjectType } from 'src/common/types/geojson.types';
 
 @ApiTags('Objects')
+@UseGuards(AuthGuard)
 @Controller('/objects')
 export class ObjectsController {
   constructor(private readonly objectsService: ObjectsService) {}

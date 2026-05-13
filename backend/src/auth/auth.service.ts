@@ -44,10 +44,26 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    const token = randomBytes(24).toString('hex');
+    const updatedUser = await this.usersService.setAuthToken(user._id, token);
+
     return {
-      token: randomBytes(24).toString('hex'),
-      user: this.toSafeUser(user),
+      token,
+      user: this.toSafeUser(updatedUser ?? user),
     };
+  }
+
+  async validateToken(token: string) {
+    if (!token) {
+      return null;
+    }
+
+    const user = await this.usersService.findByToken(token);
+    if (!user) {
+      return null;
+    }
+
+    return this.toSafeUser(user);
   }
 
   private toSafeUser(user: User) {

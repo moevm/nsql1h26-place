@@ -24,7 +24,7 @@ export class ObjectsService {
     return this.objectModel.find().exec();
   }
 
-  async findAllByType(typeParam: string): Promise<ObjectDocument[]> {
+  async findAllByType(typeParam: ObjectType): Promise<ObjectDocument[]> {
     if (!typeParam) {
       throw new BadRequestException('Invalid object type. Use points, areas, or routes');
     }

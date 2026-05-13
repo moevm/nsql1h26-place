@@ -14,6 +14,9 @@ export class User {
   @Prop({ required: true })
   password_hash: string;
 
+  @Prop({ index: true })
+  auth_token: string;
+
   @Prop(String)
   image_path: string;
 }

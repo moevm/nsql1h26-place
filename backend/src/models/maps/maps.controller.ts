@@ -1,11 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
+import { AuthGuard } from "src/auth/auth.guard";
 import { MapsService } from "./maps.service";
 import { MapDocument } from "./schemas/maps.schema";
 import { CreateMapDto } from "./dto/create-map.dto";
 import { UpdateMapDto } from "./dto/update-map.dto";
 
 @ApiTags('Maps')
+@UseGuards(AuthGuard)
 @Controller("/maps")
 export class MapsController {
     constructor(private readonly mapsService: MapsService) {}
