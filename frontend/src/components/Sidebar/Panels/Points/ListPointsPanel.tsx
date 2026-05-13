@@ -6,7 +6,7 @@ import { useMapObjectStore } from '../../../../stores/mapObjectStore';
 import { useMapStore } from '../../../../stores/mapsStore';
 import { GrEdit } from 'react-icons/gr';
 import { FaSave } from 'react-icons/fa';
-import { useState } from 'react';
+import { useState, type UIEvent } from 'react';
 import type { UpdateMapObject } from '../../../../models/MapObject';
 
 type ListPointPanelProps = {
@@ -15,7 +15,7 @@ type ListPointPanelProps = {
 }
 
 const ListPointsPanel = ({setAdditionalOpen, setOpen} : ListPointPanelProps) => {
-    const { loading, error } = useLoadMapObjectsByType('Point');
+    const { loading, error, loadMore, hasMore } = useLoadMapObjectsByType('Point');
     const [ edit, setEdit ] = useState("");
     const [ updatedMapObject, setUpdatedMapObject ] = useState<UpdateMapObject>({})
     const mapObjectStore = useMapObjectStore();
@@ -47,8 +47,17 @@ const ListPointsPanel = ({setAdditionalOpen, setOpen} : ListPointPanelProps) => 
         setUpdatedMapObject({})
     }
 
+    const handleScroll = (event: UIEvent<HTMLElement>) => {
+        if (loading || !hasMore) return;
+        const target = event.currentTarget;
+        const remaining = target.scrollHeight - target.scrollTop - target.clientHeight;
+        if (remaining < 80) {
+            loadMore();
+        }
+    };
+
     return (
-        <aside className="panel panel--primary">
+        <aside className="panel panel--primary" onScroll={handleScroll}>
             <div className="panel__header">
                 <h3>Отметки</h3>
                 <LuX className='panel__close' onClick={() => setOpen(false)} />
@@ -62,7 +71,7 @@ const ListPointsPanel = ({setAdditionalOpen, setOpen} : ListPointPanelProps) => 
                     </div>
                 </button>
                 <hr className="divider" />
-                {loading && <div className="list__empty">Загружаю отметки...</div>}
+                {loading && points.length === 0 && <div className="list__empty">Загружаю отметки...</div>}
                 {error && <div className="list__empty">Ошибка: {error.message}</div>}
                 {!loading && points.length === 0 && <div className="list__empty">Отметок пока нет</div>}
                 {points.map((point) => (
@@ -146,6 +155,12 @@ const ListPointsPanel = ({setAdditionalOpen, setOpen} : ListPointPanelProps) => 
                         </article>
                     )
                 ))}
+                {loading && points.length > 0 && (
+                    <div className="list__empty">Загружаю еще отметки...</div>
+                )}
+                {!loading && !hasMore && points.length > 0 && (
+                    <div className="list__empty">Больше нет отметок</div>
+                )}
             </div>
         </aside>
     )
