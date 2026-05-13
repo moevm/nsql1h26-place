@@ -9,7 +9,7 @@ import { MapObject, ObjectDocument } from './schemas/objects.schema';
 
 @Injectable()
 export class ObjectsService {
-  constructor(@InjectModel(MapObject.name) private objectModel: Model<ObjectDocument>) {}
+  constructor(@InjectModel(MapObject.name) private objectModel: Model<ObjectDocument>) { }
 
   async create(createObjectDto: CreateObjectDto): Promise<ObjectDocument> {
     if (createObjectDto.type === ObjectType.ROUTE) {
@@ -24,11 +24,10 @@ export class ObjectsService {
     return this.objectModel.find().exec();
   }
 
-  async findAllByType(typeParam: string): Promise<ObjectDocument[]> {
-    if (!typeParam) {
+  async findAllByType(typeParam: ObjectType): Promise<ObjectDocument[]> {
+    if (!Object.values(ObjectType).includes(typeParam)) {
       throw new BadRequestException('Invalid object type. Use points, areas, or routes');
     }
-
     return this.objectModel.find({ type: typeParam }).exec();
   }
 
