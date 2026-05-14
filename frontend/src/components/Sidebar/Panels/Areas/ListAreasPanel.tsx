@@ -6,7 +6,7 @@ import { useMapObjectStore } from '../../../../stores/mapObjectStore';
 import { useMapStore } from '../../../../stores/mapsStore';
 import { GrEdit } from 'react-icons/gr';
 import { FaSave } from 'react-icons/fa';
-import { useState } from 'react';
+import { useState, type UIEvent } from 'react';
 import type { UpdateMapObject } from '../../../../models/MapObject';
 
 type ListAreaPanelProps = {
@@ -15,7 +15,7 @@ type ListAreaPanelProps = {
 }
 
 const ListAreasPanel = ({setAdditionalOpen, setOpen} : ListAreaPanelProps) => {
-    const { loading, error } = useLoadMapObjectsByType('Area');
+    const { loading, error, loadMore, hasMore } = useLoadMapObjectsByType('Area');
     const [ edit, setEdit ] = useState("");
     const [ updatedMapObject, setUpdatedMapObject ] = useState<UpdateMapObject>({})
     const mapObjectStore = useMapObjectStore();
@@ -47,8 +47,17 @@ const ListAreasPanel = ({setAdditionalOpen, setOpen} : ListAreaPanelProps) => {
         setUpdatedMapObject({})
     }
 
+    const handleScroll = (event: UIEvent<HTMLElement>) => {
+        if (loading || !hasMore) return;
+        const target = event.currentTarget;
+        const remaining = target.scrollHeight - target.scrollTop - target.clientHeight;
+        if (remaining < 80) {
+            loadMore();
+        }
+    };
+
     return (
-        <aside className="panel panel--primary">
+        <aside className="panel panel--primary" onScroll={handleScroll}>
             <div className="panel__header">
                 <h3>Области</h3>
                 <LuX className='panel__close' onClick={() => setOpen(false)} />
@@ -62,7 +71,7 @@ const ListAreasPanel = ({setAdditionalOpen, setOpen} : ListAreaPanelProps) => {
                     </div>
                 </button>
                 <hr className="divider" />
-                {loading && <div className="list__empty">Загружаю области...</div>}
+                {loading && areas.length === 0 && <div className="list__empty">Загружаю области...</div>}
                 {error && <div className="list__empty">Ошибка: {error.message}</div>}
                 {!loading && areas.length === 0 && <div className="list__empty">Областей пока нет</div>}
                 {areas.map((area) => (
@@ -146,6 +155,12 @@ const ListAreasPanel = ({setAdditionalOpen, setOpen} : ListAreaPanelProps) => {
                         </article>
                     )
                 ))}
+                {loading && areas.length > 0 && (
+                    <div className="list__empty">Загружаю еще области...</div>
+                )}
+                {!loading && !hasMore && areas.length > 0 && (
+                    <div className="list__empty">Больше нет областей</div>
+                )}
             </div>
         </aside>
     )

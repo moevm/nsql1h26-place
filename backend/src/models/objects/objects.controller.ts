@@ -1,5 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateObjectDto } from './dto/create-object.dto';
 import { UpdateObjectDto } from './dto/update-object.dto';
 import { ObjectDocument } from './schemas/objects.schema';
@@ -19,31 +19,48 @@ export class ObjectsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all objects' })
-  @ApiResponse({ status: 200, description: 'List of all objects' })
-  async findAll(): Promise<ObjectDocument[]> {
-    return this.objectsService.findAll();
+  @ApiOperation({ summary: 'Get objects' })
+  @ApiResponse({ status: 200, description: 'List of objects' })
+  @ApiQuery({ name: 'page', required: false, description: 'Page number (starts from 1)', example: 1 })
+  async findAll(@Query('page') page?: string): Promise<ObjectDocument[]> {
+    const pageNumber = Number.parseInt(page ?? '1', 10);
+    return this.objectsService.findAll(Number.isFinite(pageNumber) && pageNumber > 0 ? pageNumber : 1);
   }
 
   @Get('points')
-  @ApiOperation({ summary: 'Get all point objects' })
+  @ApiOperation({ summary: 'Get point objects' })
   @ApiResponse({ status: 200, description: 'List of point objects' })
-  async findAllPoints(): Promise<ObjectDocument[]> {
-    return this.objectsService.findAllByType(ObjectType.POINT);
+  @ApiQuery({ name: 'page', required: false, description: 'Page number (starts from 1)', example: 1 })
+  async findAllPoints(@Query('page') page?: string): Promise<ObjectDocument[]> {
+    const pageNumber = Number.parseInt(page ?? '1', 10);
+    return this.objectsService.findAllByType(
+      ObjectType.POINT,
+      Number.isFinite(pageNumber) && pageNumber > 0 ? pageNumber : 1,
+    );
   }
 
   @Get('areas')
-  @ApiOperation({ summary: 'Get all area objects' })
+  @ApiOperation({ summary: 'Get area objects' })
   @ApiResponse({ status: 200, description: 'List of area objects' })
-  async findAllAreas(): Promise<ObjectDocument[]> {
-    return this.objectsService.findAllByType(ObjectType.AREA);
+  @ApiQuery({ name: 'page', required: false, description: 'Page number (starts from 1)', example: 1 })
+  async findAllAreas(@Query('page') page?: string): Promise<ObjectDocument[]> {
+    const pageNumber = Number.parseInt(page ?? '1', 10);
+    return this.objectsService.findAllByType(
+      ObjectType.AREA,
+      Number.isFinite(pageNumber) && pageNumber > 0 ? pageNumber : 1,
+    );
   }
 
   @Get('routes')
-  @ApiOperation({ summary: 'Get all route objects' })
+  @ApiOperation({ summary: 'Get route objects' })
   @ApiResponse({ status: 200, description: 'List of route objects' })
-  async findAllRoutes(): Promise<ObjectDocument[]> {
-    return this.objectsService.findAllByType(ObjectType.ROUTE);
+  @ApiQuery({ name: 'page', required: false, description: 'Page number (starts from 1)', example: 1 })
+  async findAllRoutes(@Query('page') page?: string): Promise<ObjectDocument[]> {
+    const pageNumber = Number.parseInt(page ?? '1', 10);
+    return this.objectsService.findAllByType(
+      ObjectType.ROUTE,
+      Number.isFinite(pageNumber) && pageNumber > 0 ? pageNumber : 1,
+    );
   }
 
   @Get(':id')
