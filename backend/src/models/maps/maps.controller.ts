@@ -17,8 +17,11 @@ export class MapsController {
     @Post()
     @ApiOperation({ summary: 'Create a new map' })
     @ApiResponse({ status: 201, description: 'Map created successfully' })
-    async create(@Body() createMapDto: CreateMapDto): Promise<MapDocument> {
-        return this.mapsService.create(createMapDto);
+    async create(
+        @CurrentUser() user: AuthUser,
+        @Body() createMapDto: CreateMapDto,
+    ): Promise<MapDocument> {
+        return this.mapsService.create(createMapDto, user._id);
     }
 
     @Get()

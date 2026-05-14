@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { ObjectType } from 'src/common/types/geojson.types';
 import { SearchCategory, SearchResultItem } from 'src/common/types/search.types';
 import { Map, MapDocument } from 'src/models/maps/schemas/maps.schema';
@@ -14,6 +14,7 @@ export type SearchFilters = {
   dateFromDay?: number;
   dateToDay?: number;
   categories?: string | string[];
+  userId?: unknown;
 };
 
 type NormalizedSearchFilters = {
@@ -44,12 +45,13 @@ export class SearchService {
     }
 
     const categories = this.normalizeCategories(filters.categories);
+    const visibleMapIds = await this.getVisibleMapIds(filters.userId);
 
     const categorySearches: Record<SearchCategory, () => Promise<SearchResultItem[]>> = {
-      maps: () => this.searchMaps(normalizedFilters),
-      points: () => this.searchObjectsByType(normalizedFilters, ObjectType.POINT, 'points'),
-      routes: () => this.searchObjectsByType(normalizedFilters, ObjectType.ROUTE, 'routes'),
-      areas: () => this.searchObjectsByType(normalizedFilters, ObjectType.AREA, 'areas'),
+      maps: () => this.searchMaps(normalizedFilters, filters.userId),
+      points: () => this.searchObjectsByType(normalizedFilters, ObjectType.POINT, 'points', visibleMapIds),
+      routes: () => this.searchObjectsByType(normalizedFilters, ObjectType.ROUTE, 'routes', visibleMapIds),
+      areas: () => this.searchObjectsByType(normalizedFilters, ObjectType.AREA, 'areas', visibleMapIds),
     };
 
     const tasks = this.allCategories
@@ -205,11 +207,23 @@ export class SearchService {
     return new Set(parsedCategories);
   }
 
-  private async searchMaps(filters: NormalizedSearchFilters): Promise<SearchResultItem[]> {
-    const mongoFilters = this.buildCommonMongoFilters(filters);
+  private async getVisibleMapIds(userId: unknown): Promise<Types.ObjectId[]> {
     const maps = await this.mapModel
       .find(
-        mongoFilters,
+        { $or: [{ visible: true }, { user_id: userId as Types.ObjectId }] },
+        { _id: 1 },
+      )
+      .lean()
+      .exec();
+    return maps.map((m) => m._id as Types.ObjectId);
+  }
+
+  private async searchMaps(filters: NormalizedSearchFilters, userId: unknown): Promise<SearchResultItem[]> {
+    const mongoFilters = this.buildCommonMongoFilters(filters);
+    const visibilityFilter = { $or: [{ visible: true }, { user_id: userId as Types.ObjectId }] };
+    const maps = await this.mapModel
+      .find(
+        { $and: [visibilityFilter, mongoFilters] },
         { _id: 1, name: 1, description: 1, image_path: 1, tags: 1 },
       )
       .limit(100)
@@ -231,12 +245,14 @@ export class SearchService {
     filters: NormalizedSearchFilters,
     type: ObjectType,
     category: Exclude<SearchCategory, 'maps'>,
+    visibleMapIds: Types.ObjectId[],
   ): Promise<SearchResultItem[]> {
     const mongoFilters = this.buildCommonMongoFilters(filters);
     const objects = await this.objectModel
       .find(
         {
           type,
+          map_id: { $in: visibleMapIds },
           ...mongoFilters,
         },
         { _id: 1, map_id: 1, name: 1, description: 1, image_path: 1, tags: 1 },
