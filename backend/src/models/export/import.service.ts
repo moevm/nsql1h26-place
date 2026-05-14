@@ -31,12 +31,10 @@ export class ImportService {
   }
 
   private async replaceUserData(data: ExportData, userId: Types.ObjectId): Promise<void> {
-    // Collect the map _ids from the imported file to know which objects belong to them
     const importedMapIds = (data.maps as any[]).map((m) => {
       try { return new Types.ObjectId(String(m._id)); } catch { return null; }
     }).filter(Boolean) as Types.ObjectId[];
 
-    // Delete only current user's existing data
     const existingMapIds = await this.mapModel
       .find({ user_id: userId }, { _id: 1 })
       .lean()
@@ -48,21 +46,18 @@ export class ImportService {
       this.objectModel.deleteMany({ map_id: { $in: existingMapIds } }),
     ]);
 
-    // Prepare maps: force user_id to current user, cast _id to ObjectId
     const maps = (data.maps as any[]).map((m) => ({
       ...m,
       _id: new Types.ObjectId(String(m._id)),
       user_id: userId,
     }));
 
-    // Prepare objects: cast _id and map_id to ObjectId
     const objects = (data.objects as any[]).map((obj) => ({
       ...obj,
       _id: new Types.ObjectId(String(obj._id)),
       map_id: new Types.ObjectId(String(obj.map_id)),
     }));
 
-    // Insert maps first, then objects (objects reference maps)
     if (maps.length > 0) {
       await this.mapModel.insertMany(maps, { ordered: false }).catch((err) => {
         throw new BadRequestException(`Ошибка вставки карт: ${err.message}`);
@@ -75,7 +70,6 @@ export class ImportService {
       });
     }
 
-    // Tags: upsert by name (shared resource — don't delete other users' referenced tags)
     if (Array.isArray(data.tags) && data.tags.length > 0) {
       await Promise.all(
         (data.tags as any[]).map((tag) =>

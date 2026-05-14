@@ -1,26 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { TOKEN_KEY, useAuthStore } from '../../stores/authStore';
 
-// ── Типы ────────────────────────────────────────────────
-
 export type ApiError = {
     message: string;
     status_code: number;
 };
 
-// ── Базовый URI ─────────────────────────────────────────
-
 export const getApiUri = () => {
     return import.meta.env.VITE_API_URI || '/api';
 };
-
-// ── runApi — единая точка входа для любого запроса к бэку ──
-//
-// Использование:
-//   await runApi<Map[]>('GET', '/maps')
-//   await runApi<Map, CreateMapPayload>('POST', '/maps', body)
-//   await runApi<Map, UpdateMapPayload>('PATCH', `/maps/${id}`, body)
-//   await runApi<Map>('DELETE', `/maps/${id}`)
 
 export const runApi = async <ResultType, BodyType = undefined>(
     method: string,
@@ -73,11 +61,6 @@ export const runApi = async <ResultType, BodyType = undefined>(
 
     return response.json() as Promise<ResultType>;
 };
-
-// ── useQuery — React-хук для GET-запросов ───────────────
-//
-// Автоматически делает GET при монтировании и при вызове refresh().
-// Возвращает [data, error, loading, refresh].
 
 export const useQuery = <T,>(
     path: string,

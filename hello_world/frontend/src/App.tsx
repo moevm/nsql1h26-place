@@ -5,23 +5,19 @@ import { getApiUri } from "./api/hooks";
 function App() {
     const [maps, , mapsLoading, refreshMaps] = useListMaps();
 
-    // Create map state
     const [createUserId, setCreateUserId] = useState("");
     const [createStatus, setCreateStatus] = useState<{ ok: boolean; text: string } | null>(null);
     const [createLoading, setCreateLoading] = useState(false);
 
-    // Get by ID state
     const [getByIdValue, setGetByIdValue] = useState("");
     const [getByIdResult, setGetByIdResult] = useState<string | null>(null);
     const [getByIdLoading, setGetByIdLoading] = useState(false);
 
-    // Update map state
     const [updateId, setUpdateId] = useState("");
     const [updateUserId, setUpdateUserId] = useState("");
     const [updateStatus, setUpdateStatus] = useState<{ ok: boolean; text: string } | null>(null);
     const [updateLoading, setUpdateLoading] = useState(false);
 
-    // Delete map state
     const [deleteId, setDeleteId] = useState("");
     const [deleteStatus, setDeleteStatus] = useState<{ ok: boolean; text: string } | null>(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
@@ -107,7 +103,6 @@ function App() {
             <p className="app-subtitle">Тестирование бэкенда — GET & POST запросы</p>
 
             <div className="cards-grid">
-                {/* GET all maps */}
                 <div className="card">
                     <div className="card-header get">
                         <span className="method-badge">GET</span>
@@ -126,7 +121,6 @@ function App() {
                     </div>
                 </div>
 
-                {/* POST create map */}
                 <div className="card">
                     <div className="card-header post">
                         <span className="method-badge">POST</span>
@@ -154,7 +148,6 @@ function App() {
                     </div>
                 </div>
 
-                {/* GET by ID */}
                 <div className="card">
                     <div className="card-header get">
                         <span className="method-badge">GET</span>
@@ -180,7 +173,6 @@ function App() {
                     </div>
                 </div>
 
-                {/* POST update map */}
                 <div className="card">
                     <div className="card-header post">
                         <span className="method-badge">POST</span>
@@ -217,7 +209,6 @@ function App() {
                     </div>
                 </div>
 
-                {/* DELETE map */}
                 <div className="card">
                     <div className="card-header delete">
                         <span className="method-badge">DELETE</span>
