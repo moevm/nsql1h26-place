@@ -7,4 +7,5 @@ export type SearchResult = {
     description: string;
     map_id: string | null;
     image_path: string;
+    tags: string[];
 };

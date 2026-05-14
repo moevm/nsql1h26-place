@@ -210,7 +210,7 @@ export class SearchService {
     const maps = await this.mapModel
       .find(
         mongoFilters,
-        { _id: 1, name: 1, description: 1, image_path: 1 },
+        { _id: 1, name: 1, description: 1, image_path: 1, tags: 1 },
       )
       .limit(100)
       .lean()
@@ -223,6 +223,7 @@ export class SearchService {
       description: map.description ?? '',
       map_id: null,
       image_path: map.image_path ?? '',
+      tags: map.tags ?? [],
     }));
   }
 
@@ -238,7 +239,7 @@ export class SearchService {
           type,
           ...mongoFilters,
         },
-        { _id: 1, map_id: 1, name: 1, description: 1, image_path: 1 },
+        { _id: 1, map_id: 1, name: 1, description: 1, image_path: 1, tags: 1 },
       )
       .limit(100)
       .lean()
@@ -251,6 +252,7 @@ export class SearchService {
       description: item.description ?? '',
       map_id: item.map_id ? String(item.map_id) : null,
       image_path: item.image_path ?? '',
+      tags: item.tags ?? [],
     }));
   }
 

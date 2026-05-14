@@ -8,6 +8,7 @@ import { useState, type UIEvent } from 'react';
 import type { UpdateMapObject } from '../../../../models/MapObject';
 import { FaSave } from 'react-icons/fa';
 import { GrEdit } from 'react-icons/gr';
+import TagSelector from '../../../TagSelector/TagSelector';
 
 type ListRoutesPanelProps = {
     setOpen: (val: boolean) => void,
@@ -20,7 +21,7 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
     const selectedMapId = useMapStore((s) => s.selectedMapId);
     const [ edit, setEdit ] = useState('');
     const [ updatedMapObject, setUpdatedMapObject ] = useState<UpdateMapObject>({});
-    const [tagsValue, setTagsValue] = useState('');
+    const [ tagsDraft, setTagsDraft ] = useState<string[]>([]);
 
     const routes = mapObjectStore.MapObjects
         .filter((item) => item.type === 'Route' && (!selectedMapId || String(item.map_id) === selectedMapId));
@@ -28,7 +29,7 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
     const handleEdit = (routeId: string, routeTags: string[]) => {
         setEdit(routeId);
         setUpdatedMapObject({});
-        setTagsValue(routeTags.join(', '));
+        setTagsDraft(routeTags);
     };
 
     const handleDelete = async (id: string) => {
@@ -43,12 +44,7 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
 
     const handleSave = async (id: string) => {
         try {
-            const payload: UpdateMapObject = {
-                ...updatedMapObject,
-                tags: tagsValue.split(',').map((tag) => tag.trim()).filter(Boolean),
-            };
-
-            const mapObject = await updateMapObject(id, payload);
+            const mapObject = await updateMapObject(id, { ...updatedMapObject, tags: tagsDraft });
             mapObjectStore.updateMapObject(mapObject);
         } catch (err) {
             alert("Не удалось обновить маршрут!")
@@ -57,7 +53,13 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
 
         setEdit('')
         setUpdatedMapObject({})
-        setTagsValue('')
+        setTagsDraft([])
+    };
+
+    const handleCancel = () => {
+        setEdit('')
+        setUpdatedMapObject({})
+        setTagsDraft([])
     };
 
     const handleScroll = (event: UIEvent<HTMLElement>) => {
@@ -111,6 +113,7 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
                                     value={updatedMapObject.description ?? route.description}
                                     onChange={(event) => setUpdatedMapObject((prev) => ({ ...prev, description: event.target.value }))}
                                 />
+                                <TagSelector value={tagsDraft} onChange={setTagsDraft} />
                                 <div className="card__actions">
                                     {route.updated_at
                                         ? `ред. ${new Date(route.updated_at).toLocaleDateString()}`
@@ -122,11 +125,7 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
                                         />
                                         <LuX
                                             className='card__action_icon card__btn--danger'
-                                            onClick={() => {
-                                                setEdit('');
-                                                setUpdatedMapObject({});
-                                                setTagsValue('');
-                                            }}
+                                            onClick={handleCancel}
                                         />
                                     </div>
                                 </div>
@@ -146,6 +145,13 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
                                     </div>
                                 </div>
                                 <div className='card__description'>{route.description}</div>
+                                {route.tags.length > 0 && (
+                                    <div className="card__tags">
+                                        {route.tags.map((tag) => (
+                                            <span key={tag} className="tag-chip">{tag}</span>
+                                        ))}
+                                    </div>
+                                )}
                                 <div className="card__actions">
                                     {route.updated_at ? "ред. " + new Date(route.updated_at).toLocaleDateString() : new Date(route.created_at).toLocaleDateString()}
                                     <div className='card__actions__container'>

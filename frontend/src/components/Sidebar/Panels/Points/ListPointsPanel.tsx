@@ -8,6 +8,7 @@ import { GrEdit } from 'react-icons/gr';
 import { FaSave } from 'react-icons/fa';
 import { useState, type UIEvent } from 'react';
 import type { UpdateMapObject } from '../../../../models/MapObject';
+import TagSelector from '../../../TagSelector/TagSelector';
 
 type ListPointPanelProps = {
     setOpen: (val: boolean) => void,
@@ -18,6 +19,7 @@ const ListPointsPanel = ({setAdditionalOpen, setOpen} : ListPointPanelProps) => 
     const { loading, error, loadMore, hasMore } = useLoadMapObjectsByType('Point');
     const [ edit, setEdit ] = useState("");
     const [ updatedMapObject, setUpdatedMapObject ] = useState<UpdateMapObject>({})
+    const [ tagsDraft, setTagsDraft ] = useState<string[]>([]);
     const mapObjectStore = useMapObjectStore();
 
     const selectedMapId = useMapStore((s) => s.selectedMapId);
@@ -34,9 +36,15 @@ const ListPointsPanel = ({setAdditionalOpen, setOpen} : ListPointPanelProps) => 
         }
     };
 
+    const handleEdit = (id: string, currentTags: string[]) => {
+        setEdit(id);
+        setUpdatedMapObject({});
+        setTagsDraft(currentTags);
+    };
+
     const handleSave = async (id: string) => {
         try {
-            const point = await updateMapObject(id, updatedMapObject);
+            const point = await updateMapObject(id, { ...updatedMapObject, tags: tagsDraft });
             mapObjectStore.updateMapObject(point);
         } catch (err) {
             alert("Не удалось обновить точку!")
@@ -45,6 +53,13 @@ const ListPointsPanel = ({setAdditionalOpen, setOpen} : ListPointPanelProps) => 
 
         setEdit("")
         setUpdatedMapObject({})
+        setTagsDraft([])
+    }
+
+    const handleCancel = () => {
+        setEdit("")
+        setUpdatedMapObject({})
+        setTagsDraft([])
     }
 
     const handleScroll = (event: UIEvent<HTMLElement>) => {
@@ -98,20 +113,17 @@ const ListPointsPanel = ({setAdditionalOpen, setOpen} : ListPointPanelProps) => 
                                     value={updatedMapObject.description ?? point.description}
                                     onChange={(e) => setUpdatedMapObject(prev => ({ ...prev, description: e.target.value }))}
                                 />
+                                <TagSelector value={tagsDraft} onChange={setTagsDraft} />
                                 <div className="card__actions">
                                     {point.updated_at ? "ред. " + new Date(point.updated_at).toLocaleDateString() : new Date(point.created_at).toLocaleDateString()}
                                     <div className='card__actions__container'>
-                                        <GrEdit
-                                            className='card__action_icon card__btn--safe'
-                                            onClick={() => setEdit(point._id)}
-                                        />
                                         <FaSave
                                             className='card__action_icon card__btn--safe'
                                             onClick={() => handleSave(point._id)}
                                         />
                                         <LuX
                                             className='card__action_icon card__btn--danger'
-                                            onClick={() => setEdit("")}
+                                            onClick={handleCancel}
                                         />
                                     </div>
                                 </div>
@@ -131,6 +143,13 @@ const ListPointsPanel = ({setAdditionalOpen, setOpen} : ListPointPanelProps) => 
                                     </div>
                                 </div>
                                 <div className='card__description'>{point.description}</div>
+                                {point.tags.length > 0 && (
+                                    <div className="card__tags">
+                                        {point.tags.map((tag) => (
+                                            <span key={tag} className="tag-chip">{tag}</span>
+                                        ))}
+                                    </div>
+                                )}
                                 <div className="card__actions">
                                     {point.updated_at ? "ред. " + new Date(point.updated_at).toLocaleDateString() : new Date(point.created_at).toLocaleDateString()}
                                     <div className='card__actions__container'>
@@ -138,7 +157,7 @@ const ListPointsPanel = ({setAdditionalOpen, setOpen} : ListPointPanelProps) => 
                                             className='card__action_icon card__btn--safe'
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                setEdit(point._id);
+                                                handleEdit(point._id, point.tags);
                                             }}
                                         />
                                         <FaSave className='card__action_icon card__btn--inactive' />

@@ -1,4 +1,4 @@
-db = db.getSiblingDB('shrooms');
+﻿db = db.getSiblingDB('shrooms');
 
 const buildCircleArea = (center, radiusMeters, steps = 36) => {
     const [lat, lon] = center;
@@ -164,7 +164,7 @@ db.maps.insertMany([
         coordinates: [59.773007, 30.775178]
     },
     visible: true,
-    tags: [ObjectId("000000000000000000000004")],
+    tags: ["гриб"],
     created_at: ISODate("2026-03-01T10:00:00.389Z"),
     updated_at: null,
     image_path: "map_icon.png"
@@ -180,7 +180,7 @@ db.maps.insertMany([
         coordinates: [59.598731, 29.677867]
     },
     visible: true,
-    tags: [ObjectId("000000000000000000000003")],
+    tags: ["ягода"],
     created_at: ISODate("2026-03-04T10:00:00.389Z"),
     updated_at: ISODate("2026-03-04T12:00:00.389Z"),
     image_path: "map_icon.png"
@@ -196,7 +196,7 @@ db.maps.insertMany([
         coordinates: [59.721421, 29.845112]
     },
     visible: true,
-    tags: [ObjectId("000000000000000000000004")],
+    tags: ["гриб"],
     created_at: ISODate("2026-03-05T09:15:00.389Z"),
     updated_at: ISODate("2026-03-05T11:20:00.389Z"),
     image_path: "map_icon.png"
@@ -212,7 +212,7 @@ db.maps.insertMany([
         coordinates: [60.712345, 28.752134]
     },
     visible: true,
-    tags: [ObjectId("000000000000000000000002")],
+    tags: ["рыбалка"],
     created_at: ISODate("2026-03-06T08:40:00.389Z"),
     updated_at: ISODate("2026-03-06T10:10:00.389Z"),
     image_path: "map_icon.png"
@@ -228,7 +228,7 @@ db.maps.insertMany([
         coordinates: [61.034567, 30.112233]
     },
     visible: true,
-    tags: [ObjectId("000000000000000000000008"), ObjectId("000000000000000000000007")],
+    tags: ["поход", "туризм"],
     created_at: ISODate("2026-03-07T07:30:00.389Z"),
     updated_at: ISODate("2026-03-07T09:45:00.389Z"),
     image_path: "map_icon.png"
@@ -244,7 +244,7 @@ db.maps.insertMany([
         coordinates: [60.198765, 30.554433]
     },
     visible: true,
-    tags: [ObjectId("000000000000000000000002"), ObjectId("000000000000000000000008")],
+    tags: ["рыбалка", "поход"],
     created_at: ISODate("2026-03-08T11:10:00.389Z"),
     updated_at: ISODate("2026-03-08T13:00:00.389Z"),
     image_path: "map_icon.png"
@@ -260,7 +260,7 @@ db.maps.insertMany([
         coordinates: [59.487654, 30.998877]
     },
     visible: true,
-    tags: [ObjectId("000000000000000000000003")],
+    tags: ["ягода"],
     created_at: ISODate("2026-03-09T06:50:00.389Z"),
     updated_at: ISODate("2026-03-09T08:25:00.389Z"),
     image_path: "map_icon.png"
@@ -276,7 +276,7 @@ db.maps.insertMany([
         coordinates: [59.452211, 32.014785]
     },
     visible: true,
-    tags: [ObjectId("000000000000000000000006"), ObjectId("000000000000000000000008")],
+    tags: ["отдых", "поход"],
     created_at: ISODate("2026-03-10T12:20:00.389Z"),
     updated_at: ISODate("2026-03-10T14:00:00.389Z"),
     image_path: "map_icon.png"
@@ -292,7 +292,7 @@ db.maps.insertMany([
         coordinates: [59.376543, 28.613245]
     },
     visible: true,
-    tags: [ObjectId("000000000000000000000001")],
+    tags: ["вода"],
     created_at: ISODate("2026-03-11T09:00:00.389Z"),
     updated_at: ISODate("2026-03-11T10:35:00.389Z"),
     image_path: "map_icon.png"
@@ -308,7 +308,7 @@ db.maps.insertMany([
         coordinates: [60.021357, 32.765421]
     },
     visible: true,
-    tags: [ObjectId("000000000000000000000003")],
+    tags: ["ягода"],
     created_at: ISODate("2026-03-12T08:00:00.389Z"),
     updated_at: ISODate("2026-03-12T09:55:00.389Z"),
     image_path: "map_icon.png"
@@ -324,7 +324,7 @@ db.maps.insertMany([
         coordinates: [58.734221, 29.112478]
     },
     visible: true,
-    tags: [ObjectId("000000000000000000000007")],
+    tags: ["туризм"],
     created_at: ISODate("2026-03-13T10:45:00.389Z"),
     updated_at: ISODate("2026-03-13T12:05:00.389Z"),
     image_path: "map_icon.png"
@@ -340,7 +340,7 @@ db.maps.insertMany([
         coordinates: [60.923451, 34.156789]
     },
     visible: true,
-    tags: [ObjectId("000000000000000000000005"), ObjectId("000000000000000000000006")],
+    tags: ["пикник", "отдых"],
     created_at: ISODate("2026-03-14T13:15:00.389Z"),
     updated_at: ISODate("2026-03-14T15:30:00.389Z"),
     image_path: "map_icon.png"
@@ -354,7 +354,7 @@ db.mapobjects.insertMany([
     name: "Маршрут с подосиновиками",
     type: "Route",
     description: "Тут прямо очень много подосиновиков",
-    tags: [ObjectId("000000000000000000000004")],
+    tags: ["гриб"],
     created_at: ISODate("2026-03-10T10:00:00.389Z"),
     updated_at: null,
     location: {
@@ -373,7 +373,7 @@ db.mapobjects.insertMany([
     name: "Маршрут с маленькими подосиновиками",
     description: "Тут только маленькие подосиновики",
     type: "Route",
-    tags: [ObjectId("000000000000000000000004")],
+    tags: ["гриб"],
     created_at: ISODate("2026-03-15T10:00:00.389Z"),
     updated_at: ISODate("2026-03-15T13:10:00.389Z"),
     location: {
@@ -392,7 +392,7 @@ db.mapobjects.insertMany([
     name: "Черничная поляна",
     type: "Area",
     description: "Все усыпано черникой",
-    tags: [ObjectId("000000000000000000000003")],
+    tags: ["ягода"],
     created_at: ISODate("2026-03-20T10:00:00.389Z"),
     updated_at: null,
     location: buildCircleArea([59.778860, 30.751252], 150),
@@ -404,7 +404,7 @@ db.mapobjects.insertMany([
     name: "Лисичковый маршрут",
     type: "Route",
     description: "Тропа через густой лес с большим количеством лисичек.",
-    tags: [ObjectId("000000000000000000000004")],
+    tags: ["гриб"],
     created_at: ISODate("2026-03-21T08:15:00.389Z"),
     updated_at: null,
     location: {
@@ -423,7 +423,7 @@ db.mapobjects.insertMany([
     name: "Белый гриб",
     type: "Point",
     description: "Белые грибы возле старой ели.",
-    tags: [ObjectId("000000000000000000000004"), ObjectId("000000000000000000000009")],
+    tags: ["гриб", "белый гриб"],
     created_at: ISODate("2026-03-22T09:40:00.389Z"),
     updated_at: ISODate("2026-03-22T11:05:00.389Z"),
     location: {
@@ -438,7 +438,7 @@ db.mapobjects.insertMany([
     name: "Клюквенное болото",
     type: "Area",
     description: "Большое болотистое место с обилием клюквы.",
-    tags: [ObjectId("000000000000000000000003"), ObjectId("000000000000000000000010")],
+    tags: ["ягода", "клюква"],
     created_at: ISODate("2026-03-23T07:20:00.389Z"),
     updated_at: null,
     location: buildCircleArea([59.900934, 30.925431], 300),
@@ -450,7 +450,7 @@ db.mapobjects.insertMany([
     name: "Лесной родник",
     type: "Point",
     description: "Источник чистой воды рядом с лесной дорогой.",
-    tags: [ObjectId("000000000000000000000001"), ObjectId("000000000000000000000011")],
+    tags: ["вода", "родник"],
     created_at: ISODate("2026-03-24T10:55:00.389Z"),
     updated_at: null,
     location: {
@@ -465,7 +465,7 @@ db.mapobjects.insertMany([
     name: "Маршрут вдоль озера",
     type: "Route",
     description: "Красивый маршрут с видами на озеро и местами для отдыха.",
-    tags: [ObjectId("000000000000000000000012"), ObjectId("000000000000000000000007")],
+    tags: ["озеро", "туризм"],
     created_at: ISODate("2026-03-25T12:10:00.389Z"),
     updated_at: ISODate("2026-03-25T14:25:00.389Z"),
     location: {
@@ -484,7 +484,7 @@ db.mapobjects.insertMany([
     name: "Поляна земляники",
     type: "Area",
     description: "Небольшая солнечная поляна с земляникой.",
-    tags: [ObjectId("000000000000000000000003"), ObjectId("000000000000000000000013")],
+    tags: ["ягода", "земляника"],
     created_at: ISODate("2026-03-26T06:45:00.389Z"),
     updated_at: null,
     location: buildCircleArea([59.834256, 30.713674], 120),
@@ -496,7 +496,7 @@ db.mapobjects.insertMany([
     name: "Смотровая точка на холме",
     type: "Point",
     description: "Отсюда открывается хороший вид на лес и озеро.",
-    tags: [ObjectId("000000000000000000000014"), ObjectId("000000000000000000000007")],
+    tags: ["вид", "туризм"],
     created_at: ISODate("2026-03-27T15:00:00.389Z"),
     updated_at: ISODate("2026-03-27T16:40:00.389Z"),
     location: {

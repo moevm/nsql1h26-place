@@ -5,6 +5,7 @@ import { createMapObject } from '../../../../api/mapObjects'
 import { useMapObjectStore } from '../../../../stores/mapObjectStore'
 import { useMapStore } from '../../../../stores/mapsStore'
 import { buildCircleArea } from '../objectGeometry'
+import TagSelector from '../../../TagSelector/TagSelector'
 
 type CreateAreaPanelProps = {
     setAdditionalOpen: (val: boolean) => void
@@ -26,7 +27,7 @@ const CreateAreaPanel = ({setAdditionalOpen} : CreateAreaPanelProps) => {
 
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
-    const [tags, setTags] = useState('')
+    const [tags, setTags] = useState<string[]>([])
     const [loading, setLoading] = useState(false)
     const [radius, setRadius] = useState(min_radius)
 
@@ -53,7 +54,6 @@ const CreateAreaPanel = ({setAdditionalOpen} : CreateAreaPanelProps) => {
         setAreaDraftRadius(newValue)
     }
 
-
     const handleCreate = async () => {
         if (!selectedMapId) {
             alert('Сначала выберите карту.')
@@ -78,7 +78,7 @@ const CreateAreaPanel = ({setAdditionalOpen} : CreateAreaPanelProps) => {
                 type: 'Area',
                 name: title.trim(),
                 description: description.trim(),
-                tags: tags.split(',').map((tag) => tag.trim()).filter(Boolean),
+                tags,
                 location,
                 image_path: 'area_icon.png',
             })
@@ -137,7 +137,7 @@ const CreateAreaPanel = ({setAdditionalOpen} : CreateAreaPanelProps) => {
                 />
                 <hr className='divider' />
 
-                <label className="create-form__label" htmlFor="tags">Выделение области</label>
+                <label className="create-form__label">Выделение области</label>
                 <button
                     type="button"
                     className="create-form__btn"
@@ -181,14 +181,8 @@ const CreateAreaPanel = ({setAdditionalOpen} : CreateAreaPanelProps) => {
 
                 <hr className='divider' />
 
-                <label className="create-form__label" htmlFor="tags">Теги (через запятую)</label>
-                <input
-                    id="tags"
-                    className="create-form__input"
-                    value={tags}
-                    onChange={(event) => setTags(event.target.value)}
-                    placeholder="грибная зона, опушка"
-                />
+                <label className="create-form__label">Теги</label>
+                <TagSelector value={tags} onChange={setTags} />
 
                 <hr className='divider' />
 
