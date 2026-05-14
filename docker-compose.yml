@@ -42,8 +42,6 @@ services:
       - 5173
     restart: always
     env_file: ./frontend/.env
-    volumes:
-      - ./frontend:/app:ro
     depends_on:
       backend:
         condition: service_healthy
