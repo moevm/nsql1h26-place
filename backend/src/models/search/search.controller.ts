@@ -1,9 +1,11 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from 'src/auth/auth.guard';
 import { SearchResultItem } from 'src/common/types/search.types';
 import { SearchFilters, SearchService } from './search.service';
 
 @ApiTags('Search')
+@UseGuards(AuthGuard)
 @Controller('/search')
 export class SearchController {
   constructor(private readonly searchService: SearchService) {}

@@ -20,10 +20,16 @@ type RegisterResponse = {
     user: AuthUser;
 };
 
+type MeResponse = AuthUser;
+
 export const login = (payload: Credentials) => {
     return runApi<LoginResponse, Credentials>('POST', '/auth/login', payload);
 };
 
 export const register = (payload: Credentials) => {
     return runApi<RegisterResponse, Credentials>('POST', '/auth/register', payload);
+};
+
+export const getMe = () => {
+    return runApi<MeResponse>('GET', '/auth/me');
 };

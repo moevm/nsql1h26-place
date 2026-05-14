@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useAuthStore } from '../../stores/authStore';
+import { TOKEN_KEY, useAuthStore } from '../../stores/authStore';
 
 // ── Типы ────────────────────────────────────────────────
 
@@ -31,7 +31,17 @@ export const runApi = async <ResultType, BodyType = undefined>(
         'Content-Type': 'application/json;charset=UTF-8',
     };
 
-    const token = useAuthStore.getState().token;
+    const store = useAuthStore.getState();
+    let token = store.token;
+
+    try {
+        const storedToken = localStorage.getItem(TOKEN_KEY);
+        if (storedToken !== token) {
+            token = storedToken;
+        }
+    } catch {
+        token = store.token;
+    }
     if (token) {
         headers.Authorization = `Bearer ${token}`;
     }
@@ -41,6 +51,10 @@ export const runApi = async <ResultType, BodyType = undefined>(
         headers,
         body: body !== undefined ? JSON.stringify(body) : undefined,
     });
+
+    if (response.status === 401) {
+        store.clearSession();
+    }
 
     if (!response.ok) {
         let message = 'Request failed';
