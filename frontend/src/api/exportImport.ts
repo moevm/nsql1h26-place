@@ -3,14 +3,12 @@ import { runApi } from './hooks'
 export type ExportFormat = 'json';
 export type ImportFormat = 'json';
 
-// Функция для экспорта данных из приложения
 export const exportData = async (): Promise<Blob> => {
   const result = await runApi<Record<string, unknown>>('GET', '/export-import/export');
   const jsonString = JSON.stringify(result, null, 2);
   return new Blob([jsonString], { type: 'application/json' });
 };
 
-// Функция для импорта данных в приложение  
 export const importData = async (
   content: string,
 ): Promise<{ message: string; success: boolean }> => {
@@ -20,7 +18,6 @@ export const importData = async (
   >('POST', `/export-import/import`, { content });
 };
 
-// Функция для скачивания экспортированного файла
 export const downloadExportFile = async (): Promise<void> => {
   try {
     const blob = await exportData();
@@ -41,7 +38,6 @@ export const downloadExportFile = async (): Promise<void> => {
   }
 };
 
-// Функция для чтения содержимого файла
 export const readFileContent = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
