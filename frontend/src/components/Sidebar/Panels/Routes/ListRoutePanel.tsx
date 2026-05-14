@@ -4,7 +4,7 @@ import { BsFillTrashFill } from 'react-icons/bs';
 import { deleteMapObject, updateMapObject, useLoadMapObjectsByType } from '../../../../api/mapObjects';
 import { useMapObjectStore } from '../../../../stores/mapObjectStore';
 import { useMapStore } from '../../../../stores/mapsStore';
-import { useState } from 'react';
+import { useState, type UIEvent } from 'react';
 import type { UpdateMapObject } from '../../../../models/MapObject';
 import { FaSave } from 'react-icons/fa';
 import { GrEdit } from 'react-icons/gr';
@@ -15,7 +15,7 @@ type ListRoutesPanelProps = {
 }
 
 const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) => {
-    const { loading, error } = useLoadMapObjectsByType('Route');
+    const { loading, error, loadMore, hasMore } = useLoadMapObjectsByType('Route');
     const mapObjectStore = useMapObjectStore();
     const selectedMapId = useMapStore((s) => s.selectedMapId);
     const [ edit, setEdit ] = useState('');
@@ -60,8 +60,17 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
         setTagsValue('')
     };
 
+    const handleScroll = (event: UIEvent<HTMLElement>) => {
+        if (loading || !hasMore) return;
+        const target = event.currentTarget;
+        const remaining = target.scrollHeight - target.scrollTop - target.clientHeight;
+        if (remaining < 80) {
+            loadMore();
+        }
+    };
+
     return (
-        <aside className="panel panel--primary">
+        <aside className="panel panel--primary" onScroll={handleScroll}>
             <div className="panel__header">
                 <h3>Маршрут</h3>
                 <LuX className='panel__close' onClick={() => setOpen(false)} />
@@ -75,7 +84,7 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
                     </div>
                 </button>
                 <hr className="divider" />
-                {loading && <div className="list__empty">Загружаю маршруты...</div>}
+                {loading && routes.length === 0 && <div className="list__empty">Загружаю маршруты...</div>}
                 {error && <div className="list__empty">Ошибка: {error.message}</div>}
                 {!loading && routes.length === 0 && <div className="list__empty">Маршрутов пока нет</div>}
                 {routes.map((route) => (
@@ -161,6 +170,12 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
                         </article>
                     )
                 ))}
+                {loading && routes.length > 0 && (
+                    <div className="list__empty">Загружаю еще маршруты...</div>
+                )}
+                {!loading && !hasMore && routes.length > 0 && (
+                    <div className="list__empty">Больше нет маршрутов</div>
+                )}
             </div>
         </aside>
     )

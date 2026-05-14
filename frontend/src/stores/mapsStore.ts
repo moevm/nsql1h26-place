@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { type ApiError } from '../api/hooks';
 import { type Map } from '../models/Map';
 
 interface MapStore {
@@ -7,10 +8,17 @@ interface MapStore {
     selectedMapTick: number;
     sortBy: '_id' | 'name' | null;
     sortOrder: 'asc' | 'desc';
+    mapsLoading: boolean;
+    mapsError: ApiError | undefined;
+    mapsPage: number;
+    mapsHasMore: boolean;
+    mapsInitialized: boolean;
+    mapsUserId: string | null;
 
     setSelectedMapId: (selectedMapId: string | null) => void;
 
     setMaps: (Maps: Map[]) => void;
+    appendMaps: (Maps: Map[]) => void;
     addMap: (Map: Map) => void;
     updateMap: (Map: Map) => void;
     removeMap: (id: string) => void;
@@ -24,11 +32,25 @@ export const useMapStore = create<MapStore>((set, get) => ({
     selectedMapTick: 0,
     sortBy: null,
     sortOrder: 'asc',
+    mapsLoading: false,
+    mapsError: undefined,
+    mapsPage: 1,
+    mapsHasMore: true,
+    mapsInitialized: false,
+    mapsUserId: null,
 
     setMaps: (Maps) => set((state) => ({
         Maps,
         selectedMapId: state.selectedMapId ?? (Maps.length ? Maps[0]._id : null),
     })),
+    appendMaps: (Maps) => set((state) => {
+        const existingIds = new Set(state.Maps.map((item) => item._id));
+        const nextMaps = Maps.filter((item) => !existingIds.has(item._id));
+
+        return {
+            Maps: nextMaps.length ? [...state.Maps, ...nextMaps] : state.Maps,
+        };
+    }),
     setSelectedMapId: (selectedMapId) => set((state) => ({
         selectedMapId,
         selectedMapTick: state.selectedMapTick + 1,

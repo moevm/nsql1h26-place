@@ -151,8 +151,7 @@ const getMapCenter = (map: Map): [number, number] | null => {
         case "Point":
             return location.coordinates;
         case "LineString":
-            const first = location.coordinates[0]
-            return first ? [first[0], first[1]] : null
+            return location.coordinates[0] ?? null
         default:
             console.log("unknown object")
             return null;
@@ -240,7 +239,9 @@ const HomePage = () => {
 
     return (
         <div className="home-page">
-            {mapsLoading && <p className="home-page__status_wrapper">Загрузка карт...</p>}
+            {mapsLoading && mapStore.Maps.length === 0 && (
+                <p className="home-page__status_wrapper">Загрузка карт...</p>
+            )}
             {mapsError && <p className="home-page__status_wrapper home-page__status--error">Ошибка: {mapsError.message}</p>}
             {(!mapsLoading && mapStore.Maps.length === 0) ?
                 ( <p className="home-page__status_wrapper">Карт пока нет - cоздайте свою первую карту через боковую панель.</p>)

@@ -9,7 +9,7 @@ import { MapObject, ObjectDocument } from './schemas/objects.schema';
 
 @Injectable()
 export class ObjectsService {
-  constructor(@InjectModel(MapObject.name) private objectModel: Model<ObjectDocument>) {}
+  constructor(@InjectModel(MapObject.name) private objectModel: Model<ObjectDocument>) { }
 
   async create(createObjectDto: CreateObjectDto): Promise<ObjectDocument> {
     if (createObjectDto.type === ObjectType.ROUTE) {
@@ -20,16 +20,31 @@ export class ObjectsService {
     return createdObject.save();
   }
 
-  async findAll(): Promise<ObjectDocument[]> {
-    return this.objectModel.find().exec();
+  async findAll(page = 1): Promise<ObjectDocument[]> {
+    const pageNumber = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+    const limit = 10;
+    return this.objectModel
+      .find()
+      .sort({ created_at: -1 })
+      .skip((pageNumber - 1) * limit)
+      .limit(limit)
+      .exec();
   }
 
-  async findAllByType(typeParam: ObjectType): Promise<ObjectDocument[]> {
+  async findAllByType(typeParam: ObjectType, page = 1): Promise<ObjectDocument[]> {
     if (!typeParam) {
       throw new BadRequestException('Invalid object type. Use points, areas, or routes');
     }
 
-    return this.objectModel.find({ type: typeParam }).exec();
+    const pageNumber = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+    const limit = 10;
+
+    return this.objectModel
+      .find({ type: typeParam })
+      .sort({ created_at: -1 })
+      .skip((pageNumber - 1) * limit)
+      .limit(limit)
+      .exec();
   }
 
   async findOne(id: string): Promise<ObjectDocument> {
