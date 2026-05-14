@@ -9,7 +9,7 @@ import { MapObject, ObjectDocument } from './schemas/objects.schema';
 
 @Injectable()
 export class ObjectsService {
-  constructor(@InjectModel(MapObject.name) private objectModel: Model<ObjectDocument>) {}
+  constructor(@InjectModel(MapObject.name) private objectModel: Model<ObjectDocument>) { }
 
   async create(createObjectDto: CreateObjectDto): Promise<ObjectDocument> {
     if (createObjectDto.type === ObjectType.ROUTE) {

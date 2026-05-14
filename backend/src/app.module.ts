@@ -7,6 +7,7 @@ import { MapsModule } from './models/maps/maps.module';
 import { ObjectsModule } from './models/objects/objects.module';
 import { TagsModule } from './models/tags/tags.module';
 import { SearchModule } from './models/search/search.module';
+import { ExportImportModule } from './models/export/export-import.module';
 
 @Module({
     imports: [
@@ -32,6 +33,7 @@ import { SearchModule } from './models/search/search.module';
         ObjectsModule,
         TagsModule,
         SearchModule,
+        ExportImportModule,
     ],
 })
 export class AppModule {}
