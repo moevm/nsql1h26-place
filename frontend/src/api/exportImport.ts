@@ -1,41 +1,13 @@
 import { runApi } from './hooks'
-import { useAuthStore } from '../stores/authStore'
 
 export type ExportFormat = 'json';
 export type ImportFormat = 'json';
 
 // Функция для экспорта данных из приложения
 export const exportData = async (): Promise<Blob> => {
-  const headers: HeadersInit = {
-    'Accept': 'application/json',
-  };
-
-  const token = useAuthStore.getState().token;
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  const apiUri = import.meta.env.VITE_API_URI || '/api';
-  const response = await fetch(
-    `${apiUri}/export-import/export`,
-    {
-      method: 'GET',
-      headers,
-    },
-  );
-
-  if (!response.ok) {
-    let message = 'Export failed';
-    try {
-      const errorPayload = await response.json();
-      message = errorPayload?.message || message;
-    } catch {
-      message = response.statusText || message;
-    }
-    throw { message, status_code: response.status };
-  }
-
-  return response.blob();
+  const result = await runApi<Record<string, unknown>>('GET', '/export-import/export');
+  const jsonString = JSON.stringify(result, null, 2);
+  return new Blob([jsonString], { type: 'application/json' });
 };
 
 // Функция для импорта данных в приложение  
