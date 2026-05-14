@@ -5,7 +5,7 @@ import { useMapStore } from '../../../../stores/mapsStore';
 import { BsFillTrashFill } from 'react-icons/bs';
 import { FaSave } from 'react-icons/fa';
 import { GrEdit } from 'react-icons/gr';
-import { useState } from 'react';
+import { useState, type UIEvent } from 'react';
 import type { UpdateMap } from '../../../../models/Map';
 
 type ListMapsPanelProps = {
@@ -14,7 +14,7 @@ type ListMapsPanelProps = {
 }
 
 const ListMapsPanel = ({setAdditionalOpen, setOpen} : ListMapsPanelProps) => {
-    const { error, loading } = useLoadMaps();
+    const { error, loading, loadMore, hasMore } = useLoadMaps();
     const maps = useMapStore((s) => s.getSortedMaps());
     const selectedMapId = useMapStore((s) => s.selectedMapId);
     const { removeMap, updateMap: update, setSelectedMapId } = useMapStore();
@@ -42,8 +42,17 @@ const ListMapsPanel = ({setAdditionalOpen, setOpen} : ListMapsPanelProps) => {
         setUpdatedMap({})
     }
 
+    const handleScroll = (event: UIEvent<HTMLElement>) => {
+        if (loading || !hasMore) return;
+        const target = event.currentTarget;
+        const remaining = target.scrollHeight - target.scrollTop - target.clientHeight;
+        if (remaining < 80) {
+            loadMore();
+        }
+    };
+
     return (
-        <aside className="panel">
+        <aside className="panel" onScroll={handleScroll}>
             <div className="panel__header">
                 <h3>Карты</h3>
                 <LuX className='panel__close' onClick={() => setOpen(false)} />
@@ -57,7 +66,7 @@ const ListMapsPanel = ({setAdditionalOpen, setOpen} : ListMapsPanelProps) => {
                     </div>
                 </button>
                 <hr className="divider" />
-                {loading && <div className="list__empty">Загружаю карты...</div>}
+                {loading && maps.length === 0 && <div className="list__empty">Загружаю карты...</div>}
                 {error && <div className="list__empty">Ошибка: {error.message}</div>}
                 {!loading && maps.length === 0 && <div className="list__empty">Карт пока нет</div>}
                 {maps.map((map) => (
@@ -151,6 +160,12 @@ const ListMapsPanel = ({setAdditionalOpen, setOpen} : ListMapsPanelProps) => {
                         </article>
                     )
                 ))}
+                {loading && maps.length > 0 && (
+                    <div className="list__empty">Загружаю еще карты...</div>
+                )}
+                {!loading && !hasMore && maps.length > 0 && (
+                    <div className="list__empty">Больше нет карт</div>
+                )}
             </div>
         </aside>
     )

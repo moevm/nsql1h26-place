@@ -1,5 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiResponse } from "@nestjs/swagger";
 import { MapsService } from "./maps.service";
 import { MapDocument } from "./schemas/maps.schema";
 import { CreateMapDto } from "./dto/create-map.dto";
@@ -18,10 +18,12 @@ export class MapsController {
     }
 
     @Get()
-    @ApiOperation({ summary: 'Get all maps' })
-    @ApiResponse({ status: 200, description: 'List of all maps' })
-    async findAll(): Promise<MapDocument[]> {
-        return this.mapsService.findAll();
+    @ApiOperation({ summary: 'Get maps' })
+    @ApiResponse({ status: 200, description: 'List of maps' })
+    @ApiQuery({ name: 'page', required: false, description: 'Page number (starts from 1)', example: 1 })
+    async findAll(@Query('page') page?: string): Promise<MapDocument[]> {
+        const pageNumber = Number.parseInt(page ?? '1', 10);
+        return this.mapsService.findAll(Number.isFinite(pageNumber) && pageNumber > 0 ? pageNumber : 1);
     }
 
     @Get(':id')

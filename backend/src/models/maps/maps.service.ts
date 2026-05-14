@@ -15,8 +15,15 @@ export class MapsService {
         return createdMap.save();
     }
 
-    async findAll(): Promise<MapDocument[]> {
-        return this.mapModel.find().exec();
+    async findAll(page = 1): Promise<MapDocument[]> {
+        const pageNumber = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+        const limit = 10;
+        return this.mapModel
+            .find()
+            .sort({ created_at: -1 })
+            .skip((pageNumber - 1) * limit)
+            .limit(limit)
+            .exec();
     }
 
     async findOne(id: string): Promise<MapDocument> {

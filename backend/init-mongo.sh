@@ -11,6 +11,7 @@ const buildCircleArea = (center, radiusMeters, steps = 36) => {
     const latDelta = safeRadius / metersPerDegreeLat;
     const lonDelta = metersPerDegreeLon === 0 ? 0 : safeRadius / metersPerDegreeLon;
     const points = [];
+
     for (let i = 0; i < safeSteps; i += 1) {
         const angle = (i / safeSteps) * Math.PI * 2;
         const pointLat = lat + latDelta * Math.sin(angle);
@@ -74,6 +75,8 @@ db.users.insertMany([
     image_path: null
 },
 ]);
+
+
 db.tags.insertMany([
 {
     _id: ObjectId("000000000000000000000001"),
@@ -407,8 +410,35 @@ db.mapobjects.insertMany([
     location: {
         type: "Point",
         coordinates: [59.745612, 30.812451]
+    _id: ObjectId("000000000000000000000003"),
+    map_id: ObjectId("000000000000000000000002"),
+    name: "Черничная поляна",
+    type: "Area",
+    description: "Все усыпано черникой",
+    tags: [ObjectId("000000000000000000000003")],
+    created_at: ISODate("2026-03-20T10:00:00.389Z"),
+    updated_at: null,
+    location: buildCircleArea([59.778860, 30.751252], 150),
+    image_path: "area_icon.png"
+},
+{
+    _id: ObjectId("000000000000000000000004"),
+    map_id: ObjectId("000000000000000000000003"),
+    name: "Лисичковый маршрут",
+    type: "Route",
+    description: "Тропа через густой лес с большим количеством лисичек.",
+    tags: [ObjectId("000000000000000000000004")],
+    created_at: ISODate("2026-03-21T08:15:00.389Z"),
+    updated_at: null,
+    location: {
+        type: "LineString",
+        coordinates: [
+            [59.812345, 30.654321],
+            [59.813112, 30.657843],
+            [59.814001, 30.660214]
+        ]
     },
-    image_path: "point_icon.png"
+    image_path: "route_icon.png"
 },
 {
     _id: ObjectId("000000000000000000000006"),
@@ -434,8 +464,61 @@ db.mapobjects.insertMany([
     location: {
         type: "Point",
         coordinates: [59.667843, 30.556712]
+    _id: ObjectId("000000000000000000000005"),
+    map_id: ObjectId("000000000000000000000004"),
+    name: "Белый гриб",
+    type: "Point",
+    description: "Белые грибы возле старой ели.",
+    tags: [ObjectId("000000000000000000000004"), ObjectId("000000000000000000000009")],
+    created_at: ISODate("2026-03-22T09:40:00.389Z"),
+    updated_at: ISODate("2026-03-22T11:05:00.389Z"),
+    location: {
+        type: "Point",
+        coordinates: [59.745612, 30.812451]
     },
     image_path: "point_icon.png"
+},
+{
+    _id: ObjectId("000000000000000000000008"),
+    map_id: ObjectId("000000000000000000000002"),
+    name: "Маршрут вдоль озера",
+    type: "Route",
+    description: "Красивый маршрут с видами на озеро и местами для отдыха.",
+    tags: [ObjectId("000000000000000000000012"), ObjectId("000000000000000000000007")],
+    created_at: ISODate("2026-03-25T12:10:00.389Z"),
+    updated_at: ISODate("2026-03-25T14:25:00.389Z"),
+    location: {
+        type: "LineString",
+        coordinates: [
+            [60.012345, 30.445566],
+            [60.013457, 30.448912],
+            [60.014782, 30.452341]
+        ]
+    _id: ObjectId("000000000000000000000006"),
+    map_id: ObjectId("000000000000000000000005"),
+    name: "Клюквенное болото",
+    type: "Area",
+    description: "Большое болотистое место с обилием клюквы.",
+    tags: [ObjectId("000000000000000000000003"), ObjectId("000000000000000000000010")],
+    created_at: ISODate("2026-03-23T07:20:00.389Z"),
+    updated_at: null,
+    location: buildCircleArea([59.900934, 30.925431], 300),
+    image_path: "area_icon.png"
+},
+{
+    _id: ObjectId("000000000000000000000007"),
+    map_id: ObjectId("000000000000000000000002"),
+    name: "Лесной родник",
+    type: "Point",
+    description: "Источник чистой воды рядом с лесной дорогой.",
+    tags: [ObjectId("000000000000000000000001"), ObjectId("000000000000000000000011")],
+    created_at: ISODate("2026-03-24T10:55:00.389Z"),
+    updated_at: null,
+    location: {
+        type: "Point",
+        coordinates: [59.667843, 30.556712]
+    },
+    image_path: "route_icon.png"
 },
 {
     _id: ObjectId("000000000000000000000008"),
