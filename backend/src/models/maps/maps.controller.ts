@@ -1,6 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiResponse } from "@nestjs/swagger";
 import { AuthGuard } from "src/auth/auth.guard";
+import type { AuthUser } from "src/auth/current-user.decorator";
+import { CurrentUser } from "src/auth/current-user.decorator";
 import { MapsService } from "./maps.service";
 import { MapDocument } from "./schemas/maps.schema";
 import { CreateMapDto } from "./dto/create-map.dto";
@@ -20,12 +22,18 @@ export class MapsController {
     }
 
     @Get()
-    @ApiOperation({ summary: 'Get maps' })
+    @ApiOperation({ summary: 'Get maps of the current user' })
     @ApiResponse({ status: 200, description: 'List of maps' })
     @ApiQuery({ name: 'page', required: false, description: 'Page number (starts from 1)', example: 1 })
-    async findAll(@Query('page') page?: string): Promise<MapDocument[]> {
+    async findAll(
+        @CurrentUser() user: AuthUser,
+        @Query('page') page?: string,
+    ): Promise<MapDocument[]> {
         const pageNumber = Number.parseInt(page ?? '1', 10);
-        return this.mapsService.findAll(Number.isFinite(pageNumber) && pageNumber > 0 ? pageNumber : 1);
+        return this.mapsService.findAll(
+            user._id,
+            Number.isFinite(pageNumber) && pageNumber > 0 ? pageNumber : 1,
+        );
     }
 
     @Get(':id')

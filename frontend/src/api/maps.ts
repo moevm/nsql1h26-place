@@ -37,14 +37,10 @@ const loadMapsPage = async (page: number, replace: boolean, userId: string | nul
         const result = await fetchMapsPage(page);
         if (requestId !== activeRequestId) return;
 
-        const filteredMaps = userId
-            ? result.filter((map) => String(map.user_id) === String(userId))
-            : [];
-
         if (replace) {
-            setMaps(filteredMaps);
+            setMaps(result);
         } else {
-            appendMaps(filteredMaps);
+            appendMaps(result);
         }
 
         useMapStore.setState({

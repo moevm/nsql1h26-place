@@ -15,6 +15,12 @@ const mapObjectPathByType: Record<MapObjectType, string> = {
     Route: '/objects/routes',
 }
 
+const typeByPath: Record<string, MapObjectType> = {
+    '/objects/points': 'Point',
+    '/objects/areas': 'Area',
+    '/objects/routes': 'Route',
+}
+
 const MAP_OBJECTS_PAGE_SIZE = 10;
 const pendingRequests: Record<string, boolean> = {};
 const activeRequestIds: Record<string, number> = {};
@@ -85,7 +91,10 @@ const loadMapObjectsPage = async (path: string, page: number, replace: boolean) 
         const result = await fetchMapObjectsPage(path, page);
         if (activeRequestIds[path] !== requestId) return;
 
-        if (replace) {
+        const type = typeByPath[path];
+        if (replace && type) {
+            useMapObjectStore.getState().setMapObjectsByType(type, result);
+        } else if (replace) {
             useMapObjectStore.getState().setMapObjects(result);
         } else {
             useMapObjectStore.getState().appendMapObjects(result);

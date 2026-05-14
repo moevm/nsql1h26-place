@@ -26,6 +26,7 @@ interface MapObjectStore {
     setSelectedMapObjectId: (selectedMapObjectId: string | null) => void;
 
     setMapObjects: (MapObjects: MapObject[]) => void;
+    setMapObjectsByType: (type: string, MapObjects: MapObject[]) => void;
     appendMapObjects: (MapObjects: MapObject[]) => void;
     addMapObject: (MapObject: MapObject) => void;
     updateMapObject: (MapObject: MapObject) => void;
@@ -69,6 +70,12 @@ export const useMapObjectStore = create<MapObjectStore>((set, get) => ({
     setMapObjects: (MapObjects) => set((state) => ({
         MapObjects,
         selectedMapObjectId: state.selectedMapObjectId ?? (MapObjects.length ? MapObjects[0]._id : null),
+    })),
+    setMapObjectsByType: (type, incoming) => set((state) => ({
+        MapObjects: [
+            ...state.MapObjects.filter((item) => item.type !== type),
+            ...incoming,
+        ],
     })),
     appendMapObjects: (MapObjects) => set((state) => {
         const existingIds = new Set(state.MapObjects.map((item) => item._id));

@@ -1,6 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
+import type { AuthUser } from 'src/auth/current-user.decorator';
+import { CurrentUser } from 'src/auth/current-user.decorator';
 import { CreateObjectDto } from './dto/create-object.dto';
 import { UpdateObjectDto } from './dto/update-object.dto';
 import { ObjectDocument } from './schemas/objects.schema';
@@ -21,45 +23,63 @@ export class ObjectsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get objects' })
+  @ApiOperation({ summary: 'Get objects of the current user' })
   @ApiResponse({ status: 200, description: 'List of objects' })
   @ApiQuery({ name: 'page', required: false, description: 'Page number (starts from 1)', example: 1 })
-  async findAll(@Query('page') page?: string): Promise<ObjectDocument[]> {
+  async findAll(
+    @CurrentUser() user: AuthUser,
+    @Query('page') page?: string,
+  ): Promise<ObjectDocument[]> {
     const pageNumber = Number.parseInt(page ?? '1', 10);
-    return this.objectsService.findAll(Number.isFinite(pageNumber) && pageNumber > 0 ? pageNumber : 1);
+    return this.objectsService.findAll(
+      user._id,
+      Number.isFinite(pageNumber) && pageNumber > 0 ? pageNumber : 1,
+    );
   }
 
   @Get('points')
-  @ApiOperation({ summary: 'Get point objects' })
+  @ApiOperation({ summary: 'Get point objects of the current user' })
   @ApiResponse({ status: 200, description: 'List of point objects' })
   @ApiQuery({ name: 'page', required: false, description: 'Page number (starts from 1)', example: 1 })
-  async findAllPoints(@Query('page') page?: string): Promise<ObjectDocument[]> {
+  async findAllPoints(
+    @CurrentUser() user: AuthUser,
+    @Query('page') page?: string,
+  ): Promise<ObjectDocument[]> {
     const pageNumber = Number.parseInt(page ?? '1', 10);
     return this.objectsService.findAllByType(
+      user._id,
       ObjectType.POINT,
       Number.isFinite(pageNumber) && pageNumber > 0 ? pageNumber : 1,
     );
   }
 
   @Get('areas')
-  @ApiOperation({ summary: 'Get area objects' })
+  @ApiOperation({ summary: 'Get area objects of the current user' })
   @ApiResponse({ status: 200, description: 'List of area objects' })
   @ApiQuery({ name: 'page', required: false, description: 'Page number (starts from 1)', example: 1 })
-  async findAllAreas(@Query('page') page?: string): Promise<ObjectDocument[]> {
+  async findAllAreas(
+    @CurrentUser() user: AuthUser,
+    @Query('page') page?: string,
+  ): Promise<ObjectDocument[]> {
     const pageNumber = Number.parseInt(page ?? '1', 10);
     return this.objectsService.findAllByType(
+      user._id,
       ObjectType.AREA,
       Number.isFinite(pageNumber) && pageNumber > 0 ? pageNumber : 1,
     );
   }
 
   @Get('routes')
-  @ApiOperation({ summary: 'Get route objects' })
+  @ApiOperation({ summary: 'Get route objects of the current user' })
   @ApiResponse({ status: 200, description: 'List of route objects' })
   @ApiQuery({ name: 'page', required: false, description: 'Page number (starts from 1)', example: 1 })
-  async findAllRoutes(@Query('page') page?: string): Promise<ObjectDocument[]> {
+  async findAllRoutes(
+    @CurrentUser() user: AuthUser,
+    @Query('page') page?: string,
+  ): Promise<ObjectDocument[]> {
     const pageNumber = Number.parseInt(page ?? '1', 10);
     return this.objectsService.findAllByType(
+      user._id,
       ObjectType.ROUTE,
       Number.isFinite(pageNumber) && pageNumber > 0 ? pageNumber : 1,
     );
@@ -87,7 +107,7 @@ export class ObjectsController {
   @ApiOperation({ summary: 'Delete an object by ID' })
   @ApiParam({ name: 'id', description: 'Object ID' })
   @ApiResponse({ status: 200, description: 'Object deleted successfully' })
-  @ApiResponse({ status: 404, description: 'Object not found' })
+  @ApiResponse({ status: 404, description: 'Map not found' })
   async delete(@Param('id') id: string): Promise<ObjectDocument> {
     return this.objectsService.delete(id);
   }
