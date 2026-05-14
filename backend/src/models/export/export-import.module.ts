@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { AuthModule } from 'src/auth/auth.module';
 import { ExportService } from './export.service';
 import { ImportService } from './import.service';
 import { ExportImportController } from './export-import.controller';
@@ -9,6 +10,7 @@ import { Tag, TagSchema } from '../tags/schemas/tags.schema';
 
 @Module({
   imports: [
+    AuthModule,
     MongooseModule.forFeature([
       { name: Map.name, schema: MapSchema },
       { name: MapObject.name, schema: ObjectSchema },
@@ -17,6 +19,5 @@ import { Tag, TagSchema } from '../tags/schemas/tags.schema';
   ],
   controllers: [ExportImportController],
   providers: [ExportService, ImportService],
-  exports: [ExportService, ImportService],
 })
 export class ExportImportModule {}

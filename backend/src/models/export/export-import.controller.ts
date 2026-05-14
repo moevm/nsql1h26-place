@@ -1,8 +1,14 @@
-import { Controller, Get, Post, Body, BadRequestException, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, BadRequestException, Res, UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from 'src/auth/auth.guard';
+import type { AuthUser } from 'src/auth/current-user.decorator';
+import { CurrentUser } from 'src/auth/current-user.decorator';
 import { ExportService } from './export.service';
 import { ImportService } from './import.service';
 
+@ApiTags('Export/Import')
+@UseGuards(AuthGuard)
 @Controller('export-import')
 export class ExportImportController {
   constructor(
@@ -11,35 +17,37 @@ export class ExportImportController {
   ) {}
 
   @Get('export')
-  async export(@Res() res: Response): Promise<void> {
+  @ApiOperation({ summary: 'Export current user data as JSON file' })
+  @ApiResponse({ status: 200, description: 'JSON file with user data' })
+  async export(
+    @CurrentUser() user: AuthUser,
+    @Res() res: Response,
+  ): Promise<void> {
     try {
-      const data = await this.exportService.getAllData();
-      const exportedContent = await this.exportService.exportToJSON(data);
+      const content = await this.exportService.exportForUser(user._id);
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const filename = `mushroom-place-export-${timestamp}.json`;
 
       res.setHeader('Content-Type', 'application/json');
-      res.setHeader(
-        'Content-Disposition',
-        `attachment; filename="${filename}"`,
-      );
-      res.send(exportedContent);
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(content);
     } catch (error) {
-      throw new BadRequestException(`Export failed: ${error.message}`);
+      throw new BadRequestException(`Ошибка экспорта: ${error.message}`);
     }
   }
 
   @Post('import')
-  async import(@Body() payload: { content: string }): Promise<{ message: string; success: boolean }> {
-    if (!payload || !payload.content) {
-      throw new BadRequestException('No content provided in request body');
+  @ApiOperation({ summary: 'Import user data from JSON (replaces current user data only)' })
+  @ApiResponse({ status: 200, description: 'Import successful' })
+  async import(
+    @CurrentUser() user: AuthUser,
+    @Body() payload: { content: string },
+  ): Promise<{ message: string; success: boolean }> {
+    if (!payload?.content) {
+      throw new BadRequestException('Содержимое файла не передано');
     }
 
-    try {
-      await this.importService.importFromJSON(payload.content);
-      return { message: 'Data imported successfully', success: true };
-    } catch (error) {
-      throw new BadRequestException(`Import failed: ${error.message}`);
-    }
+    await this.importService.importFromJSON(payload.content, user._id);
+    return { message: 'Данные успешно импортированы', success: true };
   }
 }
