@@ -3,7 +3,6 @@ import '../Panels.css'
 import { createMap } from '../../../../api/maps'
 import { useMapStore } from '../../../../stores/mapsStore'
 import { LuX } from 'react-icons/lu'
-import { useAuthStore } from '../../../../stores/authStore'
 import type { GeoJSONPoint } from '../../../../models/GeoJSON'
 import TagSelector from '../../../TagSelector/TagSelector'
 
@@ -13,7 +12,6 @@ type CreateMapPanelProps = {
 
 const CreateMapPanel = ({setAdditionalOpen} : CreateMapPanelProps) => {
     const { addMap } = useMapStore()
-    const { user } = useAuthStore()
 
     const [name, setName] = useState('')
     const [description, setDescription] = useState('')
@@ -65,14 +63,9 @@ const CreateMapPanel = ({setAdditionalOpen} : CreateMapPanelProps) => {
         setLoading(true)
 
         try {
-            if (!user?._id) {
-                throw new Error('Пользователь не авторизован');
-            }
-
             const location = await geocodeAreaCenter(area.trim());
 
             const newMap = await createMap({
-                user_id: user._id,
                 name: name.trim(),
                 description: description.trim(),
                 area: area.trim(),

@@ -1,6 +1,8 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
+import type { AuthUser } from 'src/auth/current-user.decorator';
+import { CurrentUser } from 'src/auth/current-user.decorator';
 import { SearchResultItem } from 'src/common/types/search.types';
 import { SearchFilters, SearchService } from './search.service';
 
@@ -56,6 +58,7 @@ export class SearchController {
   })
   @ApiResponse({ status: 200, description: 'Search results list' })
   async search(
+    @CurrentUser() user: AuthUser,
     @Query('query') query = '',
     @Query('nameQuery') nameQuery = '',
     @Query('descriptionQuery') descriptionQuery = '',
@@ -72,6 +75,7 @@ export class SearchController {
       dateFromDay: this.parseDay(rawDateFromDay),
       dateToDay: this.parseDay(rawDateToDay),
       categories,
+      userId: user._id,
     };
 
     return this.searchService.search(filters);

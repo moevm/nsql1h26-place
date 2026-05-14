@@ -10,8 +10,8 @@ import { UpdateMapDto } from "./dto/update-map.dto";
 export class MapsService {
     constructor(@InjectModel(Map.name) private mapModel: Model<MapDocument>) {}
 
-    async create(createMapDto: CreateMapDto): Promise<MapDocument> {
-        const createdMap = new this.mapModel(createMapDto);
+    async create(createMapDto: CreateMapDto, userId: unknown): Promise<MapDocument> {
+        const createdMap = new this.mapModel({ ...createMapDto, user_id: new Types.ObjectId(String(userId)) });
         return createdMap.save();
     }
 

@@ -2,9 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import type { GeoJSONGeometry } from 'src/common/types/geojson.types';
 
 export class CreateMapDto {
-    @ApiProperty({ description: 'User ObjectId', example: '507f1f77bcf86cd799439011' })
-    user_id: string;
-
     @ApiProperty({ description: 'Map name', example: 'Карта подосиновиков' })
     name: string;
 

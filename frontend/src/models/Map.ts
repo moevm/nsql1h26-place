@@ -15,7 +15,6 @@ export type Map = {
 };
 
 export type CreateMap = {
-    user_id: string;
     name: string;
     location: GeoJSONGeometry;
     description: string;
