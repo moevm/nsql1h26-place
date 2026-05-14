@@ -19,10 +19,8 @@ export class AuthService {
     }
 
     const passwordHash = await bcrypt.hash(registerDto.password, this.saltRounds);
-    const userId = randomBytes(12).toString('hex');
 
     const user = await this.usersService.create({
-      _id: userId,
       username: registerDto.username,
       password_hash: passwordHash,
     });

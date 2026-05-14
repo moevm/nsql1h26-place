@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { User } from './schemas/users.schema';
 
 @Injectable()
@@ -11,7 +11,7 @@ export class UsersService {
     return this.userModel.findOne({ username }).exec();
   }
 
-  async findById(id: string): Promise<User | null> {
+  async findById(id: Types.ObjectId | string): Promise<User | null> {
     return this.userModel.findOne({ _id: id }).exec();
   }
 
@@ -24,13 +24,13 @@ export class UsersService {
     return createdUser.save();
   }
 
-  async updatePasswordHash(id: string, passwordHash: string): Promise<User | null> {
+  async updatePasswordHash(id: Types.ObjectId | string, passwordHash: string): Promise<User | null> {
     return this.userModel
       .findByIdAndUpdate({ _id: id }, { password_hash: passwordHash }, { new: true })
       .exec();
   }
 
-  async setAuthToken(id: string, token: string): Promise<User | null> {
+  async setAuthToken(id: Types.ObjectId | string, token: string): Promise<User | null> {
     return this.userModel
       .findByIdAndUpdate({ _id: id }, { auth_token: token }, { new: true })
       .exec();
