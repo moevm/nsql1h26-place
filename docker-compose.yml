@@ -1,13 +1,14 @@
 name: shrooms
 services:
   db:
-    image: mongo:8
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.db
     container_name: db
     expose:
       - 27017
     volumes:
       - db_data:/data/db
-      - ./backend/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
     restart:
       always
     healthcheck:
