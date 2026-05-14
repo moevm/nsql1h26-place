@@ -14,6 +14,8 @@ interface MapObjectStore {
     routeDraftWaypoints: LatLon[];
     routeDraftHoveredIndex: number | null;
     routeDraftMapCenter: LatLon | null;
+    areaDraftActive: boolean;
+    areaDraftRadius: number;
 
     setSelectedMapObjectId: (selectedMapObjectId: string | null) => void;
 
@@ -31,6 +33,8 @@ interface MapObjectStore {
     reorderRouteDraftWaypoints: (fromIndex: number, toIndex: number) => void;
     setRouteDraftHoveredIndex: (index: number | null) => void;
     setRouteDraftMapCenter: (center: LatLon | null) => void;
+    setAreaDraftActive: (active: boolean) => void;
+    setAreaDraftRadius: (radius: number) => void;
     setSort: (field: '_id' | 'name' | null) => void;
     getSortedMapObjects: () => MapObject[];
 }
@@ -47,6 +51,8 @@ export const useMapObjectStore = create<MapObjectStore>((set, get) => ({
     routeDraftWaypoints: [],
     routeDraftHoveredIndex: null,
     routeDraftMapCenter: null,
+    areaDraftActive: false,
+    areaDraftRadius: 1,
 
     setMapObjects: (MapObjects) => set((state) => ({
         MapObjects,
@@ -119,6 +125,10 @@ export const useMapObjectStore = create<MapObjectStore>((set, get) => ({
     setRouteDraftHoveredIndex: (index) => set({ routeDraftHoveredIndex: index }),
 
     setRouteDraftMapCenter: (center) => set({ routeDraftMapCenter: center }),
+
+    setAreaDraftActive: (active) => set({ areaDraftActive: active }),
+
+    setAreaDraftRadius: (radius) => set({ areaDraftRadius: radius }),
 
     setSort: (field) => set(state => ({
         sortBy: field,

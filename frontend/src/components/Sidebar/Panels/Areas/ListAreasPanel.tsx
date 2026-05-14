@@ -3,31 +3,31 @@ import '../Panels.css'
 import { BsFillTrashFill } from 'react-icons/bs';
 import { deleteMapObject, updateMapObject, useLoadMapObjectsByType } from '../../../../api/mapObjects';
 import { useMapObjectStore } from '../../../../stores/mapObjectStore';
-import { useState } from 'react';
-import type { UpdateMapObject } from '../../../../models/MapObject';
+import { useMapStore } from '../../../../stores/mapsStore';
 import { GrEdit } from 'react-icons/gr';
 import { FaSave } from 'react-icons/fa';
-import { useMapStore } from '../../../../stores/mapsStore';
+import { useState } from 'react';
+import type { UpdateMapObject } from '../../../../models/MapObject';
 
-type ListAreasPanelProps = {
+type ListAreaPanelProps = {
     setOpen: (val: boolean) => void,
     setAdditionalOpen: (val: boolean) => void,
 }
 
-const ListAreasPanel = ({setAdditionalOpen, setOpen} : ListAreasPanelProps) => {
+const ListAreasPanel = ({setAdditionalOpen, setOpen} : ListAreaPanelProps) => {
     const { loading, error } = useLoadMapObjectsByType('Area');
-    const selectedMapId = useMapStore((s) => s.selectedMapId);
     const [ edit, setEdit ] = useState("");
     const [ updatedMapObject, setUpdatedMapObject ] = useState<UpdateMapObject>({})
+    const mapObjectStore = useMapObjectStore();
 
-    const areas = useMapObjectStore((s) => s.MapObjects)
+    const selectedMapId = useMapStore((s) => s.selectedMapId);
+    const areas = mapObjectStore.MapObjects
         .filter((item) => item.type === 'Area' && (!selectedMapId || String(item.map_id) === selectedMapId));
-    const { removeMapObject } = useMapObjectStore();
 
     const handleDelete = async (id: string) => {
         try {
             await deleteMapObject(id);
-            removeMapObject(id);
+            mapObjectStore.removeMapObject(id);
         } catch (err) {
             alert('Не удалось удалить область!');
             console.log(err)
@@ -36,16 +36,16 @@ const ListAreasPanel = ({setAdditionalOpen, setOpen} : ListAreasPanelProps) => {
 
     const handleSave = async (id: string) => {
         try {
-            const areaObject = await updateMapObject(id, updatedMapObject);
-            updateMapObject(id, areaObject);
+            const area = await updateMapObject(id, updatedMapObject);
+            mapObjectStore.updateMapObject(area);
         } catch (err) {
-            alert("Не удалось обновить маршрут!")
+            alert("Не удалось обновить область!")
             console.log(err)
         }
 
         setEdit("")
         setUpdatedMapObject({})
-    };
+    }
 
     return (
         <aside className="panel panel--primary">
@@ -67,7 +67,11 @@ const ListAreasPanel = ({setAdditionalOpen, setOpen} : ListAreasPanelProps) => {
                 {!loading && areas.length === 0 && <div className="list__empty">Областей пока нет</div>}
                 {areas.map((area) => (
                     edit === area._id ? (
-                        <article key={area._id} className="card">
+                        <article
+                            key={area._id}
+                            className={`card ${mapObjectStore.selectedMapObjectId === area._id ? 'card--selected' : ''}`}
+                            onClick={() => mapObjectStore.setSelectedMapObjectId(area._id)}
+                        >
                             <div className="card__content">
                                 <div className='card__title_container'>
                                     <img className='card__icon' src={`/src/assets/images/${area.image_path}`} alt="logo" />
@@ -105,7 +109,11 @@ const ListAreasPanel = ({setAdditionalOpen, setOpen} : ListAreasPanelProps) => {
                             </div>
                         </article>
                     ) : (
-                        <article key={area._id} className="card">
+                        <article
+                            key={area._id}
+                            className={`card ${mapObjectStore.selectedMapObjectId === area._id ? 'card--selected' : ''}`}
+                            onClick={() => mapObjectStore.setSelectedMapObjectId(area._id)}
+                        >
                             <div className="card__content">
                                 <div className='card__title_container'>
                                     <img className='card__icon' src={`/src/assets/images/${area.image_path}`} alt="logo" />
@@ -143,4 +151,4 @@ const ListAreasPanel = ({setAdditionalOpen, setOpen} : ListAreasPanelProps) => {
     )
 }
 
-export default ListAreasPanel
+export default ListAreasPanel;
