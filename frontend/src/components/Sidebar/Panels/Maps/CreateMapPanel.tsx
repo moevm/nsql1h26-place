@@ -5,6 +5,7 @@ import { useMapStore } from '../../../../stores/mapsStore'
 import { LuX } from 'react-icons/lu'
 import { useAuthStore } from '../../../../stores/authStore'
 import type { GeoJSONPoint } from '../../../../models/GeoJSON'
+import TagSelector from '../../../TagSelector/TagSelector'
 
 type CreateMapPanelProps = {
     setAdditionalOpen: (val: boolean) => void
@@ -18,6 +19,7 @@ const CreateMapPanel = ({setAdditionalOpen} : CreateMapPanelProps) => {
     const [description, setDescription] = useState('')
     const [area, setArea] = useState('')
     const [visible, setVisible] = useState(true)
+    const [tags, setTags] = useState<string[]>([])
     const [loading, setLoading] = useState(false)
 
     type GeocodeResult = {
@@ -76,7 +78,7 @@ const CreateMapPanel = ({setAdditionalOpen} : CreateMapPanelProps) => {
                 area: area.trim(),
                 location,
                 visible: visible,
-                tags: [],
+                tags,
                 image_path: "map_icon.png"
             })
 
@@ -125,6 +127,11 @@ const CreateMapPanel = ({setAdditionalOpen} : CreateMapPanelProps) => {
                     onChange={(event) => setArea(event.target.value)}
                     placeholder="Свердловское городское поселение"
                 />
+
+                <hr className='divider' />
+
+                <label>Теги</label>
+                <TagSelector value={tags} onChange={setTags} />
 
                 <hr className='divider' />
 

@@ -173,6 +173,27 @@ button.card {
     line-height: 1.35;
 }
 
+.card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 4px 0 6px;
+}
+
+.tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: #e8f4e8;
+    color: #3a5c34;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid #b5d4b2;
+    white-space: nowrap;
+}
+
 .card__actions {
     display: flex;
     gap: 8px;

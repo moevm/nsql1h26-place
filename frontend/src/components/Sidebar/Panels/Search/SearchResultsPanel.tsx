@@ -125,6 +125,13 @@ const SearchResultsPanel = ({ setOpen, setAdditionalOpen, criteria }: SearchResu
                                 </div>
                             </div>
                             <div className='card__description'>{result.description || 'Без описания'}</div>
+                            {result.tags.length > 0 && (
+                                <div className="card__tags">
+                                    {result.tags.map((tag) => (
+                                        <span key={tag} className="tag-chip">{tag}</span>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </article>
                 ))}

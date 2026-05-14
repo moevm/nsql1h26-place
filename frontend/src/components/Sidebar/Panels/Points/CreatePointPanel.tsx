@@ -4,6 +4,7 @@ import { LuX } from 'react-icons/lu'
 import { createMapObject } from '../../../../api/mapObjects'
 import { useMapObjectStore } from '../../../../stores/mapObjectStore'
 import { useMapStore } from '../../../../stores/mapsStore'
+import TagSelector from '../../../TagSelector/TagSelector'
 
 type CreatePointPanelProps = {
     setAdditionalOpen: (val: boolean) => void
@@ -15,7 +16,7 @@ const CreatePointPanel = ({setAdditionalOpen} : CreatePointPanelProps) => {
 
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
-    const [tags, setTags] = useState('')
+    const [tags, setTags] = useState<string[]>([])
     const [loading, setLoading] = useState(false)
 
     useEffect(() => {
@@ -46,7 +47,7 @@ const CreatePointPanel = ({setAdditionalOpen} : CreatePointPanelProps) => {
                 type: 'Point',
                 name: title.trim(),
                 description: description.trim(),
-                tags: tags.split(',').map((tag) => tag.trim()).filter(Boolean),
+                tags,
                 location: {
                     type: 'Point',
                     coordinates: mapObjectStore.pointPlacementCoordinates,
@@ -105,18 +106,12 @@ const CreatePointPanel = ({setAdditionalOpen} : CreatePointPanelProps) => {
                     placeholder="Краткое описание отметки"
                 />
 
-                <label className="create-form__label" htmlFor="tags">Теги (через запятую)</label>
-                <input
-                    id="tags"
-                    className="create-form__input"
-                    value={tags}
-                    onChange={(event) => setTags(event.target.value)}
-                    placeholder="гриб, лес, ягоды"
-                />
+                <label className="create-form__label">Теги</label>
+                <TagSelector value={tags} onChange={setTags} />
 
                 <hr className='divider' />
 
-                <label className="create-form__label" htmlFor="tags">Координаты отметки</label>
+                <label className="create-form__label" htmlFor="coords">Координаты отметки</label>
                 <button
                     type="button"
                     className="create-form__btn"

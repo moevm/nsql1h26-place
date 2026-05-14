@@ -8,6 +8,7 @@ import { GrEdit } from 'react-icons/gr';
 import { FaSave } from 'react-icons/fa';
 import { useState, type UIEvent } from 'react';
 import type { UpdateMapObject } from '../../../../models/MapObject';
+import TagSelector from '../../../TagSelector/TagSelector';
 
 type ListAreaPanelProps = {
     setOpen: (val: boolean) => void,
@@ -18,6 +19,7 @@ const ListAreasPanel = ({setAdditionalOpen, setOpen} : ListAreaPanelProps) => {
     const { loading, error, loadMore, hasMore } = useLoadMapObjectsByType('Area');
     const [ edit, setEdit ] = useState("");
     const [ updatedMapObject, setUpdatedMapObject ] = useState<UpdateMapObject>({})
+    const [ tagsDraft, setTagsDraft ] = useState<string[]>([]);
     const mapObjectStore = useMapObjectStore();
 
     const selectedMapId = useMapStore((s) => s.selectedMapId);
@@ -34,9 +36,15 @@ const ListAreasPanel = ({setAdditionalOpen, setOpen} : ListAreaPanelProps) => {
         }
     };
 
+    const handleEdit = (id: string, currentTags: string[]) => {
+        setEdit(id);
+        setUpdatedMapObject({});
+        setTagsDraft(currentTags);
+    };
+
     const handleSave = async (id: string) => {
         try {
-            const area = await updateMapObject(id, updatedMapObject);
+            const area = await updateMapObject(id, { ...updatedMapObject, tags: tagsDraft });
             mapObjectStore.updateMapObject(area);
         } catch (err) {
             alert("Не удалось обновить область!")
@@ -45,6 +53,13 @@ const ListAreasPanel = ({setAdditionalOpen, setOpen} : ListAreaPanelProps) => {
 
         setEdit("")
         setUpdatedMapObject({})
+        setTagsDraft([])
+    }
+
+    const handleCancel = () => {
+        setEdit("")
+        setUpdatedMapObject({})
+        setTagsDraft([])
     }
 
     const handleScroll = (event: UIEvent<HTMLElement>) => {
@@ -98,20 +113,17 @@ const ListAreasPanel = ({setAdditionalOpen, setOpen} : ListAreaPanelProps) => {
                                     value={updatedMapObject.description ?? area.description}
                                     onChange={(e) => setUpdatedMapObject(prev => ({ ...prev, description: e.target.value }))}
                                 />
+                                <TagSelector value={tagsDraft} onChange={setTagsDraft} />
                                 <div className="card__actions">
                                     {area.updated_at ? "ред. " + new Date(area.updated_at).toLocaleDateString() : new Date(area.created_at).toLocaleDateString()}
                                     <div className='card__actions__container'>
-                                        <GrEdit
-                                            className='card__action_icon card__btn--safe'
-                                            onClick={() => setEdit(area._id)}
-                                        />
                                         <FaSave
                                             className='card__action_icon card__btn--safe'
                                             onClick={() => handleSave(area._id)}
                                         />
                                         <LuX
                                             className='card__action_icon card__btn--danger'
-                                            onClick={() => setEdit("")}
+                                            onClick={handleCancel}
                                         />
                                     </div>
                                 </div>
@@ -131,6 +143,13 @@ const ListAreasPanel = ({setAdditionalOpen, setOpen} : ListAreaPanelProps) => {
                                     </div>
                                 </div>
                                 <div className='card__description'>{area.description}</div>
+                                {area.tags.length > 0 && (
+                                    <div className="card__tags">
+                                        {area.tags.map((tag) => (
+                                            <span key={tag} className="tag-chip">{tag}</span>
+                                        ))}
+                                    </div>
+                                )}
                                 <div className="card__actions">
                                     {area.updated_at ? "ред. " + new Date(area.updated_at).toLocaleDateString() : new Date(area.created_at).toLocaleDateString()}
                                     <div className='card__actions__container'>
@@ -138,7 +157,7 @@ const ListAreasPanel = ({setAdditionalOpen, setOpen} : ListAreaPanelProps) => {
                                             className='card__action_icon card__btn--safe'
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                setEdit(area._id);
+                                                handleEdit(area._id, area.tags);
                                             }}
                                         />
                                         <FaSave className='card__action_icon card__btn--inactive' />

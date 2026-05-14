@@ -8,10 +8,10 @@ export class User {
   @Prop({ type: MongooseSchema.Types.ObjectId, default: () => new Types.ObjectId() })
   _id: Types.ObjectId;
 
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true, unique: true, trim: true, lowercase: true, minlength: 3, maxlength: 30 })
   username: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, minlength: 1 })
   password_hash: string;
 
   @Prop({ index: true })
