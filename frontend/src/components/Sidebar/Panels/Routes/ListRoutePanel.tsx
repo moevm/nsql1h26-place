@@ -16,14 +16,14 @@ type ListRoutesPanelProps = {
 
 const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) => {
     const { loading, error } = useLoadMapObjectsByType('Route');
+    const mapObjectStore = useMapObjectStore();
     const selectedMapId = useMapStore((s) => s.selectedMapId);
     const [ edit, setEdit ] = useState('');
     const [ updatedMapObject, setUpdatedMapObject ] = useState<UpdateMapObject>({});
     const [tagsValue, setTagsValue] = useState('');
 
-    const routes = useMapObjectStore((s) => s.MapObjects)
+    const routes = mapObjectStore.MapObjects
         .filter((item) => item.type === 'Route' && (!selectedMapId || String(item.map_id) === selectedMapId));
-    const { removeMapObject, updateMapObject: updateMapObjectInStore } = useMapObjectStore();
 
     const handleEdit = (routeId: string, routeTags: string[]) => {
         setEdit(routeId);
@@ -34,7 +34,7 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
     const handleDelete = async (id: string) => {
         try {
             await deleteMapObject(id);
-            removeMapObject(id);
+            mapObjectStore.removeMapObject(id);
         } catch (err) {
             alert('Не удалось удалить маршрут!');
             console.log(err)
@@ -49,7 +49,7 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
             };
 
             const mapObject = await updateMapObject(id, payload);
-            updateMapObjectInStore(mapObject);
+            mapObjectStore.updateMapObject(mapObject);
         } catch (err) {
             alert("Не удалось обновить маршрут!")
             console.log(err)
@@ -80,7 +80,11 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
                 {!loading && routes.length === 0 && <div className="list__empty">Маршрутов пока нет</div>}
                 {routes.map((route) => (
                     edit === route._id ? (
-                        <article key={route._id} className="card">
+                        <article
+                            key={route._id}
+                            className={`card ${mapObjectStore.selectedMapObjectId === route._id ? 'card--selected' : ''}`}
+                            onClick={() => mapObjectStore.setSelectedMapObjectId(route._id)}
+                        >
                             <div className="card__content">
                                 <div className='card__title_container'>
                                     <img className='card__icon' src={`/src/assets/images/${route.image_path}`} alt="route" />
@@ -120,7 +124,11 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
                             </div>
                         </article>
                     ) : (
-                        <article key={route._id} className="card">
+                        <article
+                            key={route._id}
+                            className={`card ${mapObjectStore.selectedMapObjectId === route._id ? 'card--selected' : ''}`}
+                            onClick={() => mapObjectStore.setSelectedMapObjectId(route._id)}
+                        >
                             <div className="card__content">
                                 <div className='card__title_container'>
                                     <img className='card__icon' src={`/src/assets/images/${route.image_path}`} alt="logo" />
