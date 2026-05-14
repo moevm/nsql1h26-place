@@ -1,15 +1,19 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { type GeoJSONGeometry, ObjectType } from 'src/common/types/geojson.types';
 import { deleteByIdOrThrow, findByIdOrThrow, updateByIdOrThrow } from 'src/common/utils/crud.utils';
+import { Map, MapDocument } from 'src/models/maps/schemas/maps.schema';
 import { CreateObjectDto } from './dto/create-object.dto';
 import { UpdateObjectDto } from './dto/update-object.dto';
 import { MapObject, ObjectDocument } from './schemas/objects.schema';
 
 @Injectable()
 export class ObjectsService {
-  constructor(@InjectModel(MapObject.name) private objectModel: Model<ObjectDocument>) {}
+  constructor(
+    @InjectModel(MapObject.name) private objectModel: Model<ObjectDocument>,
+    @InjectModel(Map.name) private mapModel: Model<MapDocument>,
+  ) {}
 
   async create(createObjectDto: CreateObjectDto): Promise<ObjectDocument> {
     if (createObjectDto.type === ObjectType.ROUTE) {
@@ -20,16 +24,33 @@ export class ObjectsService {
     return createdObject.save();
   }
 
-  async findAll(): Promise<ObjectDocument[]> {
-    return this.objectModel.find().exec();
+  async findAll(userId: unknown, page = 1): Promise<ObjectDocument[]> {
+    const mapIds = await this.getUserMapIds(userId);
+    const pageNumber = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+    const limit = 10;
+    return this.objectModel
+      .find({ map_id: { $in: mapIds } })
+      .sort({ created_at: -1 })
+      .skip((pageNumber - 1) * limit)
+      .limit(limit)
+      .exec();
   }
 
-  async findAllByType(typeParam: string): Promise<ObjectDocument[]> {
+  async findAllByType(userId: unknown, typeParam: ObjectType, page = 1): Promise<ObjectDocument[]> {
     if (!typeParam) {
       throw new BadRequestException('Invalid object type. Use points, areas, or routes');
     }
 
-    return this.objectModel.find({ type: typeParam }).exec();
+    const mapIds = await this.getUserMapIds(userId);
+    const pageNumber = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+    const limit = 10;
+
+    return this.objectModel
+      .find({ type: typeParam, map_id: { $in: mapIds } })
+      .sort({ created_at: -1 })
+      .skip((pageNumber - 1) * limit)
+      .limit(limit)
+      .exec();
   }
 
   async findOne(id: string): Promise<ObjectDocument> {
@@ -44,6 +65,15 @@ export class ObjectsService {
     }
 
     return updateByIdOrThrow(this.objectModel.findByIdAndUpdate(id, updateObjectDto, { new: true }).exec(), id, updateObjectDto, 'Object');
+  }
+
+  async delete(id: string): Promise<ObjectDocument> {
+    return deleteByIdOrThrow(this.objectModel.findByIdAndDelete(id).exec(), id, 'Object');
+  }
+
+  private async getUserMapIds(userId: unknown): Promise<Types.ObjectId[]> {
+    const maps = await this.mapModel.find({ user_id: userId as Types.ObjectId }, { _id: 1 }).lean().exec();
+    return maps.map((m) => m._id as Types.ObjectId);
   }
 
   private validateRouteGeometry(location: GeoJSONGeometry | undefined): void {
@@ -66,9 +96,5 @@ export class ObjectsService {
     if (hasInvalidWaypoint) {
       throw new BadRequestException('Each route waypoint must contain valid latitude and longitude');
     }
-  }
-
-  async delete(id: string): Promise<ObjectDocument> {
-    return deleteByIdOrThrow(this.objectModel.findByIdAndDelete(id).exec(), id, 'Object');
   }
 }

@@ -1,11 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from 'src/auth/auth.guard';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
 import { TagDocument } from './schemas/tags.schema';
 import { TagsService } from './tags.service';
 
 @ApiTags('Tags')
+@UseGuards(AuthGuard)
 @Controller('/tags')
 export class TagsController {
   constructor(private readonly tagsService: TagsService) {}
@@ -18,10 +20,11 @@ export class TagsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all tags' })
-  @ApiResponse({ status: 200, description: 'List of all tags' })
-  async findAll(): Promise<TagDocument[]> {
-    return this.tagsService.findAll();
+  @ApiOperation({ summary: 'Get all tags, optionally filtered by name substring' })
+  @ApiQuery({ name: 'search', required: false, description: 'Substring to filter tags by name' })
+  @ApiResponse({ status: 200, description: 'List of tags' })
+  async findAll(@Query('search') search?: string): Promise<TagDocument[]> {
+    return this.tagsService.findAll(search);
   }
 
   @Get(':id')
@@ -34,7 +37,7 @@ export class TagsController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update a tag by ID' })
+  @ApiOperation({ summary: 'Update a tag by ID (also renames it in all objects/maps)' })
   @ApiParam({ name: 'id', description: 'Tag ID' })
   @ApiResponse({ status: 200, description: 'Tag updated successfully' })
   @ApiResponse({ status: 404, description: 'Tag not found' })
@@ -43,7 +46,7 @@ export class TagsController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete a tag by ID' })
+  @ApiOperation({ summary: 'Delete a tag by ID (also removes it from all objects/maps)' })
   @ApiParam({ name: 'id', description: 'Tag ID' })
   @ApiResponse({ status: 200, description: 'Tag deleted successfully' })
   @ApiResponse({ status: 404, description: 'Tag not found' })

@@ -1,6 +1,5 @@
-﻿#!/bin/bash
-mongosh <<'EOF'
-use shrooms;
+﻿db = db.getSiblingDB('shrooms');
+
 const buildCircleArea = (center, radiusMeters, steps = 36) => {
     const [lat, lon] = center;
     const safeRadius = Math.max(0, radiusMeters);
@@ -18,13 +17,17 @@ const buildCircleArea = (center, radiusMeters, steps = 36) => {
         const pointLon = lon + lonDelta * Math.cos(angle);
         points.push([Number(pointLat.toFixed(6)), Number(pointLon.toFixed(6))]);
     }
+
     points.push(points[0]);
+
     return { type: "Polygon", coordinates: [points] };
 };
+
 db.createCollection("users");
 db.createCollection("maps");
 db.createCollection("mapobjects");
 db.createCollection("tags");
+
 db.users.insertMany([
 {
     _id: ObjectId("000000000000000000000001"),
@@ -75,7 +78,6 @@ db.users.insertMany([
     image_path: null
 },
 ]);
-
 
 db.tags.insertMany([
 {
@@ -149,13 +151,16 @@ db.tags.insertMany([
     image_path: ""
 },
 ]);
+
 db.maps.insertMany([
 {
     _id: ObjectId("000000000000000000000001"),
     user_id: ObjectId("000000000000000000000001"),
     name: "Карта подосиновиков",
     description: "На этой карте находятся все подосиновики в районе.",
-	@@ -45,17 +168,14 @@ db.maps.insertMany([
+    area: "Свердловское городское поселение",
+    location: {
+        type: "Point",
         coordinates: [59.773007, 30.775178]
     },
     visible: true,
@@ -170,7 +175,8 @@ db.maps.insertMany([
     name: "Ягодная карта",
     description: "Тут собраны все ягоды местности.",
     area: "Гатчинский муниципальный округ",
-	@@ -64,25 +184,181 @@ db.maps.insertMany([
+    location: {
+        type: "Point",
         coordinates: [59.598731, 29.677867]
     },
     visible: true,
@@ -340,6 +346,7 @@ db.maps.insertMany([
     image_path: "map_icon.png"
 }
 ]);
+
 db.mapobjects.insertMany([
 {
     _id: ObjectId("000000000000000000000001"),
@@ -351,7 +358,13 @@ db.mapobjects.insertMany([
     created_at: ISODate("2026-03-10T10:00:00.389Z"),
     updated_at: null,
     location: {
-	@@ -96,14 +372,12 @@ db.mapobjects.insertMany([
+        type: "LineString",
+        coordinates: [
+            [ 59.787504, 30.773917],
+            [ 59.788627, 30.778359],
+            [ 59.788287, 30.777903]
+        ]
+    },
     image_path: "route_icon.png"
 },
 {
@@ -364,7 +377,13 @@ db.mapobjects.insertMany([
     created_at: ISODate("2026-03-15T10:00:00.389Z"),
     updated_at: ISODate("2026-03-15T13:10:00.389Z"),
     location: {
-	@@ -117,72 +391,123 @@ db.mapobjects.insertMany([
+        type: "LineString",
+        coordinates: [
+            [ 59.780151, 30.756108],
+            [ 59.780529, 30.757449],
+            [ 59.780805, 30.757835]
+        ]
+    },
     image_path: "route_icon.png"
 },
 {
@@ -399,71 +418,6 @@ db.mapobjects.insertMany([
     image_path: "route_icon.png"
 },
 {
-    _id: ObjectId("000000000000000000000005"),
-    map_id: ObjectId("000000000000000000000004"),
-    name: "Белый гриб",
-    type: "Point",
-    description: "Белые грибы возле старой ели.",
-    tags: ["гриб", "белый гриб"],
-    created_at: ISODate("2026-03-22T09:40:00.389Z"),
-    updated_at: ISODate("2026-03-22T11:05:00.389Z"),
-    location: {
-        type: "Point",
-        coordinates: [59.745612, 30.812451]
-    _id: ObjectId("000000000000000000000003"),
-    map_id: ObjectId("000000000000000000000002"),
-    name: "Черничная поляна",
-    type: "Area",
-    description: "Все усыпано черникой",
-    tags: ["ягода"],
-    created_at: ISODate("2026-03-20T10:00:00.389Z"),
-    updated_at: null,
-    location: buildCircleArea([59.778860, 30.751252], 150),
-    image_path: "area_icon.png"
-},
-{
-    _id: ObjectId("000000000000000000000004"),
-    map_id: ObjectId("000000000000000000000003"),
-    name: "Лисичковый маршрут",
-    type: "Route",
-    description: "Тропа через густой лес с большим количеством лисичек.",
-    tags: ["гриб"],
-    created_at: ISODate("2026-03-21T08:15:00.389Z"),
-    updated_at: null,
-    location: {
-        type: "LineString",
-        coordinates: [
-            [59.812345, 30.654321],
-            [59.813112, 30.657843],
-            [59.814001, 30.660214]
-        ]
-    },
-    image_path: "route_icon.png"
-},
-{
-    _id: ObjectId("000000000000000000000006"),
-    map_id: ObjectId("000000000000000000000005"),
-    name: "Клюквенное болото",
-    type: "Area",
-    description: "Большое болотистое место с обилием клюквы.",
-    tags: ["ягода", "клюква"],
-    created_at: ISODate("2026-03-23T07:20:00.389Z"),
-    updated_at: null,
-    location: buildCircleArea([59.900934, 30.925431], 300),
-    image_path: "area_icon.png"
-},
-{
-    _id: ObjectId("000000000000000000000007"),
-    map_id: ObjectId("000000000000000000000002"),
-    name: "Лесной родник",
-    type: "Point",
-    description: "Источник чистой воды рядом с лесной дорогой.",
-    tags: ["вода", "родник"],
-    created_at: ISODate("2026-03-24T10:55:00.389Z"),
-    updated_at: null,
-    location: {
-        type: "Point",
-        coordinates: [59.667843, 30.556712]
     _id: ObjectId("000000000000000000000005"),
     map_id: ObjectId("000000000000000000000004"),
     name: "Белый гриб",
@@ -479,21 +433,6 @@ db.mapobjects.insertMany([
     image_path: "point_icon.png"
 },
 {
-    _id: ObjectId("000000000000000000000008"),
-    map_id: ObjectId("000000000000000000000002"),
-    name: "Маршрут вдоль озера",
-    type: "Route",
-    description: "Красивый маршрут с видами на озеро и местами для отдыха.",
-    tags: ["озеро", "туризм"],
-    created_at: ISODate("2026-03-25T12:10:00.389Z"),
-    updated_at: ISODate("2026-03-25T14:25:00.389Z"),
-    location: {
-        type: "LineString",
-        coordinates: [
-            [60.012345, 30.445566],
-            [60.013457, 30.448912],
-            [60.014782, 30.452341]
-        ]
     _id: ObjectId("000000000000000000000006"),
     map_id: ObjectId("000000000000000000000005"),
     name: "Клюквенное болото",
@@ -518,7 +457,7 @@ db.mapobjects.insertMany([
         type: "Point",
         coordinates: [59.667843, 30.556712]
     },
-    image_path: "route_icon.png"
+    image_path: "point_icon.png"
 },
 {
     _id: ObjectId("000000000000000000000008"),

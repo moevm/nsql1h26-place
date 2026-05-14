@@ -1,4 +1,4 @@
-import type { GeoJSONLineString, GeoJSONPoint, GeoJSONPolygon } from '../../../models/GeoJSON';
+import type { GeoJSONLineString, GeoJSONPoint, GeoJSONPolygon, LatLon } from '../../../models/GeoJSON';
 import type { Map } from '../../../models/Map';
 
 export const getMapCenterPoint = (map: Map | null): GeoJSONPoint | null => {
@@ -71,5 +71,36 @@ export const buildDefaultArea = (center: GeoJSONPoint): GeoJSONPolygon => {
             [lat - latDelta, lon + lonDelta],
             [lat - latDelta, lon - lonDelta],
         ]],
+    };
+};
+
+export const buildCircleArea = (
+    center: GeoJSONPoint,
+    radiusMeters: number,
+    steps = 36,
+): GeoJSONPolygon => {
+    const [lat, lon] = center.coordinates;
+    const safeRadius = Math.max(0, radiusMeters);
+    const safeSteps = Math.max(3, steps);
+    const latRad = (lat * Math.PI) / 180;
+    const metersPerDegreeLat = 111320;
+    const metersPerDegreeLon = Math.cos(latRad) * 111320;
+    const latDelta = safeRadius / metersPerDegreeLat;
+    const lonDelta = metersPerDegreeLon === 0 ? 0 : safeRadius / metersPerDegreeLon;
+
+    const points: LatLon[] = [];
+
+    for (let i = 0; i < safeSteps; i += 1) {
+        const angle = (i / safeSteps) * Math.PI * 2;
+        const pointLat = lat + latDelta * Math.sin(angle);
+        const pointLon = lon + lonDelta * Math.cos(angle);
+        points.push([pointLat, pointLon]);
+    }
+
+    points.push(points[0]);
+
+    return {
+        type: 'Polygon',
+        coordinates: [points],
     };
 };

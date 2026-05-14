@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { ApiError } from '../api/hooks';
 import type { LatLon } from '../models/GeoJSON';
 import { type MapObject } from '../models/MapObject';
 
@@ -14,10 +15,19 @@ interface MapObjectStore {
     routeDraftWaypoints: LatLon[];
     routeDraftHoveredIndex: number | null;
     routeDraftMapCenter: LatLon | null;
+    areaDraftActive: boolean;
+    areaDraftRadius: number;
+    mapObjectsLoadingByPath: Record<string, boolean>;
+    mapObjectsErrorByPath: Record<string, ApiError | undefined>;
+    mapObjectsPageByPath: Record<string, number>;
+    mapObjectsHasMoreByPath: Record<string, boolean>;
+    mapObjectsInitializedByPath: Record<string, boolean>;
 
     setSelectedMapObjectId: (selectedMapObjectId: string | null) => void;
 
     setMapObjects: (MapObjects: MapObject[]) => void;
+    setMapObjectsByType: (type: string, MapObjects: MapObject[]) => void;
+    appendMapObjects: (MapObjects: MapObject[]) => void;
     addMapObject: (MapObject: MapObject) => void;
     updateMapObject: (MapObject: MapObject) => void;
     removeMapObject: (id: string) => void;
@@ -31,6 +41,8 @@ interface MapObjectStore {
     reorderRouteDraftWaypoints: (fromIndex: number, toIndex: number) => void;
     setRouteDraftHoveredIndex: (index: number | null) => void;
     setRouteDraftMapCenter: (center: LatLon | null) => void;
+    setAreaDraftActive: (active: boolean) => void;
+    setAreaDraftRadius: (radius: number) => void;
     setSort: (field: '_id' | 'name' | null) => void;
     getSortedMapObjects: () => MapObject[];
 }
@@ -47,11 +59,32 @@ export const useMapObjectStore = create<MapObjectStore>((set, get) => ({
     routeDraftWaypoints: [],
     routeDraftHoveredIndex: null,
     routeDraftMapCenter: null,
+    areaDraftActive: false,
+    areaDraftRadius: 1,
+    mapObjectsLoadingByPath: {},
+    mapObjectsErrorByPath: {},
+    mapObjectsPageByPath: {},
+    mapObjectsHasMoreByPath: {},
+    mapObjectsInitializedByPath: {},
 
     setMapObjects: (MapObjects) => set((state) => ({
         MapObjects,
         selectedMapObjectId: state.selectedMapObjectId ?? (MapObjects.length ? MapObjects[0]._id : null),
     })),
+    setMapObjectsByType: (type, incoming) => set((state) => ({
+        MapObjects: [
+            ...state.MapObjects.filter((item) => item.type !== type),
+            ...incoming,
+        ],
+    })),
+    appendMapObjects: (MapObjects) => set((state) => {
+        const existingIds = new Set(state.MapObjects.map((item) => item._id));
+        const nextObjects = MapObjects.filter((item) => !existingIds.has(item._id));
+
+        return {
+            MapObjects: nextObjects.length ? [...state.MapObjects, ...nextObjects] : state.MapObjects,
+        };
+    }),
     setSelectedMapObjectId: (selectedMapObjectId) => set((state) => ({
         selectedMapObjectId,
         selectedMapObjectTick: state.selectedMapObjectTick + 1,
@@ -119,6 +152,10 @@ export const useMapObjectStore = create<MapObjectStore>((set, get) => ({
     setRouteDraftHoveredIndex: (index) => set({ routeDraftHoveredIndex: index }),
 
     setRouteDraftMapCenter: (center) => set({ routeDraftMapCenter: center }),
+
+    setAreaDraftActive: (active) => set({ areaDraftActive: active }),
+
+    setAreaDraftRadius: (radius) => set({ areaDraftRadius: radius }),
 
     setSort: (field) => set(state => ({
         sortBy: field,

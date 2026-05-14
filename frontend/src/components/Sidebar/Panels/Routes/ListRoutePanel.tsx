@@ -4,10 +4,11 @@ import { BsFillTrashFill } from 'react-icons/bs';
 import { deleteMapObject, updateMapObject, useLoadMapObjectsByType } from '../../../../api/mapObjects';
 import { useMapObjectStore } from '../../../../stores/mapObjectStore';
 import { useMapStore } from '../../../../stores/mapsStore';
-import { useState } from 'react';
+import { useState, type UIEvent } from 'react';
 import type { UpdateMapObject } from '../../../../models/MapObject';
 import { FaSave } from 'react-icons/fa';
 import { GrEdit } from 'react-icons/gr';
+import TagSelector from '../../../TagSelector/TagSelector';
 
 type ListRoutesPanelProps = {
     setOpen: (val: boolean) => void,
@@ -15,26 +16,26 @@ type ListRoutesPanelProps = {
 }
 
 const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) => {
-    const { loading, error } = useLoadMapObjectsByType('Route');
+    const { loading, error, loadMore, hasMore } = useLoadMapObjectsByType('Route');
+    const mapObjectStore = useMapObjectStore();
     const selectedMapId = useMapStore((s) => s.selectedMapId);
     const [ edit, setEdit ] = useState('');
     const [ updatedMapObject, setUpdatedMapObject ] = useState<UpdateMapObject>({});
-    const [tagsValue, setTagsValue] = useState('');
+    const [ tagsDraft, setTagsDraft ] = useState<string[]>([]);
 
-    const routes = useMapObjectStore((s) => s.MapObjects)
+    const routes = mapObjectStore.MapObjects
         .filter((item) => item.type === 'Route' && (!selectedMapId || String(item.map_id) === selectedMapId));
-    const { removeMapObject, updateMapObject: updateMapObjectInStore } = useMapObjectStore();
 
     const handleEdit = (routeId: string, routeTags: string[]) => {
         setEdit(routeId);
         setUpdatedMapObject({});
-        setTagsValue(routeTags.join(', '));
+        setTagsDraft(routeTags);
     };
 
     const handleDelete = async (id: string) => {
         try {
             await deleteMapObject(id);
-            removeMapObject(id);
+            mapObjectStore.removeMapObject(id);
         } catch (err) {
             alert('Не удалось удалить маршрут!');
             console.log(err)
@@ -43,13 +44,8 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
 
     const handleSave = async (id: string) => {
         try {
-            const payload: UpdateMapObject = {
-                ...updatedMapObject,
-                tags: tagsValue.split(',').map((tag) => tag.trim()).filter(Boolean),
-            };
-
-            const mapObject = await updateMapObject(id, payload);
-            updateMapObjectInStore(mapObject);
+            const mapObject = await updateMapObject(id, { ...updatedMapObject, tags: tagsDraft });
+            mapObjectStore.updateMapObject(mapObject);
         } catch (err) {
             alert("Не удалось обновить маршрут!")
             console.log(err)
@@ -57,11 +53,26 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
 
         setEdit('')
         setUpdatedMapObject({})
-        setTagsValue('')
+        setTagsDraft([])
+    };
+
+    const handleCancel = () => {
+        setEdit('')
+        setUpdatedMapObject({})
+        setTagsDraft([])
+    };
+
+    const handleScroll = (event: UIEvent<HTMLElement>) => {
+        if (loading || !hasMore) return;
+        const target = event.currentTarget;
+        const remaining = target.scrollHeight - target.scrollTop - target.clientHeight;
+        if (remaining < 80) {
+            loadMore();
+        }
     };
 
     return (
-        <aside className="panel panel--primary">
+        <aside className="panel panel--primary" onScroll={handleScroll}>
             <div className="panel__header">
                 <h3>Маршрут</h3>
                 <LuX className='panel__close' onClick={() => setOpen(false)} />
@@ -75,12 +86,16 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
                     </div>
                 </button>
                 <hr className="divider" />
-                {loading && <div className="list__empty">Загружаю маршруты...</div>}
+                {loading && routes.length === 0 && <div className="list__empty">Загружаю маршруты...</div>}
                 {error && <div className="list__empty">Ошибка: {error.message}</div>}
                 {!loading && routes.length === 0 && <div className="list__empty">Маршрутов пока нет</div>}
                 {routes.map((route) => (
                     edit === route._id ? (
-                        <article key={route._id} className="card">
+                        <article
+                            key={route._id}
+                            className={`card ${mapObjectStore.selectedMapObjectId === route._id ? 'card--selected' : ''}`}
+                            onClick={() => mapObjectStore.setSelectedMapObjectId(route._id)}
+                        >
                             <div className="card__content">
                                 <div className='card__title_container'>
                                     <img className='card__icon' src={`/src/assets/images/${route.image_path}`} alt="route" />
@@ -98,6 +113,7 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
                                     value={updatedMapObject.description ?? route.description}
                                     onChange={(event) => setUpdatedMapObject((prev) => ({ ...prev, description: event.target.value }))}
                                 />
+                                <TagSelector value={tagsDraft} onChange={setTagsDraft} />
                                 <div className="card__actions">
                                     {route.updated_at
                                         ? `ред. ${new Date(route.updated_at).toLocaleDateString()}`
@@ -109,18 +125,18 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
                                         />
                                         <LuX
                                             className='card__action_icon card__btn--danger'
-                                            onClick={() => {
-                                                setEdit('');
-                                                setUpdatedMapObject({});
-                                                setTagsValue('');
-                                            }}
+                                            onClick={handleCancel}
                                         />
                                     </div>
                                 </div>
                             </div>
                         </article>
                     ) : (
-                        <article key={route._id} className="card">
+                        <article
+                            key={route._id}
+                            className={`card ${mapObjectStore.selectedMapObjectId === route._id ? 'card--selected' : ''}`}
+                            onClick={() => mapObjectStore.setSelectedMapObjectId(route._id)}
+                        >
                             <div className="card__content">
                                 <div className='card__title_container'>
                                     <img className='card__icon' src={`/src/assets/images/${route.image_path}`} alt="logo" />
@@ -129,6 +145,13 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
                                     </div>
                                 </div>
                                 <div className='card__description'>{route.description}</div>
+                                {route.tags.length > 0 && (
+                                    <div className="card__tags">
+                                        {route.tags.map((tag) => (
+                                            <span key={tag} className="tag-chip">{tag}</span>
+                                        ))}
+                                    </div>
+                                )}
                                 <div className="card__actions">
                                     {route.updated_at ? "ред. " + new Date(route.updated_at).toLocaleDateString() : new Date(route.created_at).toLocaleDateString()}
                                     <div className='card__actions__container'>
@@ -153,6 +176,12 @@ const ListRoutesPanel = ({setAdditionalOpen, setOpen} : ListRoutesPanelProps) =>
                         </article>
                     )
                 ))}
+                {loading && routes.length > 0 && (
+                    <div className="list__empty">Загружаю еще маршруты...</div>
+                )}
+                {!loading && !hasMore && routes.length > 0 && (
+                    <div className="list__empty">Больше нет маршрутов</div>
+                )}
             </div>
         </aside>
     )

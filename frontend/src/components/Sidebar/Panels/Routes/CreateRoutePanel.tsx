@@ -9,6 +9,7 @@ import { getMapCenterPoint } from '../objectGeometry'
 import type { LatLon } from '../../../../models/GeoJSON'
 import { useShallow } from 'zustand/react/shallow'
 import './CreateRoutePanel.css'
+import TagSelector from '../../../TagSelector/TagSelector'
 
 type CreateRoutePanelProps = {
     setAdditionalOpen: (val: boolean) => void
@@ -47,7 +48,7 @@ const CreateRoutePanel = ({setAdditionalOpen} : CreateRoutePanelProps) => {
 
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
-    const [tags, setTags] = useState('')
+    const [tags, setTags] = useState<string[]>([])
     const [loading, setLoading] = useState(false)
     const [dragFromIndex, setDragFromIndex] = useState<number | null>(null)
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
@@ -118,7 +119,7 @@ const CreateRoutePanel = ({setAdditionalOpen} : CreateRoutePanelProps) => {
                 type: 'Route',
                 name: title.trim(),
                 description: description.trim(),
-                tags: tags.split(',').map((tag) => tag.trim()).filter(Boolean),
+                tags,
                 location: {
                     type: 'LineString',
                     coordinates: waypoints,
@@ -221,14 +222,8 @@ const CreateRoutePanel = ({setAdditionalOpen} : CreateRoutePanelProps) => {
 
                 <hr className="divider route-create__divider" />
 
-                <label className="create-form__label" htmlFor="tags">Теги (через запятую)</label>
-                <input
-                    id="tags"
-                    className="create-form__input"
-                    value={tags}
-                    onChange={(event) => setTags(event.target.value)}
-                    placeholder="лесная тропа, пешком"
-                />
+                <label className="create-form__label">Теги</label>
+                <TagSelector value={tags} onChange={setTags} />
 
                 <hr className="divider route-create__divider" />
                 

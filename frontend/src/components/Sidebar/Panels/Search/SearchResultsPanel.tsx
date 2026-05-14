@@ -19,7 +19,7 @@ const SearchResultsPanel = ({ setOpen, setAdditionalOpen, criteria }: SearchResu
     const normalizedNameQuery = criteria?.nameQuery.trim().toLowerCase() ?? '';
     const normalizedTagsQuery = criteria?.tagsQuery.trim().toLowerCase() ?? '';
     const normalizedDescriptionQuery = criteria?.descriptionQuery.trim().toLowerCase() ?? '';
-    const activeFilters = criteria?.activeFilters ?? [];
+    const activeFilters = useMemo(() => criteria?.activeFilters ?? [], [criteria]);
 
     const hasSearchCriteria = useMemo(
         () => Boolean(
@@ -74,12 +74,12 @@ const SearchResultsPanel = ({ setOpen, setAdditionalOpen, criteria }: SearchResu
             window.clearTimeout(timer);
         };
     }, [
-        activeFilters,
         criteria,
         hasSearchCriteria,
         normalizedDescriptionQuery,
         normalizedNameQuery,
         normalizedTagsQuery,
+        activeFilters,
     ]);
 
     const handleClose = () => {
@@ -125,6 +125,13 @@ const SearchResultsPanel = ({ setOpen, setAdditionalOpen, criteria }: SearchResu
                                 </div>
                             </div>
                             <div className='card__description'>{result.description || 'Без описания'}</div>
+                            {result.tags.length > 0 && (
+                                <div className="card__tags">
+                                    {result.tags.map((tag) => (
+                                        <span key={tag} className="tag-chip">{tag}</span>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </article>
                 ))}

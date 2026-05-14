@@ -1,0 +1,93 @@
+.tag-selector {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.tag-selector__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    min-height: 24px;
+}
+
+.tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: #e8f4e8;
+    color: #3a5c34;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid #b5d4b2;
+    white-space: nowrap;
+}
+
+.tag-chip--removable {
+    cursor: default;
+}
+
+.tag-chip__remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: #7a9c74;
+    line-height: 1;
+    font-size: 13px;
+}
+
+.tag-chip__remove:hover {
+    color: #c0392b;
+}
+
+.tag-selector__input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.tag-selector__input:focus {
+    outline: none;
+    border-color: #51704A;
+}
+
+.tag-selector__dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.tag-selector__option {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+}
+
+.tag-selector__option:hover {
+    background: #f0f7ef;
+}
+
+.tag-selector__empty {
+    padding: 8px 12px;
+    font-size: 13px;
+    color: #888;
+}

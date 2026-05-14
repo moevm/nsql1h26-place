@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 import { deleteByIdOrThrow, findByIdOrThrow, updateByIdOrThrow } from "src/common/utils/crud.utils";
 import { CreateMapDto } from "./dto/create-map.dto";
 import { Map, MapDocument } from "./schemas/maps.schema";
@@ -15,8 +15,15 @@ export class MapsService {
         return createdMap.save();
     }
 
-    async findAll(): Promise<MapDocument[]> {
-        return this.mapModel.find().exec();
+    async findAll(userId: unknown, page = 1): Promise<MapDocument[]> {
+        const pageNumber = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+        const limit = 10;
+        return this.mapModel
+            .find({ user_id: userId as Types.ObjectId })
+            .sort({ created_at: -1 })
+            .skip((pageNumber - 1) * limit)
+            .limit(limit)
+            .exec();
     }
 
     async findOne(id: string): Promise<MapDocument> {

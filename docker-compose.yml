@@ -7,7 +7,7 @@ services:
       - 27017
     volumes:
       - db_data:/data/db
-      - ./backend/init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
+      - ./backend/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
     restart:
       always
     healthcheck:

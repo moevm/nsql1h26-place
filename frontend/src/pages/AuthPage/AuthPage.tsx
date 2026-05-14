@@ -1,4 +1,4 @@
-import { useState, type SubmitEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { login, register } from '../../api/auth'
 import { useAuthStore } from '../../stores/authStore'
@@ -17,7 +17,7 @@ const AuthPage = ({ mode }: AuthPageProps) => {
     const navigate = useNavigate()
     const setSession = useAuthStore((state) => state.setSession)
 
-    const handleSubmit = async (e: SubmitEvent) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setError('')
         setLoading(true)

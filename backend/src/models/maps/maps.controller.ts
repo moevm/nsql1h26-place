@@ -1,11 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiResponse } from "@nestjs/swagger";
+import { AuthGuard } from "src/auth/auth.guard";
+import type { AuthUser } from "src/auth/current-user.decorator";
+import { CurrentUser } from "src/auth/current-user.decorator";
 import { MapsService } from "./maps.service";
 import { MapDocument } from "./schemas/maps.schema";
 import { CreateMapDto } from "./dto/create-map.dto";
 import { UpdateMapDto } from "./dto/update-map.dto";
 
 @ApiTags('Maps')
+@UseGuards(AuthGuard)
 @Controller("/maps")
 export class MapsController {
     constructor(private readonly mapsService: MapsService) {}
@@ -18,10 +22,18 @@ export class MapsController {
     }
 
     @Get()
-    @ApiOperation({ summary: 'Get all maps' })
-    @ApiResponse({ status: 200, description: 'List of all maps' })
-    async findAll(): Promise<MapDocument[]> {
-        return this.mapsService.findAll();
+    @ApiOperation({ summary: 'Get maps of the current user' })
+    @ApiResponse({ status: 200, description: 'List of maps' })
+    @ApiQuery({ name: 'page', required: false, description: 'Page number (starts from 1)', example: 1 })
+    async findAll(
+        @CurrentUser() user: AuthUser,
+        @Query('page') page?: string,
+    ): Promise<MapDocument[]> {
+        const pageNumber = Number.parseInt(page ?? '1', 10);
+        return this.mapsService.findAll(
+            user._id,
+            Number.isFinite(pageNumber) && pageNumber > 0 ? pageNumber : 1,
+        );
     }
 
     @Get(':id')

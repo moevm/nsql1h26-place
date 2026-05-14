@@ -5,8 +5,9 @@ import { useMapStore } from '../../../../stores/mapsStore';
 import { BsFillTrashFill } from 'react-icons/bs';
 import { FaSave } from 'react-icons/fa';
 import { GrEdit } from 'react-icons/gr';
-import { useState } from 'react';
+import { useState, type UIEvent } from 'react';
 import type { UpdateMap } from '../../../../models/Map';
+import TagSelector from '../../../TagSelector/TagSelector';
 
 type ListMapsPanelProps = {
     setOpen: (val: boolean) => void,
@@ -14,12 +15,13 @@ type ListMapsPanelProps = {
 }
 
 const ListMapsPanel = ({setAdditionalOpen, setOpen} : ListMapsPanelProps) => {
-    const { error, loading } = useLoadMaps();
+    const { error, loading, loadMore, hasMore } = useLoadMaps();
     const maps = useMapStore((s) => s.getSortedMaps());
     const selectedMapId = useMapStore((s) => s.selectedMapId);
     const { removeMap, updateMap: update, setSelectedMapId } = useMapStore();
     const [ edit, setEdit ] = useState("");
     const [ updatedMap, setUpdatedMap ] = useState<UpdateMap>({})
+    const [ tagsDraft, setTagsDraft ] = useState<string[]>([]);
 
     const handleDelete = async (map_id: string) => {
         try {
@@ -30,9 +32,15 @@ const ListMapsPanel = ({setAdditionalOpen, setOpen} : ListMapsPanelProps) => {
         }
     }
 
+    const handleEdit = (id: string, currentTags: string[]) => {
+        setEdit(id);
+        setUpdatedMap({});
+        setTagsDraft(currentTags);
+    };
+
     const handleSave = async (map_id: string) => {
         try {
-            const map = await updateMap(map_id, updatedMap);
+            const map = await updateMap(map_id, { ...updatedMap, tags: tagsDraft });
             update(map);
         } catch (err) {
             alert("Не удалось обновить карту!")
@@ -40,10 +48,26 @@ const ListMapsPanel = ({setAdditionalOpen, setOpen} : ListMapsPanelProps) => {
 
         setEdit("")
         setUpdatedMap({})
+        setTagsDraft([])
     }
 
+    const handleCancel = () => {
+        setEdit("")
+        setUpdatedMap({})
+        setTagsDraft([])
+    }
+
+    const handleScroll = (event: UIEvent<HTMLElement>) => {
+        if (loading || !hasMore) return;
+        const target = event.currentTarget;
+        const remaining = target.scrollHeight - target.scrollTop - target.clientHeight;
+        if (remaining < 80) {
+            loadMore();
+        }
+    };
+
     return (
-        <aside className="panel">
+        <aside className="panel" onScroll={handleScroll}>
             <div className="panel__header">
                 <h3>Карты</h3>
                 <LuX className='panel__close' onClick={() => setOpen(false)} />
@@ -57,7 +81,7 @@ const ListMapsPanel = ({setAdditionalOpen, setOpen} : ListMapsPanelProps) => {
                     </div>
                 </button>
                 <hr className="divider" />
-                {loading && <div className="list__empty">Загружаю карты...</div>}
+                {loading && maps.length === 0 && <div className="list__empty">Загружаю карты...</div>}
                 {error && <div className="list__empty">Ошибка: {error.message}</div>}
                 {!loading && maps.length === 0 && <div className="list__empty">Карт пока нет</div>}
                 {maps.map((map) => (
@@ -93,20 +117,17 @@ const ListMapsPanel = ({setAdditionalOpen, setOpen} : ListMapsPanelProps) => {
                                     value={updatedMap.description ?? map.description}
                                     onChange={(e) => setUpdatedMap(prev => ({ ...prev, description: e.target.value }))}
                                 />
+                                <TagSelector value={tagsDraft} onChange={setTagsDraft} />
                                 <div className="card__actions">
                                     {map.updated_at ? "ред. " + new Date(map.updated_at).toLocaleDateString() : new Date(map.created_at).toLocaleDateString()}
                                     <div className='card__actions__container'>
-                                        <GrEdit
-                                            className='card__action_icon card__btn--safe'
-                                            onClick={() => setEdit(map._id)}
-                                        />
                                         <FaSave
                                             className='card__action_icon card__btn--safe'
                                             onClick={() => handleSave(map._id)}
                                         />
                                         <LuX
                                             className='card__action_icon card__btn--danger'
-                                            onClick={() => setEdit("")}
+                                            onClick={handleCancel}
                                         />
                                     </div>
                                 </div>
@@ -127,6 +148,13 @@ const ListMapsPanel = ({setAdditionalOpen, setOpen} : ListMapsPanelProps) => {
                                     </div>
                                 </div>
                                 <div className='card__description'>{map.description}</div>
+                                {map.tags.length > 0 && (
+                                    <div className="card__tags">
+                                        {map.tags.map((tag) => (
+                                            <span key={tag} className="tag-chip">{tag}</span>
+                                        ))}
+                                    </div>
+                                )}
                                 <div className="card__actions">
                                     {map.updated_at ? "ред. " + new Date(map.updated_at).toLocaleDateString() : new Date(map.created_at).toLocaleDateString()}
                                     <div className='card__actions__container'>
@@ -134,7 +162,7 @@ const ListMapsPanel = ({setAdditionalOpen, setOpen} : ListMapsPanelProps) => {
                                             className='card__action_icon card__btn--safe'
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                setEdit(map._id);
+                                                handleEdit(map._id, map.tags);
                                             }}
                                         />
                                         <FaSave className='card__action_icon card__btn--inactive' />
@@ -151,6 +179,12 @@ const ListMapsPanel = ({setAdditionalOpen, setOpen} : ListMapsPanelProps) => {
                         </article>
                     )
                 ))}
+                {loading && maps.length > 0 && (
+                    <div className="list__empty">Загружаю еще карты...</div>
+                )}
+                {!loading && !hasMore && maps.length > 0 && (
+                    <div className="list__empty">Больше нет карт</div>
+                )}
             </div>
         </aside>
     )
