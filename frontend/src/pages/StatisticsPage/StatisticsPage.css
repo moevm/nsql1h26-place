@@ -1,42 +1,89 @@
 .statistics-page {
-    padding: clamp(0.75rem, 2.4vw, 1.5rem);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.5rem, 1.6vw, 0.85rem);
 }
 
 .statistics-page h1 {
-    margin: 0 0 8px;
     font-size: clamp(1.5rem, 4vw, 1.75rem);
     color: #948C0F;
 }
 
-.statistics-page__subtitle {
-    color: #666;
-    margin: 0 0 clamp(1rem, 3.5vw, 2rem);
-}
-
-.statistics-page__grid {
+.statistics-page__layout {
+    flex: 1;
+    min-height: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(clamp(10.5rem, 45vw, 12.5rem), 1fr));
-    gap: clamp(0.75rem, 2.5vw, 1rem);
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
 }
 
-.statistics-page__card {
-    background: #fff;
-    border-radius: 12px;
-    padding: clamp(0.875rem, 3vw, 1.5rem);
+.statistics-page__chart {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    min-height: 0;
+    border-bottom: 2px solid #948C0F;
 }
 
-.statistics-page__card-value {
-    font-size: clamp(1.5rem, 7vw, 2.25rem);
-    font-weight: 700;
-    color: #2e7d32;
+.statistics-page__axis-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 10px;
 }
 
-.statistics-page__card-label {
-    font-size: 14px;
-    color: #888;
+.statistics-page__controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: clamp(0.75rem, 2vw, 1.25rem);
+    min-height: 0;
+}
+
+.statistics-page__panel {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.5rem, 1.4vw, 0.8rem);
+    min-height: 0;
+    padding: 10px;
+}
+
+.statistics-page__panel h2 {
+    margin: 0 0 4px;
+    font-size: clamp(1rem, 2.8vw, 1.125rem);
+    color: #948C0F;
+}
+
+.statistics-page__panel--axis {
+    border-left: 2px solid #948C0F;
+}
+
+.statistics-page__axis {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.statistics-page__axis h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.statistics-page__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.statistics-page__field label {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.statistics-page__select {
+    width: 100%;
+    padding: 0.45rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 0.95rem;
+    background-color: #fff;
 }
