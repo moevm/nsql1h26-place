@@ -1,36 +1,146 @@
 .settings-page {
+    height: 100%;
     padding: clamp(0.75rem, 2.4vw, 1.5rem);
+    display: flex;
+    justify-content: center;
 }
 
-.settings-page h1 {
-    margin: 0 0 8px;
-    font-size: clamp(1.5rem, 4vw, 1.75rem);
+.settings-page__content {
+    width: 100%;
+    max-width: 720px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(0.5rem, 1.6vw, 0.85rem);
+}
+
+.settings-page__avatar {
+    width: clamp(4.5rem, 10vw, 6rem);
+    height: clamp(4.5rem, 10vw, 6rem);
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid #ddd;
+}
+
+.settings-page__avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.settings-page__name {
+    margin: 0;
+    font-size: clamp(1.5rem, 4vw, 2rem);
     color: #948C0F;
+    text-align: center;
 }
 
-.settings-page__subtitle {
-    color: #666;
-    margin: 0 0 clamp(1rem, 3.5vw, 2rem);
+.settings-page__divider {
+    width: 100%;
+    height: 2px;
+    background: #948C0F;
+    border-radius: 999px;
 }
 
-.settings-page__section {
-    background: #fff;
-    border-radius: 12px;
-    padding: clamp(0.875rem, 2.8vw, 1.5rem);
-    margin-bottom: clamp(0.75rem, 2.2vw, 1rem);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-}
-
-.settings-page__section h2 {
-    margin: 0 0 12px;
+.settings-page__section-title {
+    margin: 0;
+    align-self: flex-start;
     font-size: clamp(1rem, 2.8vw, 1.125rem);
     color: #948C0F;
 }
 
-.settings-page__placeholder {
-    color: #999;
-    padding: clamp(0.875rem, 3vw, 1.5rem);
-    text-align: center;
-    border: 1px dashed #ddd;
-    border-radius: 8px;
+.settings-page__form {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(0.75rem, 2vw, 1.25rem);
+}
+
+.settings-page__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+}
+
+.settings-page__field label {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.settings-page__input {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 0.95rem;
+    background-color: #f7f7f7;
+}
+
+.settings-page__input:focus-visible {
+    outline: 2px solid rgba(148, 140, 15, 0.3);
+    outline-offset: 2px;
+}
+
+.settings-page__file {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.settings-page__input--file {
+    padding-right: 2.25rem;
+    cursor: pointer;
+    color: #666;
+}
+
+.settings-page__input--file::file-selector-button {
+    border: none;
+    background: transparent;
+    color: transparent;
+    margin: 0;
+    padding: 0;
+}
+
+.settings-page__input--file::-webkit-file-upload-button {
+    border: none;
+    background: transparent;
+    color: transparent;
+    margin: 0;
+    padding: 0;
+}
+
+.settings-page__file-icon {
+    position: absolute;
+    right: 0.75rem;
+    color: #948C0F;
+    font-size: 1.1rem;
+    pointer-events: none;
+}
+
+.settings-page__button {
+    border: none;
+    background: #948C0F;
+    color: #fff;
+    padding: 0.6rem 2rem;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.settings-page__button:focus-visible {
+    outline: 2px solid rgba(148, 140, 15, 0.4);
+    outline-offset: 2px;
+}
+
+@media (max-width: 800px) {
+    .settings-page__form {
+        grid-template-columns: 1fr;
+    }
+
+    .settings-page__section-title {
+        align-self: center;
+        text-align: center;
+    }
+}
 }
