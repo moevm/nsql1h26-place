@@ -15,6 +15,7 @@ export type SearchCriteria = {
     nameQuery: string;
     dateFromDay: number;
     dateToDay: number;
+    dateRangeActive: boolean;
     tagsQuery: string;
     descriptionQuery: string;
     activeFilters: SearchCategory[];
@@ -40,6 +41,7 @@ const SearchPanel = ({ setOpen, setAdditionalOpen, onCriteriaChange }: SearchPan
         nameQuery: '',
         dateFromDay: minDay,
         dateToDay: maxDay,
+        dateRangeActive: false,
         tagsQuery: '',
         descriptionQuery: '',
         activeFilters: [],
@@ -106,6 +108,7 @@ const SearchPanel = ({ setOpen, setAdditionalOpen, onCriteriaChange }: SearchPan
                                     ...criteria,
                                     dateFromDay: nextFrom,
                                     dateToDay: Math.max(nextFrom, dateToDay),
+                                    dateRangeActive: true,
                                 });
                             }}
                         />
@@ -126,6 +129,7 @@ const SearchPanel = ({ setOpen, setAdditionalOpen, onCriteriaChange }: SearchPan
                                     ...criteria,
                                     dateFromDay: Math.min(dateFromDay, nextTo),
                                     dateToDay: nextTo,
+                                    dateRangeActive: true,
                                 });
                             }}
                         />

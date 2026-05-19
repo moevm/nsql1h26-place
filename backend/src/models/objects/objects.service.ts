@@ -20,7 +20,10 @@ export class ObjectsService {
       this.validateRouteGeometry(createObjectDto.location);
     }
 
-    const createdObject = new this.objectModel(createObjectDto);
+    const createdObject = new this.objectModel({
+      ...createObjectDto,
+      map_id: new Types.ObjectId(createObjectDto.map_id),
+    });
     return createdObject.save();
   }
 

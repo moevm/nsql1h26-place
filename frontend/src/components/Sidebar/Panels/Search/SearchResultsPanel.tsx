@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { LuX } from 'react-icons/lu';
 import { searchEntities } from '../../../../api/search';
 import type { SearchResult } from '../../../../models/SearchResult';
@@ -15,6 +15,7 @@ const SearchResultsPanel = ({ setOpen, setAdditionalOpen, criteria }: SearchResu
     const [results, setResults] = useState<SearchResult[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const requestIdRef = useRef(0);
 
     const normalizedNameQuery = criteria?.nameQuery.trim().toLowerCase() ?? '';
     const normalizedTagsQuery = criteria?.tagsQuery.trim().toLowerCase() ?? '';
@@ -31,6 +32,8 @@ const SearchResultsPanel = ({ setOpen, setAdditionalOpen, criteria }: SearchResu
     );
 
     useEffect(() => {
+        const requestId = ++requestIdRef.current;
+
         if (!criteria || !hasSearchCriteria) {
             setResults([]);
             setError(null);
@@ -38,39 +41,38 @@ const SearchResultsPanel = ({ setOpen, setAdditionalOpen, criteria }: SearchResu
             return;
         }
 
-        let cancelled = false;
+        setResults([]);
+        setError(null);
 
         const timer = window.setTimeout(async () => {
             setLoading(true);
-            setError(null);
 
             try {
                 const searchResults = await searchEntities({
                     nameQuery: normalizedNameQuery || undefined,
                     tagsQuery: normalizedTagsQuery || undefined,
                     descriptionQuery: normalizedDescriptionQuery || undefined,
-                    dateFromDay: criteria.dateFromDay,
-                    dateToDay: criteria.dateToDay,
+                    dateFromDay: criteria.dateRangeActive ? criteria.dateFromDay : undefined,
+                    dateToDay: criteria.dateRangeActive ? criteria.dateToDay : undefined,
                     categories: activeFilters.length ? activeFilters : undefined,
                 });
 
-                if (!cancelled) {
+                if (requestId === requestIdRef.current) {
                     setResults(searchResults);
                 }
             } catch {
-                if (!cancelled) {
+                if (requestId === requestIdRef.current) {
                     setResults([]);
                     setError('Не удалось выполнить поиск');
                 }
             } finally {
-                if (!cancelled) {
+                if (requestId === requestIdRef.current) {
                     setLoading(false);
                 }
             }
         }, 250);
 
         return () => {
-            cancelled = true;
             window.clearTimeout(timer);
         };
     }, [
