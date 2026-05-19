@@ -21,7 +21,7 @@
 
 ## Mushrooms Place
 
-Веб-приложение для работы с картами грибных мест. Позволяет создавать, просматривать, обновлять и удалять карты.
+Веб-приложение для работы с картами грибных мест. Позволяет создавать, просматривать, обновлять и удалять карты, отметки, маршруты и области, анализировать статистику и осуществлять поиск среди своих объектов.
 
 ### Структура проекта
 
@@ -64,30 +64,18 @@ cp frontend/.env.example frontend/.env
 3. Запустите проект:
 
 ```bash
-docker-compose up --build
+docker-compose up --build -d
 ```
 
 Приложение будет доступно:
 
 | Сервис | URL |
 |--------|-----|
-| Frontend | http://localhost |
-| Backend API | http://localhost/api |
-| Swagger UI | http://localhost/api/docs |
+| Frontend | http://localhost:8080 |
+| Backend API | http://localhost:8080/api |
+| Swagger UI | http://localhost:8080/api/docs |
 
 ### Предварительно заданный пользователь
-В приложении со старта доступен пользователь:
-  имя пользователя: user
-  пароль: 123
-
-### API эндпоинты
-
-| Метод | Путь | Описание |
-|-------|------|----------|
-| POST | `/api/maps` | Создать карту |
-| GET | `/api/maps` | Получить все карты |
-| GET | `/api/maps/:id` | Получить карту по ID |
-| POST | `/api/maps/:id` | Обновить карту по ID |
-| DELETE | `/api/maps/:id` | Удалить карту по ID |
+В приложении заранее создано 10 пользователей: netlibra, ryebread, blackeye, highnoon, pinecone, pearpie, lettuce и cookies. Всем им задан пароль 123
 
 Полная документация API доступна в Swagger UI по адресу `/api/docs` после запуска бэкенда.
