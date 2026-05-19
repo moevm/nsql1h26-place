@@ -8,6 +8,7 @@ import { ObjectsModule } from './models/objects/objects.module';
 import { TagsModule } from './models/tags/tags.module';
 import { SearchModule } from './models/search/search.module';
 import { ExportImportModule } from './models/export/export-import.module';
+import { StatisticsModule } from './models/statistics/statistics.module';
 
 @Module({
     imports: [
@@ -34,6 +35,7 @@ import { ExportImportModule } from './models/export/export-import.module';
         TagsModule,
         SearchModule,
         ExportImportModule,
+        StatisticsModule,
     ],
 })
 export class AppModule {}
