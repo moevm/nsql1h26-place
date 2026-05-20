@@ -88,27 +88,37 @@
     align-items: center;
 }
 
-.settings-page__input--file {
-    padding-right: 2.25rem;
-    cursor: pointer;
-    color: #666;
+.settings-page__input--hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
-.settings-page__input--file::file-selector-button {
-    border: none;
-    background: transparent;
-    color: transparent;
-    margin: 0;
-    padding: 0;
+.settings-page__file-label {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.55rem 2.25rem 0.55rem 0.75rem; /* правый отступ для иконки */
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  background-color: #f7f7f7;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #666;
+  box-sizing: border-box;
 }
 
-.settings-page__input--file::-webkit-file-upload-button {
-    border: none;
-    background: transparent;
-    color: transparent;
-    margin: 0;
-    padding: 0;
+.settings-page__file-text {
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
 
 .settings-page__file-icon {
     position: absolute;
@@ -118,14 +128,28 @@
     pointer-events: none;
 }
 
+.settings-page__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    width: 100%;
+    grid-column: 1 / -1;
+    margin-top: 0.25rem;
+}
+
 .settings-page__button {
     border: none;
-    background: #948C0F;
+    border-radius: 10px;
+    background: #51704A;
     color: #fff;
     padding: 0.6rem 2rem;
-    border-radius: 999px;
     font-size: 0.95rem;
     cursor: pointer;
+}
+
+.settings-page__button--cancel {
+    background: #f2f2f2;
+    color: #444;
 }
 
 .settings-page__button:focus-visible {

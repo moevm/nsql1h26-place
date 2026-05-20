@@ -1,10 +1,13 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { CurrentUser } from './current-user.decorator';
+import type { AuthUser } from './current-user.decorator';
+import { UpdateUserDto } from '../models/users/dto/update-user.dto';
 
 @ApiTags('Auth')
 @Controller('/auth')
@@ -33,5 +36,14 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getMe(@Req() request: Request & { user?: unknown }) {
     return request.user;
+  }
+
+  @Patch('/me')
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Update current user' })
+  @ApiResponse({ status: 200, description: 'User updated' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async updateMe(@CurrentUser() user: AuthUser, @Body() updateUserDto: UpdateUserDto) {
+    return this.authService.updateUser(user._id, updateUserDto);
   }
 }

@@ -5,6 +5,11 @@ type Credentials = {
     password: string;
 };
 
+type UpdateUserPayload = {
+    username: string;
+    image_path?: string;
+};
+
 type AuthUser = {
     _id: string;
     username: string;
@@ -32,4 +37,8 @@ export const register = (payload: Credentials) => {
 
 export const getMe = () => {
     return runApi<MeResponse>('GET', '/auth/me');
+};
+
+export const updateMe = (payload: UpdateUserPayload) => {
+    return runApi<AuthUser, UpdateUserPayload>('PATCH', '/auth/me', payload);
 };

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { UsersService } from '../models/users/users.service';
@@ -49,6 +49,14 @@ export class AuthService {
       token,
       user: this.toSafeUser(updatedUser ?? user),
     };
+  }
+
+  async updateUser(id: string, updateUserDto: Partial<User>) {
+    const updatedUser = await this.usersService.updateById(id, updateUserDto);
+    if (!updatedUser) {
+      throw new NotFoundException('User not found');
+    }
+    return this.toSafeUser(updatedUser);
   }
 
   async validateToken(token: string) {

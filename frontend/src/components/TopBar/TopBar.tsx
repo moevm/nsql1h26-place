@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TbGraphFilled, TbSettingsFilled } from 'react-icons/tb';
 import { useAuthStore } from '../../stores/authStore'
@@ -9,6 +9,12 @@ const TopBar = () => {
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
     const userMenuRef = useRef<HTMLDivElement | null>(null)
     const clearSession = useAuthStore((state) => state.clearSession)
+    const authUser = useAuthStore((state) => state.user)
+
+    const userAvatarSrc = useMemo(
+        () => authUser?.image_path || '/src/assets/images/avatar.jpg',
+        [authUser],
+    )
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -52,7 +58,7 @@ const TopBar = () => {
                         title="Пользователь"
                         onClick={() => setIsUserMenuOpen((prev) => !prev)}
                     >
-                        <img className='topbar__icon-img--user' src="/src/assets/images/avatar.jpg" alt="user" />
+                        <img className='topbar__icon-img--user' src={userAvatarSrc} alt="user" />
                     </button>
 
                     {isUserMenuOpen && (

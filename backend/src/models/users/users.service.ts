@@ -35,4 +35,8 @@ export class UsersService {
       .findByIdAndUpdate({ _id: id }, { auth_token: token }, { new: true })
       .exec();
   }
+
+  async updateById(id: Types.ObjectId | string, update: Partial<User>): Promise<User | null> {
+    return this.userModel.findByIdAndUpdate({ _id: id }, update, { new: true }).exec();
+  }
 }
