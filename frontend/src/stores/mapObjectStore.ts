@@ -15,6 +15,7 @@ interface MapObjectStore {
     routeDraftWaypoints: LatLon[];
     routeDraftHoveredIndex: number | null;
     routeDraftMapCenter: LatLon | null;
+    routeWaypointPlacementActive: boolean;
     areaDraftActive: boolean;
     areaDraftRadius: number;
     mapObjectsLoadingByPath: Record<string, boolean>;
@@ -41,6 +42,7 @@ interface MapObjectStore {
     reorderRouteDraftWaypoints: (fromIndex: number, toIndex: number) => void;
     setRouteDraftHoveredIndex: (index: number | null) => void;
     setRouteDraftMapCenter: (center: LatLon | null) => void;
+    setRouteWaypointPlacementActive: (active: boolean) => void;
     setAreaDraftActive: (active: boolean) => void;
     setAreaDraftRadius: (radius: number) => void;
     setSort: (field: '_id' | 'name' | null) => void;
@@ -59,6 +61,7 @@ export const useMapObjectStore = create<MapObjectStore>((set, get) => ({
     routeDraftWaypoints: [],
     routeDraftHoveredIndex: null,
     routeDraftMapCenter: null,
+    routeWaypointPlacementActive: false,
     areaDraftActive: false,
     areaDraftRadius: 1,
     mapObjectsLoadingByPath: {},
@@ -108,9 +111,19 @@ export const useMapObjectStore = create<MapObjectStore>((set, get) => ({
         pointPlacementCoordinates: coordinates,
     })),
 
-    startRouteDraft: () => set({ routeDraftActive: true, routeDraftWaypoints: [], routeDraftHoveredIndex: null }),
+    startRouteDraft: () => set({
+        routeDraftActive: true,
+        routeDraftWaypoints: [],
+        routeDraftHoveredIndex: null,
+        routeWaypointPlacementActive: false,
+    }),
 
-    stopRouteDraft: () => set({ routeDraftActive: false, routeDraftWaypoints: [], routeDraftHoveredIndex: null }),
+    stopRouteDraft: () => set({
+        routeDraftActive: false,
+        routeDraftWaypoints: [],
+        routeDraftHoveredIndex: null,
+        routeWaypointPlacementActive: false,
+    }),
 
     addRouteDraftWaypoint: (waypoint) => set((state) => ({
         routeDraftWaypoints: [...state.routeDraftWaypoints, waypoint],
@@ -152,6 +165,8 @@ export const useMapObjectStore = create<MapObjectStore>((set, get) => ({
     setRouteDraftHoveredIndex: (index) => set({ routeDraftHoveredIndex: index }),
 
     setRouteDraftMapCenter: (center) => set({ routeDraftMapCenter: center }),
+
+    setRouteWaypointPlacementActive: (active) => set({ routeWaypointPlacementActive: active }),
 
     setAreaDraftActive: (active) => set({ areaDraftActive: active }),
 
