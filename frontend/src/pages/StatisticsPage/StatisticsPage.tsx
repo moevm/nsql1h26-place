@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
     Bar,
     BarChart,
@@ -51,6 +51,12 @@ const StatisticsPage = () => {
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
     const [tagsData, tagsError, tagsLoading] = useQuery<Tag[]>('/tags');
+
+    useEffect(() => {
+        if (dataType === 'others' && visibility === 'private') {
+            setVisibility('public');
+        }
+    }, [dataType, visibility]);
 
     const resolvedCategories = useMemo(() => {
         if (isCategoryMode(axisY)) {
@@ -175,7 +181,7 @@ const StatisticsPage = () => {
                                         <XAxis type="number" allowDecimals={false} />
                                         <YAxis type="category" dataKey="label" width={120} />
                                         <Tooltip formatter={(value) => [value, 'Количество']} />
-                                        <Bar dataKey="value" fill="#948C0F" radius={[6, 6, 6, 6]}>
+                                        <Bar dataKey="value" fill="#948C0F" radius={[6, 6, 6, 6]} maxBarSize={44}>
                                             <LabelList dataKey="value" position="right" />
                                         </Bar>
                                     </BarChart>
@@ -209,7 +215,9 @@ const StatisticsPage = () => {
                                 onChange={(event) => setVisibility(event.target.value as 'public' | 'private')}
                             >
                                 <option value="public">Публичная</option>
-                                <option value="private">Приватная</option>
+                                <option value="private" disabled={dataType === 'others'}>
+                                    Приватная
+                                </option>
                             </select>
                         </div>
                     </div>

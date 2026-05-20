@@ -42,6 +42,26 @@ const PointPlacementClickHandler = () => {
     return null
 }
 
+const RouteWaypointPlacementClickHandler = () => {
+    const mapObjectStore = useMapObjectStore()
+
+    useMapEvents({
+        click(event) {
+            if (!mapObjectStore.routeDraftActive || !mapObjectStore.routeWaypointPlacementActive) {
+                return
+            }
+
+            mapObjectStore.addRouteDraftWaypoint([
+                roundCoordinate(event.latlng.lat),
+                roundCoordinate(event.latlng.lng),
+            ])
+            mapObjectStore.setRouteWaypointPlacementActive(false)
+        },
+    })
+
+    return null
+}
+
 const ViewportCenterSync = () => {
     const map = useMap()
     const setRouteDraftMapCenter = useMapObjectStore((s) => s.setRouteDraftMapCenter)
@@ -264,6 +284,7 @@ const HomePage = () => {
                             <FlyToSelected center={selectedMapObjectCenter} zoom={17} trigger={mapObjectStore.selectedMapObjectTick} />
                         )}
                         <PointPlacementClickHandler />
+                        <RouteWaypointPlacementClickHandler />
                         {pointsForSelectedMap.map((point) => (
                             <Marker
                                 key={point._id}

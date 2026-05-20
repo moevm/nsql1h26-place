@@ -5,8 +5,6 @@ import { BsGripVertical } from 'react-icons/bs'
 import { createMapObject } from '../../../../api/mapObjects'
 import { useMapObjectStore } from '../../../../stores/mapObjectStore'
 import { useMapStore } from '../../../../stores/mapsStore'
-import { getMapCenterPoint } from '../objectGeometry'
-import type { LatLon } from '../../../../models/GeoJSON'
 import { useShallow } from 'zustand/react/shallow'
 import './CreateRoutePanel.css'
 import TagSelector from '../../../TagSelector/TagSelector'
@@ -15,36 +13,32 @@ type CreateRoutePanelProps = {
     setAdditionalOpen: (val: boolean) => void
 }
 
-const roundCoordinate = (value: number): number => Number(value.toFixed(6))
-
 const CreateRoutePanel = ({setAdditionalOpen} : CreateRoutePanelProps) => {
     const [
         addMapObject,
         waypoints,
-        routeDraftMapCenter,
+        routeWaypointPlacementActive,
         startDraft,
         stopDraft,
-        addWaypoint,
         removeWaypoint,
         reorderWaypoints,
         setHoveredWaypointIndex,
+        setRouteWaypointPlacementActive,
     ] = useMapObjectStore(
         useShallow((s) => [
             s.addMapObject,
             s.routeDraftWaypoints,
-            s.routeDraftMapCenter,
+            s.routeWaypointPlacementActive,
             s.startRouteDraft,
             s.stopRouteDraft,
-            s.addRouteDraftWaypoint,
             s.removeRouteDraftWaypoint,
             s.reorderRouteDraftWaypoints,
             s.setRouteDraftHoveredIndex,
+            s.setRouteWaypointPlacementActive,
         ]),
     )
 
-    const [maps, selectedMapId] = useMapStore(
-        useShallow((s) => [s.Maps, s.selectedMapId]),
-    )
+    const selectedMapId = useMapStore((s) => s.selectedMapId)
 
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
@@ -55,15 +49,14 @@ const CreateRoutePanel = ({setAdditionalOpen} : CreateRoutePanelProps) => {
 
     useEffect(() => {
         startDraft()
+        setRouteWaypointPlacementActive(false)
 
         return () => {
             setHoveredWaypointIndex(null)
+            setRouteWaypointPlacementActive(false)
             stopDraft()
         }
-    }, [setHoveredWaypointIndex, startDraft, stopDraft])
-
-    const selectedMap = maps.find((m) => m._id === selectedMapId) ?? null
-    const centerPoint = getMapCenterPoint(selectedMap)
+    }, [setHoveredWaypointIndex, setRouteWaypointPlacementActive, startDraft, stopDraft])
 
     const handleAddWaypoint = () => {
         if (!selectedMapId) {
@@ -71,18 +64,7 @@ const CreateRoutePanel = ({setAdditionalOpen} : CreateRoutePanelProps) => {
             return
         }
 
-        const fallbackCenter = centerPoint
-            ? [roundCoordinate(centerPoint.coordinates[0]), roundCoordinate(centerPoint.coordinates[1])] as LatLon
-            : null
-
-        const targetCenter = routeDraftMapCenter ?? fallbackCenter
-
-        if (!targetCenter) {
-            alert('У выбранной карты нет корректной геометрии.')
-            return
-        }
-
-        addWaypoint([roundCoordinate(targetCenter[0]), roundCoordinate(targetCenter[1])])
+        setRouteWaypointPlacementActive(true)
     }
 
     const handleDropWaypoint = (targetIndex: number) => {
@@ -165,7 +147,7 @@ const CreateRoutePanel = ({setAdditionalOpen} : CreateRoutePanelProps) => {
                 <hr className="divider route-create__divider" />
 
                 <button type="button" className="create-form__btn route-create__add-point" onClick={handleAddWaypoint}>
-                    <LuMapPinned /> Поставить метку на карте
+                    <LuMapPinned /> {routeWaypointPlacementActive ? 'Ожидание клика по карте...' : 'Поставить метку на карте'}
                 </button>
 
                 <div className="route-create__waypoints">
