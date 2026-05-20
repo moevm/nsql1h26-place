@@ -187,11 +187,11 @@ const CreateAreaPanel = ({setAdditionalOpen} : CreateAreaPanelProps) => {
                 <hr className='divider' />
 
                 <div className="create-form__actions">
-                    <button className="create-form__btn" onClick={handleCreate} disabled={loading}>
-                        Создать
-                    </button>
                     <button className="create-form__btn create-form__btn--ghost" onClick={handleClose}>
-                        Отмена
+                        Отменить
+                    </button>
+                    <button className="create-form__btn" onClick={handleCreate} disabled={loading}>
+                        Принять
                     </button>
                 </div>
             </div>
