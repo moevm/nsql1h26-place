@@ -1,12 +1,23 @@
-FROM node:20-alpine
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
-COPY package*.json .
+COPY package*.json ./
 RUN npm ci
 
 COPY . .
 
-EXPOSE 5173
+RUN npm run build
 
-CMD ["npm", "run", "dev", "--", "--host"]
+
+FROM nginx:1.27.5-alpine
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+COPY --from=build /app/dist /usr/share/nginx/html
+
+COPY --from=build /app/src/assets/images /usr/share/nginx/html/src/assets/images
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
