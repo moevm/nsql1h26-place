@@ -5,10 +5,11 @@ import { deleteByIdOrThrow, findByIdOrThrow, updateByIdOrThrow } from "src/commo
 import { CreateMapDto } from "./dto/create-map.dto";
 import { Map, MapDocument } from "./schemas/maps.schema";
 import { UpdateMapDto } from "./dto/update-map.dto";
+import { MapObject, ObjectDocument, } from "../objects/schemas/objects.schema";
 
 @Injectable()
 export class MapsService {
-    constructor(@InjectModel(Map.name) private mapModel: Model<MapDocument>) {}
+    constructor(@InjectModel(Map.name) private mapModel: Model<MapDocument>, @InjectModel(MapObject.name) private objectModel: Model<ObjectDocument>,) { }
 
     async create(createMapDto: CreateMapDto, userId: unknown): Promise<MapDocument> {
         const createdMap = new this.mapModel({ ...createMapDto, user_id: new Types.ObjectId(String(userId)) });
@@ -39,7 +40,9 @@ export class MapsService {
         );
     }
 
-    async delete(id: string): Promise<MapDocument> {
-        return deleteByIdOrThrow(this.mapModel.findByIdAndDelete(id).exec(), id, 'Map');
+    async delete(id: string,): Promise<MapDocument> {
+        const deletedMap = await deleteByIdOrThrow(this.mapModel.findByIdAndDelete(id).exec(), id, 'Map',);
+        await this.objectModel.deleteMany({ map_id: deletedMap._id, });
+        return deletedMap;
     }
 }

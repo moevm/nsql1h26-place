@@ -23,7 +23,7 @@ interface MapObjectStore {
     mapObjectsPageByPath: Record<string, number>;
     mapObjectsHasMoreByPath: Record<string, boolean>;
     mapObjectsInitializedByPath: Record<string, boolean>;
-
+    
     setSelectedMapObjectId: (selectedMapObjectId: string | null) => void;
 
     setMapObjects: (MapObjects: MapObject[]) => void;
@@ -47,6 +47,7 @@ interface MapObjectStore {
     setAreaDraftRadius: (radius: number) => void;
     setSort: (field: '_id' | 'name' | null) => void;
     getSortedMapObjects: () => MapObject[];
+    removeMapObjectsByMapId: (mapId: string) => void;
 }
 
 export const useMapObjectStore = create<MapObjectStore>((set, get) => ({
@@ -101,6 +102,10 @@ export const useMapObjectStore = create<MapObjectStore>((set, get) => ({
 
     removeMapObject: (id) => set(state => ({
         MapObjects: state.MapObjects.filter(MapObject => MapObject._id !== id)
+    })),
+
+    removeMapObjectsByMapId: (mapId) => set((state) => ({
+        MapObjects: state.MapObjects.filter((object) => object.map_id !== mapId,),
     })),
 
     setPointPlacementActive: (active) => set(() => ({

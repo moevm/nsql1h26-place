@@ -8,29 +8,35 @@ import { GrEdit } from 'react-icons/gr';
 import { useState, type UIEvent } from 'react';
 import type { UpdateMap } from '../../../../models/Map';
 import TagSelector from '../../../TagSelector/TagSelector';
+import { useMapObjectStore } from '../../../../stores/mapObjectStore';
 
 type ListMapsPanelProps = {
     setOpen: (val: boolean) => void,
     setAdditionalOpen: (val: boolean) => void,
 }
 
-const ListMapsPanel = ({setAdditionalOpen, setOpen} : ListMapsPanelProps) => {
+const ListMapsPanel = ({ setAdditionalOpen, setOpen }: ListMapsPanelProps) => {
     const { error, loading, loadMore, hasMore } = useLoadMaps();
     const maps = useMapStore((s) => s.getSortedMaps());
     const selectedMapId = useMapStore((s) => s.selectedMapId);
-    const { removeMap, updateMap: update, setSelectedMapId } = useMapStore();
-    const [ edit, setEdit ] = useState("");
-    const [ updatedMap, setUpdatedMap ] = useState<UpdateMap>({})
-    const [ tagsDraft, setTagsDraft ] = useState<string[]>([]);
+    const { removeMap, updateMap: update, setSelectedMapId, } = useMapStore();
+    const removeMapObjectsByMapId = useMapObjectStore((s) => s.removeMapObjectsByMapId,);
+    const [edit, setEdit] = useState("");
+    const [updatedMap, setUpdatedMap] = useState<UpdateMap>({})
+    const [tagsDraft, setTagsDraft] = useState<string[]>([]);
 
-    const handleDelete = async (map_id: string) => {
+    const handleDelete = async (map_id: string,) => {
         try {
             await deleteMap(map_id);
             removeMap(map_id);
+            removeMapObjectsByMapId(map_id,);
+            if (selectedMapId === map_id) {
+                setSelectedMapId(null);
+            }
         } catch (err) {
-            alert("Не удалось удалить карту!")
+            alert('Не удалось удалить карту!',);
         }
-    }
+    };
 
     const handleEdit = (id: string, currentTags: string[]) => {
         setEdit(id);
