@@ -76,6 +76,6 @@ docker-compose up --build -d
 | Swagger UI | http://localhost:8080/api/docs |
 
 ### Предварительно заданный пользователь
-В приложении заранее создано 10 пользователей: netlibra, ryebread, blackeye, highnoon, pinecone, pearpie, lettuce и cookies. Всем им задан пароль 123
+В приложении заранее создано 8 пользователей: netlibra, ryebread, blackeye, highnoon, pinecone, pearpie, lettuce и cookies. Всем им задан пароль 123
 
 Полная документация API доступна в Swagger UI по адресу `/api/docs` после запуска бэкенда.
