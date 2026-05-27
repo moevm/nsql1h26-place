@@ -144,6 +144,7 @@ const SettingsPage = () => {
         setLoading(true)
 
         try {
+            const currentUser = await resolveCurrentUser()
             let image_path: string | undefined
 
             if (selectedFile) {
@@ -168,7 +169,7 @@ const SettingsPage = () => {
 
             const updatedUser = await updateMe(payload)
             const newUser = updatedUser || {
-                ...authUser,
+                ...currentUser,
                 username: name.trim(),
                 ...(image_path ? { image_path } : {}),
             }
@@ -177,7 +178,7 @@ const SettingsPage = () => {
                 throw new Error('Некорректный ответ сервера')
             }
 
-            setSession(token, newUser as typeof authUser)
+            setSession(token, newUser)
             setStatus('Данные успешно сохранены')
             setSelectedFile(null)
         } catch (err: unknown) {
