@@ -1,8 +1,8 @@
-import { ChangeEvent, useEffect, useState } from 'react'
+import { useState } from 'react'
 import { LuX } from 'react-icons/lu'
 import '../Panels.css'
-import { BiExport, BiImport, BiPaperclip } from 'react-icons/bi'
-import { exportData, importData, readFileContent } from '../../../../api/exportImport'
+import { BiExport, BiImport } from 'react-icons/bi'
+import { downloadExportFile, importData, readFileContent } from '../../../../api/exportImport'
 
 type DataPanelProps = {
     setOpen: (val: boolean) => void,
@@ -10,65 +10,52 @@ type DataPanelProps = {
 
 const DataPanel = ({ setOpen }: DataPanelProps) => {
     const [isLoading, setIsLoading] = useState(false)
-    const [selectedFile, setSelectedFile] = useState<string | null>(null)
-    const [exportLink, setExportLink] = useState<string | null>(null)
-    const [exportFileName, setExportFileName] = useState<string | null>(null)
-
-    useEffect(() => {
-        return () => {
-            if (exportLink) {
-                window.URL.revokeObjectURL(exportLink)
-            }
-        }
-    }, [exportLink])
+    const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
     const handleExport = async () => {
         try {
             setIsLoading(true)
-            if (exportLink) {
-                window.URL.revokeObjectURL(exportLink)
-            }
-            const blob = await exportData()
-            const url = window.URL.createObjectURL(blob)
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-            const fileName = `mushroom-place-export-${timestamp}.json`
-
-            setExportLink(url)
-            setExportFileName(fileName)
+            setErrorMessage(null)
+            await downloadExportFile()
         } catch (error) {
             console.error('Export failed:', error)
-            alert('Ошибка при экспорте данных')
+            setErrorMessage('Ошибка при экспорте данных')
+            setTimeout(() => setErrorMessage(null), 5000)
         } finally {
             setIsLoading(false)
         }
     }
 
-    const handleImportClick = async (event: ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0]
-        if (!file) return
+    const handleImportClick = () => {
+        const input = document.createElement('input')
+        input.type = 'file'
+        input.accept = '.json'
+        input.onchange = async (e) => {
+            const file = (e.target as HTMLInputElement).files?.[0]
+            if (!file) return
 
-        const extension = file.name.toLowerCase().split('.').pop()
-        if (extension !== 'json') {
-            setSelectedFile(null)
-            alert('Выберите файл с расширением .json')
-            return
+            if (!file.name.toLowerCase().endsWith('.json')) {
+                setErrorMessage('Выберите файл с расширением .json')
+                setTimeout(() => setErrorMessage(null), 5000)
+                return
+            }
+
+            try {
+                setIsLoading(true)
+                setErrorMessage(null)
+                const content = await readFileContent(file)
+                await importData(content)
+                window.location.reload()
+            } catch (error) {
+                console.error('Import failed:', error)
+                setErrorMessage(error instanceof Error ? error.message : 'Ошибка при импорте данных',)
+                setTimeout(() => setErrorMessage(null), 5000)
+            } finally {
+                setIsLoading(false)
+            }
         }
-
-        try {
-            setIsLoading(true)
-            setSelectedFile(file.name)
-
-            const content = await readFileContent(file)
-            await importData(content)
-        } catch (error) {
-            console.error('Import failed:', error)
-            const message = error instanceof Error ? error.message : 'Ошибка при импорте данных'
-            alert(message)
-        } finally {
-            setIsLoading(false)
-        }
+        input.click()
     }
-
 
     return (
         <aside className="panel panel--primary">
@@ -76,63 +63,39 @@ const DataPanel = ({ setOpen }: DataPanelProps) => {
                 <h3>Данные</h3>
                 <LuX className='panel__close' onClick={() => {
                     setOpen(false)
-                    setSelectedFile(null)
+                    setErrorMessage(null)
                 }} />
             </div>
             <div className="list">
-                <button className="card card--add" type="button" disabled={isLoading}>
-                    <div className="card__content data-panel__content">
-                        <div className="data-panel__row">
-                            <div className="card__avatar"><BiImport /></div>
-                            <div className="data-panel__section-title">Импорт данных</div>
-                        </div>
-                        <label htmlFor="file-upload" className="file_upload">
-                            Прикрепите файл формата .json ... <BiPaperclip />
-                        </label>
-                        <input
-                            id="file-upload"
-                            className="file_upload__input"
-                            type="file"
-                            accept=".json"
-                            onChange={handleImportClick}
-                            disabled={isLoading}
-                        />
-                    </div>
+                <button
+                    className="card card--add"
+                    onClick={handleImportClick}
+                    disabled={isLoading}
+                >
+                    <div className="card__avatar"><BiImport /></div>
+                    <div className="card__title">Импорт данных</div>
                 </button>
                 <hr className="divider" />
                 <button
                     className="card card--add"
-                    type="button"
                     onClick={handleExport}
                     disabled={isLoading}
                 >
-                    <div className="card__content data-panel__content">
-                        <div className="data-panel__row">
-                            <div className="card__avatar"><BiExport /></div>
-                            <div className="data-panel__section-title">Экспорт данных</div>
-                        </div>
-                        <div
-                            className="file_upload file_upload--stub"
-                            role={exportLink ? 'button' : undefined}
-                            style={{
-                                cursor: exportLink ? 'pointer' : 'default',
-                                marginTop: '10px',
-                                padding: '12px',
-                            }}
-                            onClick={() => {
-                                if (!exportLink || !exportFileName) return
-                                const link = document.createElement('a')
-                                link.href = exportLink
-                                link.download = exportFileName
-                                document.body.appendChild(link)
-                                link.click()
-                                document.body.removeChild(link)
-                            }}
-                        >
-                            {exportFileName || 'Файл для скачивания появится здесь ...'} <BiExport />
-                        </div>
-                    </div>
+                    <div className="card__avatar"><BiExport /></div>
+                    <div className="card__title">Экспорт данных</div>
                 </button>
+                {errorMessage && (
+                    <div style={{
+                        marginTop: '12px',
+                        padding: '8px',
+                        backgroundColor: '#ffdddd',
+                        border: '1px solid #ffaaaa',
+                        borderRadius: '4px',
+                        color: '#aa0000'
+                    }}>
+                        {errorMessage}
+                    </div>
+                )}
             </div>
         </aside>
     )
