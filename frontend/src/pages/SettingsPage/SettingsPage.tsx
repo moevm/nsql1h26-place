@@ -102,16 +102,19 @@ const SettingsPage = () => {
         setStatus('')
 
         try {
-            await updateMe({ image_path: '' })
+            const currentUser = await resolveCurrentUser()
+
+            await updateMe({
+                username: currentUser.username,
+                image_path: '',
+            })
 
             const updatedUser = {
-                ...authUser,
+                ...currentUser,
                 image_path: '',
             }
 
-            if (updatedUser) {
-                setSession(token, updatedUser as typeof authUser)
-            }
+            setSession(token, updatedUser)
 
             setSelectedFile(null)
             setAvatarPreview('')
