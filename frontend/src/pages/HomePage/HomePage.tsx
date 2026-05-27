@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useMemo, useState } from 'react'
 import { divIcon } from 'leaflet'
-import { MapContainer, Marker, Polygon, Polyline, Popup, TileLayer, Tooltip, useMap, useMapEvents, ZoomControl } from 'react-leaflet'
+import { CircleMarker, MapContainer, Marker, Polygon, Polyline, Popup, TileLayer, Tooltip, useMap, useMapEvents, ZoomControl } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useMapStore } from '../../stores/mapsStore'
 import { useLoadMaps } from '../../api/maps'
@@ -286,20 +286,26 @@ const HomePage = () => {
                         <PointPlacementClickHandler />
                         <RouteWaypointPlacementClickHandler />
                         {pointsForSelectedMap.map((point) => (
-                            <Marker
+                            <CircleMarker
                                 key={point._id}
-                                position={point.location.coordinates}
+                                center={point.location.coordinates}
+                                pathOptions={{ color: '#51704A', fillColor: '#6F8F66', fillOpacity: 0.95, weight: 2 }}
+                                radius={9}
                                 eventHandlers={{
                                     click: () => mapObjectStore.setSelectedMapObjectId(point._id),
                                 }}
                             >
                                 <Popup>{point.name || 'Отметка'}</Popup>
-                            </Marker>
+                            </CircleMarker>
                         ))}
                         {mapObjectStore.pointPlacementCoordinates && (
-                            <Marker position={mapObjectStore.pointPlacementCoordinates}>
+                            <CircleMarker
+                                center={mapObjectStore.pointPlacementCoordinates}
+                                pathOptions={{ color: '#51704A', fillColor: '#6F8F66', fillOpacity: 0.8, weight: 2 }}
+                                radius={9}
+                            >
                                 <Popup>Временная отметка</Popup>
-                            </Marker>
+                            </CircleMarker>
                         )}
                         {areaDraftPreview && (
                             <Polygon
