@@ -1,7 +1,7 @@
 ﻿import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react'
 import { TbPaperclip } from 'react-icons/tb'
 import { getMe, updateMe } from '../../api/auth'
-import { useAuthStore } from '../../stores/authStore'
+import { useAuthStore, type AuthUser } from '../../stores/authStore'
 import './SettingsPage.css'
 
 const DEFAULT_AVATAR = '/src/assets/images/avatar.jpg'
@@ -19,6 +19,16 @@ const SettingsPage = () => {
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
     const [profileLoading, setProfileLoading] = useState(true)
+
+    const resolveCurrentUser = async (): Promise<AuthUser> => {
+        if (authUser) {
+            return authUser
+        }
+
+        const user = await getMe()
+        setSession(token ?? '', user)
+        return user
+    }
 
     useEffect(() => {
         const initialize = async () => {
