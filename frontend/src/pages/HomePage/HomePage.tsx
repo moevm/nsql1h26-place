@@ -295,6 +295,7 @@ const HomePage = () => {
                                     click: () => mapObjectStore.setSelectedMapObjectId(point._id),
                                 }}
                             >
+                                <Tooltip>{point.name || 'Отметка'}</Tooltip>
                                 <Popup>{point.name || 'Отметка'}</Popup>
                             </CircleMarker>
                         ))}
@@ -304,6 +305,7 @@ const HomePage = () => {
                                 pathOptions={{ color: '#51704A', fillColor: '#6F8F66', fillOpacity: 0.8, weight: 2 }}
                                 radius={9}
                             >
+                                <Tooltip>Временная отметка</Tooltip>
                                 <Popup>Временная отметка</Popup>
                             </CircleMarker>
                         )}
@@ -322,7 +324,8 @@ const HomePage = () => {
                                         click: () => mapObjectStore.setSelectedMapObjectId(route._id),
                                     }}
                                 >
-                                    <Tooltip>{route.name || 'Маршрут'}</Tooltip>
+                                    <Tooltip sticky>{route.name || 'Маршрут'}</Tooltip>
+                                    <Popup>{route.name || 'Маршрут'}</Popup>
                                 </Polyline>
 
                                 {route.location.coordinates.map((waypoint, waypointIndex) => (
@@ -346,7 +349,8 @@ const HomePage = () => {
                                     click: () => mapObjectStore.setSelectedMapObjectId(area._id),
                                 }}
                             >
-                                <Tooltip>{area.name || 'Область'}</Tooltip>
+                                <Tooltip sticky>{area.name || 'Область'}</Tooltip>
+                                <Popup>{area.name || 'Область'}</Popup>
                             </Polygon>
                         ))}
                         <RouteDraftLayer />
